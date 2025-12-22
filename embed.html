@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Scanner - Quay Video Đóng Gói</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 800px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .panel-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        /* Camera Preview */
+        .camera-container {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+        }
+        
+        #videoPreview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .camera-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+        }
+        
+        .recording-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4444;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            display: none;
+            animation: blink 1s infinite;
+        }
+        
+        .recording-indicator.show { display: block; }
+        
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+        
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* QR Result */
+        .qr-result {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .qr-result.detected {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .qr-code {
+            font-size: 16px;
+            font-weight: bold;
+            color: #28a745;
+            word-break: break-all;
+        }
+        
+        .qr-placeholder {
+            color: #999;
+            font-size: 13px;
+        }
+        
+        /* History */
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-code {
+            font-weight: bold;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .history-time {
+            font-size: 11px;
+            color: #999;
+        }
+        
+        .history-status {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        
+        .status-recorded {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+        
+        /* Camera Select */
+        .camera-select {
+            margin-bottom: 10px;
+        }
+        
+        .camera-select select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📦 Quay Video Đóng Gói Hàng</h1>
+            <p>Quét QR/Barcode → Tự động ghi video → Bảo vệ shop khỏi khiếu nại</p>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Panel - Camera -->
+            <div class="panel">
+                <div class="panel-title">📹 Camera Preview</div>
+                
+                <div class="camera-select">
+                    <select id="cameraSelect">
+                        <option value="">Đang tải danh sách camera...</option>
+                    </select>
+                </div>
+                
+                <div class="camera-container">
+                    <video id="videoPreview" autoplay playsinline muted></video>
+                    <div class="camera-overlay" id="cameraInfo">Chưa kết nối</div>
+                    <div class="recording-indicator" id="recordingIndicator">🔴 ĐANG GHI</div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" id="btnStartCamera">📷 Bật Camera</button>
+                    <button class="btn btn-success" id="btnStartRecord" disabled>▶️ Bắt đầu ghi</button>
+                    <button class="btn btn-danger" id="btnStopRecord" disabled>⏹️ Dừng ghi</button>
+                </div>
+                
+                <!-- QR Result -->
+                <div class="qr-result" id="qrResult">
+                    <span class="qr-placeholder">📷 Đưa mã QR/Barcode vào camera để quét</span>
+                </div>
+            </div>
+            
+            <!-- Right Panel - History -->
+            <div class="panel">
+                <div class="panel-title">📋 Lịch sử quét hôm nay</div>
+                
+                <div class="history-list" id="historyList">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Chưa có đơn hàng nào được quét</p>
+                    </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number" id="statTotal">0</div>
+                        <div class="stat-label">Tổng đơn</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="statRecorded">0</div>
+                        <div class="stat-label">Đã ghi video</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="statPending">0</div>
+                        <div class="stat-label">Chờ xử lý</div>
+                    </div>
+                </div>
+                
+                <div class="controls" style="margin-top: 15px;">
+                    <button class="btn btn-primary" id="btnExport">📥 Xuất Excel</button>
+                    <button class="btn btn-danger" id="btnClear">🗑️ Xóa lịch sử</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ========== APP STATE ==========
+        let stream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+        let scanHistory = [];
+        let lastScannedCode = '';
+        
+        // ========== DOM ELEMENTS ==========
+        const videoPreview = document.getElementById('videoPreview');
+        const cameraSelect = document.getElementById('cameraSelect');
+        const cameraInfo = document.getElementById('cameraInfo');
+        const recordingIndicator = document.getElementById('recordingIndicator');
+        const qrResult = document.getElementById('qrResult');
+        const historyList = document.getElementById('historyList');
+        const btnStartCamera = document.getElementById('btnStartCamera');
+        const btnStartRecord = document.getElementById('btnStartRecord');
+        const btnStopRecord = document.getElementById('btnStopRecord');
+        const btnExport = document.getElementById('btnExport');
+        const btnClear = document.getElementById('btnClear');
+        
+        // ========== CAMERA FUNCTIONS ==========
+        
+        async function getCameras() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const cameras = devices.filter(d => d.kind === 'videoinput');
+                
+                cameraSelect.innerHTML = '';
+                cameras.forEach((camera, index) => {
+                    const option = document.createElement('option');
+                    option.value = camera.deviceId;
+                    option.textContent = camera.label || `Camera ${index + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+                
+                if (cameras.length === 0) {
+                    cameraSelect.innerHTML = '<option value="">Không tìm thấy camera</option>';
+                }
+            } catch (err) {
+                console.error('Error getting cameras:', err);
+                cameraSelect.innerHTML = '<option value="">Lỗi: không thể truy cập camera</option>';
+            }
+        }
+        
+        async function startCamera() {
+            try {
+                const deviceId = cameraSelect.value;
+                const constraints = {
+                    video: deviceId ? { deviceId: { exact: deviceId } } : true,
+                    audio: false
+                };
+                
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoPreview.srcObject = stream;
+                
+                cameraInfo.textContent = '🟢 Camera đang hoạt động';
+                btnStartCamera.textContent = '🔄 Đổi Camera';
+                btnStartRecord.disabled = false;
+                
+                // Start QR scanning simulation
+                startQRScanning();
+                
+            } catch (err) {
+                console.error('Error starting camera:', err);
+                cameraInfo.textContent = '🔴 Lỗi: ' + err.message;
+                alert('Không thể truy cập camera. Vui lòng cho phép quyền truy cập.');
+            }
+        }
+        
+        // ========== RECORDING FUNCTIONS ==========
+        
+        function startRecording() {
+            if (!stream) return;
+            
+            recordedChunks = [];
+            
+            const options = { mimeType: 'video/webm;codecs=vp9' };
+            try {
+                mediaRecorder = new MediaRecorder(stream, options);
+            } catch (e) {
+                mediaRecorder = new MediaRecorder(stream);
+            }
+            
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    recordedChunks.push(e.data);
+                }
+            };
+            
+            mediaRecorder.onstop = saveRecording;
+            
+            mediaRecorder.start();
+            isRecording = true;
+            
+            recordingIndicator.classList.add('show');
+            btnStartRecord.disabled = true;
+            btnStopRecord.disabled = false;
+        }
+        
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                
+                recordingIndicator.classList.remove('show');
+                btnStartRecord.disabled = false;
+                btnStopRecord.disabled = true;
+            }
+        }
+        
+        function saveRecording() {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const filename = `video_${lastScannedCode || 'manual'}_${timestamp}.webm`;
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            
+            // Update history
+            if (lastScannedCode) {
+                updateHistoryStatus(lastScannedCode, 'recorded');
+            }
+        }
+        
+        // ========== QR SCANNING (SIMULATION) ==========
+        
+        function startQRScanning() {
+            // In real app, use a QR library like jsQR or ZXing
+            // This is a simulation for demo
+            console.log('[QR] Scanner ready - waiting for codes');
+        }
+        
+        function simulateQRDetection(code) {
+            if (code === lastScannedCode) return;
+            
+            lastScannedCode = code;
+            
+            qrResult.classList.add('detected');
+            qrResult.innerHTML = `<span class="qr-code">✅ ${code}</span>`;
+            
+            addToHistory(code);
+            
+            // Auto start recording on QR detect
+            if (!isRecording && stream) {
+                startRecording();
+            }
+        }
+        
+        // ========== HISTORY FUNCTIONS ==========
+        
+        function addToHistory(code) {
+            const now = new Date();
+            const item = {
+                code: code,
+                time: now.toLocaleTimeString('vi-VN'),
+                status: 'pending'
+            };
+            
+            scanHistory.unshift(item);
+            renderHistory();
+            updateStats();
+        }
+        
+        function updateHistoryStatus(code, status) {
+            const item = scanHistory.find(h => h.code === code);
+            if (item) {
+                item.status = status;
+                renderHistory();
+                updateStats();
+            }
+        }
+        
+        function renderHistory() {
+            if (scanHistory.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Chưa có đơn hàng nào được quét</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyList.innerHTML = scanHistory.map(item => `
+                <div class="history-item">
+                    <div>
+                        <div class="history-code">${item.code}</div>
+                        <div class="history-time">${item.time}</div>
+                    </div>
+                    <span class="history-status ${item.status === 'recorded' ? 'status-recorded' : 'status-pending'}">
+                        ${item.status === 'recorded' ? '✅ Đã ghi' : '⏳ Chờ'}
+                    </span>
+                </div>
+            `).join('');
+        }
+        
+        function updateStats() {
+            document.getElementById('statTotal').textContent = scanHistory.length;
+            document.getElementById('statRecorded').textContent = scanHistory.filter(h => h.status === 'recorded').length;
+            document.getElementById('statPending').textContent = scanHistory.filter(h => h.status === 'pending').length;
+        }
+        
+        function exportToExcel() {
+            if (scanHistory.length === 0) {
+                alert('Chưa có dữ liệu để xuất!');
+                return;
+            }
+            
+            let csv = 'Mã đơn,Thời gian,Trạng thái\n';
+            scanHistory.forEach(item => {
+                csv += `${item.code},${item.time},${item.status === 'recorded' ? 'Đã ghi video' : 'Chờ xử lý'}\n`;
+            });
+            
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `lich-su-quet_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+        
+        function clearHistory() {
+            if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử?')) {
+                scanHistory = [];
+                lastScannedCode = '';
+                qrResult.classList.remove('detected');
+                qrResult.innerHTML = '<span class="qr-placeholder">📷 Đưa mã QR/Barcode vào camera để quét</span>';
+                renderHistory();
+                updateStats();
+            }
+        }
+        
+        // ========== EVENT LISTENERS ==========
+        
+        btnStartCamera.addEventListener('click', startCamera);
+        btnStartRecord.addEventListener('click', startRecording);
+        btnStopRecord.addEventListener('click', stopRecording);
+        btnExport.addEventListener('click', exportToExcel);
+        btnClear.addEventListener('click', clearHistory);
+        
+        cameraSelect.addEventListener('change', () => {
+            if (stream) startCamera();
+        });
+        
+        // ========== DEMO: Simulate QR detection on click ==========
+        videoPreview.addEventListener('click', () => {
+            const demoCode = 'SPXVN' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            simulateQRDetection(demoCode);
+        });
+        
+        // ========== INIT ==========
+        getCameras();
+        
+        // Request camera permission on load
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(s => {
+                s.getTracks().forEach(t => t.stop());
+                getCameras();
+            })
+            .catch(err => console.log('Initial permission check:', err));
+            
+        console.log('[App] QR Scanner Web App loaded');
+        console.log('[App] Click on video preview to simulate QR detection');
+    </script>
+</body>
+</html>
