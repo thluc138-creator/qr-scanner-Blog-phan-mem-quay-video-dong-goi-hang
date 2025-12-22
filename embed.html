@@ -251,6 +251,7 @@
         #counterDisplay h3 { margin-bottom: 3px; font-size: 13px; }
         .counter-info { font-size: 14px; }
         .counter-info strong { font-size: 18px; }
+        .counter-total { font-size: 11px; opacity: 0.9; margin-top: 3px; }
         
         /* ========== HISTORY SECTION ========== */
         .history-section {
@@ -448,16 +449,19 @@
     
     <!-- Counter Display -->
     <div id="counterDisplay">
-        <h3>📊 Thống kê hôm nay</h3>
+        <h3>📊 Thống kê</h3>
         <div class="counter-info">
-            Đã quét: <strong id="scanCount">0</strong> đơn
+            Hôm nay: <strong id="scanCount">0</strong> đơn
+        </div>
+        <div class="counter-total">
+            Tổng cộng: <span id="totalCount">0</span> / 100,000 đơn
         </div>
     </div>
     
     <!-- History Section -->
     <div class="history-section">
         <div class="history-header">
-            <h3>📜 Lịch sử quét</h3>
+            <h3>📜 Lịch sử quét (<span id="historyCount">0</span> đơn)</h3>
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="🔍 Tìm mã QR...">
             </div>
@@ -485,10 +489,11 @@
         
         // ========== CONFIGURATION ==========
         var STORAGE_KEY = 'qrScannerOrdersBlog';
-        var MAX_ORDERS = 100000;  // 100,000 đơn
-        var AUTO_DELETE_DAYS = 60;  // Tự xóa sau 60 ngày
+        var MAX_ORDERS = 100000;
+        var AUTO_DELETE_DAYS = 60;
         var SCAN_LOCK_FIRST = 10000;
         var SCAN_LOCK_SECOND = 5000;
+        var FOLDER_NAME = 'PackingVideos';
         
         var VIDEO_PRESETS = {
             '1080p30': { width: 1920, height: 1080, fps: 30, scanFPS: 3, scanScale: 0.5 },
@@ -572,6 +577,11 @@
         function getTimeStr() {
             var d = new Date();
             return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+        }
+        
+        function getFilenameTimeStr() {
+            var d = new Date();
+            return String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0') + String(d.getSeconds()).padStart(2,'0');
         }
         
         // ========== AUTO DELETE OLD ORDERS ==========
@@ -827,7 +837,8 @@
             var blob = new Blob(state.recordedChunks, { type: 'video/webm' });
             var url = URL.createObjectURL(blob);
             
-            var filename = state.currentQR + '_' + getDateStr() + '_' + getTimeStr().replace(/:/g, '') + '.webm';
+            // Tạo filename với folder path
+            var filename = FOLDER_NAME + '/' + state.currentQR + '_' + getDateStr() + '_' + getFilenameTimeStr() + '.webm';
             
             var a = document.createElement('a');
             a.href = url;
@@ -960,18 +971,39 @@
             showToast('Camera đã tắt', 'warning');
         }
         
-        // ========== OPEN FOLDER ==========
+        // ========== OPEN FOLDER - Download helper file to show folder ==========
         function openFolder() {
-            showToast('📁 Video được lưu trong thư mục Downloads', 'success');
-            // Web browser không thể mở folder trực tiếp
-            // Chỉ có thể thông báo cho user
+            // Tạo file text nhỏ để trigger Downloads folder
+            var content = 'Video được lưu trong thư mục: ' + FOLDER_NAME + '\n';
+            content += 'Đường dẫn: Downloads/' + FOLDER_NAME + '/\n\n';
+            content += 'Ngày: ' + getDateStr() + '\n';
+            content += 'Tổng số video: ' + state.orders.length + '\n';
+            
+            var blob = new Blob([content], { type: 'text/plain' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = FOLDER_NAME + '/_MO_THU_MUC_NAY_.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            showToast('📁 Mở thư mục Downloads/' + FOLDER_NAME, 'success');
         }
         
-        // ========== UI FUNCTIONS ==========
+        // ========== UI FUNCTIONS - ĐỒNG BỘ ==========
         function updateCounter() {
             var today = getDateStr();
             var todayOrders = state.orders.filter(function(o) { return o.date === today; });
+            
+            // Cập nhật số đơn hôm nay
             document.getElementById('scanCount').textContent = todayOrders.length;
+            
+            // Cập nhật tổng số đơn
+            document.getElementById('totalCount').textContent = state.orders.length.toLocaleString();
+            
+            // Cập nhật số đơn trong history header
+            document.getElementById('historyCount').textContent = state.orders.length.toLocaleString();
         }
         
         function renderHistory(searchTerm) {
@@ -984,6 +1016,9 @@
                     return o.qr.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
                 });
             }
+            
+            // Cập nhật count trong header
+            document.getElementById('historyCount').textContent = filtered.length.toLocaleString();
             
             if (filtered.length === 0) {
                 list.innerHTML = '<div class="empty-history">Chưa có lịch sử quét</div>';
@@ -1009,11 +1044,11 @@
                 return;
             }
             
-            var headers = ['STT', 'Mã QR', 'Ngày', 'Giờ', 'Thời lượng', 'File'];
+            var headers = ['STT', 'Mã QR', 'Ngày', 'Giờ', 'Thời lượng', 'Dung lượng', 'File'];
             var csv = '\uFEFF' + headers.join(',') + '\n';
             
             state.orders.forEach(function(o, i) {
-                csv += [i + 1, '"' + o.qr + '"', o.date, o.time, o.duration, o.filename].join(',') + '\n';
+                csv += [i + 1, '"' + o.qr + '"', o.date, o.time, o.duration, o.size || '-', o.filename].join(',') + '\n';
             });
             
             var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -1023,16 +1058,16 @@
             a.download = 'QRScanner_' + getDateStr() + '.csv';
             a.click();
             
-            showToast('✅ Đã xuất Excel', 'success');
+            showToast('✅ Đã xuất Excel (' + state.orders.length + ' đơn)', 'success');
         }
         
         function deleteOrders() {
-            if (confirm('Xóa toàn bộ lịch sử?')) {
+            if (confirm('Xóa toàn bộ ' + state.orders.length.toLocaleString() + ' đơn trong lịch sử?')) {
                 state.orders = [];
                 localStorage.setItem(STORAGE_KEY, '[]');
                 updateCounter();
                 renderHistory();
-                showToast('Đã xóa', 'success');
+                showToast('Đã xóa lịch sử', 'success');
             }
         }
         
@@ -1067,9 +1102,10 @@
         
         // ========== INIT ==========
         function init() {
-            console.log('[QR Scanner] Blog Edition v2.0');
-            console.log('[Config] Max orders: ' + MAX_ORDERS);
+            console.log('[QR Scanner] Blog Edition v3.0');
+            console.log('[Config] Max orders: ' + MAX_ORDERS.toLocaleString());
             console.log('[Config] Auto-delete: ' + AUTO_DELETE_DAYS + ' days');
+            console.log('[Config] Folder: ' + FOLDER_NAME);
             
             try {
                 var saved = localStorage.getItem(STORAGE_KEY);
