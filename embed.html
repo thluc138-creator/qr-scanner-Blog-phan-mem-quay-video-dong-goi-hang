@@ -9,7 +9,8 @@
         
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: white;
+            background: #1a1a2e;
+            color: #333;
             min-height: 100vh;
         }
         
@@ -176,7 +177,30 @@
         
         .btn-danger { background: #dc3545; color: white; }
         .btn-secondary { background: #6c757d; color: white; }
+        .btn-warning { background: #ffc107; color: #333; }
         .btn-small { padding: 6px 12px; font-size: 11px; }
+        
+        /* ========== FOLDER INFO ========== */
+        .folder-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 6px;
+            padding: 10px 15px;
+            margin: 0 15px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 11px;
+        }
+        
+        .folder-info .icon { font-size: 20px; }
+        .folder-info .path {
+            background: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 10px;
+        }
         
         /* ========== VIDEO CONTAINER ========== */
         .video-container {
@@ -320,38 +344,6 @@
             flex-wrap: wrap;
         }
         
-        /* ========== FOLDER INFO BOX ========== */
-        .folder-info {
-            background: #e7f3ff;
-            border: 1px solid #b3d7ff;
-            border-radius: 8px;
-            padding: 12px 15px;
-            margin: 10px 15px;
-            text-align: center;
-        }
-        
-        .folder-info h4 {
-            color: #0066cc;
-            font-size: 12px;
-            margin-bottom: 5px;
-        }
-        
-        .folder-info p {
-            font-size: 11px;
-            color: #333;
-        }
-        
-        .folder-info .path {
-            background: #fff;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 11px;
-            margin-top: 5px;
-            display: inline-block;
-            user-select: all;
-        }
-        
         /* ========== TOAST ========== */
         .toast {
             position: fixed;
@@ -456,17 +448,13 @@
     <div class="action-buttons">
         <button id="startBtn" class="btn btn-primary">🎬 Bắt đầu</button>
         <button id="stopBtn" class="btn btn-danger hidden">⏹️ Dừng</button>
-        <button id="btnOpenFolder" class="btn btn-secondary">📁 Mở thư mục</button>
     </div>
     
-    <!-- Folder Info - Hiện sau khi click Mở thư mục -->
-    <div id="folderInfo" class="folder-info hidden">
-        <h4>📁 Video được lưu tại:</h4>
-        <p>Mở File Explorer và vào thư mục Downloads</p>
-        <div class="path">C:\Users\[TênUser]\Downloads</div>
-        <p style="margin-top: 8px; font-size: 10px; color: #666;">
-            💡 Nhấn <strong>Win + E</strong> → Click <strong>Downloads</strong> ở menu trái
-        </p>
+    <!-- Folder Info - Luôn hiện -->
+    <div class="folder-info">
+        <span class="icon">📁</span>
+        <span>Video lưu tại: <span class="path">Downloads</span></span>
+        <span style="color:#666">| Nhấn Win+E → Downloads</span>
     </div>
     
     <!-- Video Container -->
@@ -528,7 +516,6 @@
     (function() {
         'use strict';
         
-        // ========== CONFIGURATION ==========
         var STORAGE_KEY = 'qrScannerOrdersBlog';
         var MAX_ORDERS = 100000;
         var AUTO_DELETE_DAYS = 60;
@@ -546,7 +533,6 @@
             '12': { value: 12000000 }
         };
         
-        // ========== STATE ==========
         var state = {
             stream: null,
             mediaRecorder: null,
@@ -579,7 +565,6 @@
             postBufferDuration: 3000
         };
         
-        // ========== UTILITIES ==========
         function showToast(msg, type) {
             type = type || 'success';
             var toast = document.getElementById('toast');
@@ -623,7 +608,6 @@
             return String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0') + String(d.getSeconds()).padStart(2,'0');
         }
         
-        // ========== AUTO DELETE OLD ORDERS ==========
         function autoDeleteOldOrders() {
             var now = new Date();
             var cutoffDate = new Date(now.getTime() - (AUTO_DELETE_DAYS * 24 * 60 * 60 * 1000));
@@ -637,11 +621,10 @@
             var deletedCount = beforeCount - state.orders.length;
             if (deletedCount > 0) {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
-                console.log('[Auto-Delete] Deleted ' + deletedCount + ' orders older than ' + AUTO_DELETE_DAYS + ' days');
+                console.log('[Auto-Delete] Deleted ' + deletedCount + ' orders');
             }
         }
         
-        // ========== CODEC ==========
         function getCompatibleCodec() {
             var codecs = [
                 { mimeType: 'video/webm;codecs=vp8,opus', ext: 'webm' },
@@ -654,7 +637,6 @@
             return { mimeType: 'video/webm', ext: 'webm' };
         }
         
-        // ========== CANVAS SETUP ==========
         function setupCanvases() {
             var preset = VIDEO_PRESETS[state.selectedQuality];
             
@@ -676,7 +658,6 @@
             state.scanInterval = Math.round(1000 / preset.scanFPS);
         }
         
-        // ========== RENDER LOOP ==========
         function renderLoop(timestamp) {
             if (!state.stream) return;
             
@@ -722,7 +703,6 @@
             ctx.fillText(text, 10, 40);
         }
         
-        // ========== QR SCANNING ==========
         function scanQRCode() {
             if (state.scanBlocked && Date.now() < state.scanBlockedUntil) return;
             if (state.scanBlocked && Date.now() >= state.scanBlockedUntil) {
@@ -796,7 +776,6 @@
             }
         }
         
-        // ========== RECORDING ==========
         function startRecording() {
             if (!state.stream || state.isRecording) return;
             
@@ -865,7 +844,7 @@
             stopRecording();
             
             if (state.recordedChunks.length === 0) {
-                showToast('❌ Không có video để lưu', 'error');
+                showToast('❌ Không có video', 'error');
                 resetScanState();
                 return;
             }
@@ -924,7 +903,6 @@
             if (currentTimerEl) currentTimerEl.textContent = formatDuration(elapsed);
         }
         
-        // ========== CAMERA ==========
         function getCameras() {
             navigator.mediaDevices.enumerateDevices().then(function(devices) {
                 var cameras = devices.filter(function(d) { return d.kind === 'videoinput'; });
@@ -977,7 +955,7 @@
                 
                 setTimeout(startRecording, 500);
                 
-                showToast('✅ Camera đã bật - Sẵn sàng quét!', 'success');
+                showToast('✅ Camera đã bật!', 'success');
                 getCameras();
                 
             }).catch(function(e) {
@@ -1003,19 +981,6 @@
             showToast('Camera đã tắt', 'warning');
         }
         
-        // ========== OPEN FOLDER ==========
-        function openFolder() {
-            // Hiện/ẩn hướng dẫn folder
-            var folderInfo = document.getElementById('folderInfo');
-            if (folderInfo.classList.contains('hidden')) {
-                folderInfo.classList.remove('hidden');
-                showToast('📁 Video lưu trong thư mục Downloads', 'success');
-            } else {
-                folderInfo.classList.add('hidden');
-            }
-        }
-        
-        // ========== UI FUNCTIONS ==========
         function updateCounter() {
             var today = getDateStr();
             var todayOrders = state.orders.filter(function(o) { return o.date === today; });
@@ -1095,7 +1060,6 @@
             document.getElementById(device === 'camera' ? 'cameraTab' : 'scannerTab').classList.add('active');
         }
         
-        // ========== BARCODE SCANNER ==========
         var barcodeBuffer = '';
         var barcodeTimeout = null;
         
@@ -1118,9 +1082,8 @@
             }, 100);
         }
         
-        // ========== INIT ==========
         function init() {
-            console.log('[QR Scanner] Blog Edition v4.0');
+            console.log('[QR Scanner] Blog v5.0');
             
             try {
                 var saved = localStorage.getItem(STORAGE_KEY);
@@ -1144,10 +1107,8 @@
             updateCounter();
             renderHistory();
             
-            // Events
             document.getElementById('startBtn').onclick = startCamera;
             document.getElementById('stopBtn').onclick = stopCamera;
-            document.getElementById('btnOpenFolder').onclick = openFolder;
             document.getElementById('exportExcelBtn').onclick = exportExcel;
             document.getElementById('deleteBtn').onclick = deleteOrders;
             document.getElementById('cameraTab').onclick = function() { selectDevice('camera'); };
