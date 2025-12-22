@@ -21,7 +21,6 @@
             color: white;
             padding: 15px 20px;
             text-align: center;
-            position: relative;
         }
         
         .header h1 { font-size: 18px; margin-bottom: 3px; }
@@ -321,6 +320,38 @@
             flex-wrap: wrap;
         }
         
+        /* ========== FOLDER INFO BOX ========== */
+        .folder-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin: 10px 15px;
+            text-align: center;
+        }
+        
+        .folder-info h4 {
+            color: #0066cc;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .folder-info p {
+            font-size: 11px;
+            color: #333;
+        }
+        
+        .folder-info .path {
+            background: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            margin-top: 5px;
+            display: inline-block;
+            user-select: all;
+        }
+        
         /* ========== TOAST ========== */
         .toast {
             position: fixed;
@@ -428,6 +459,16 @@
         <button id="btnOpenFolder" class="btn btn-secondary">📁 Mở thư mục</button>
     </div>
     
+    <!-- Folder Info - Hiện sau khi click Mở thư mục -->
+    <div id="folderInfo" class="folder-info hidden">
+        <h4>📁 Video được lưu tại:</h4>
+        <p>Mở File Explorer và vào thư mục Downloads</p>
+        <div class="path">C:\Users\[TênUser]\Downloads</div>
+        <p style="margin-top: 8px; font-size: 10px; color: #666;">
+            💡 Nhấn <strong>Win + E</strong> → Click <strong>Downloads</strong> ở menu trái
+        </p>
+    </div>
+    
     <!-- Video Container -->
     <div class="video-container">
         <video id="webcamVideo" autoplay playsinline muted></video>
@@ -493,7 +534,6 @@
         var AUTO_DELETE_DAYS = 60;
         var SCAN_LOCK_FIRST = 10000;
         var SCAN_LOCK_SECOND = 5000;
-        var FOLDER_NAME = 'PackingVideos';
         
         var VIDEO_PRESETS = {
             '1080p30': { width: 1920, height: 1080, fps: 30, scanFPS: 3, scanScale: 0.5 },
@@ -521,7 +561,6 @@
             scanBlocked: false,
             scanBlockedUntil: 0,
             recordingStartTime: null,
-            scanTime: null,
             recordingTimerInterval: null,
             orders: [],
             isRecording: false,
@@ -718,7 +757,6 @@
             if (state.isFirstScan) {
                 state.currentQR = qrData;
                 state.isFirstScan = false;
-                state.scanTime = Date.now();
                 
                 document.getElementById('currentBarcode').textContent = qrData;
                 document.getElementById('currentOrderInfo').classList.add('show');
@@ -800,8 +838,6 @@
             state.recordingTimerInterval = setInterval(updateRecordingTimer, 1000);
             
             document.getElementById('fpsCounter').classList.remove('hidden');
-            
-            console.log('[Recording] Started');
         }
         
         function stopRecording() {
@@ -837,8 +873,7 @@
             var blob = new Blob(state.recordedChunks, { type: 'video/webm' });
             var url = URL.createObjectURL(blob);
             
-            // Tạo filename với folder path
-            var filename = FOLDER_NAME + '/' + state.currentQR + '_' + getDateStr() + '_' + getFilenameTimeStr() + '.webm';
+            var filename = state.currentQR + '_' + getDateStr() + '_' + getFilenameTimeStr() + '.webm';
             
             var a = document.createElement('a');
             a.href = url;
@@ -915,8 +950,6 @@
                         select.value = saved;
                     }
                 }
-            }).catch(function(e) {
-                console.error('Error getting cameras:', e);
             });
         }
         
@@ -948,7 +981,6 @@
                 getCameras();
                 
             }).catch(function(e) {
-                console.error('Camera error:', e);
                 showToast('❌ Không thể truy cập camera', 'error');
             });
         }
@@ -971,38 +1003,25 @@
             showToast('Camera đã tắt', 'warning');
         }
         
-        // ========== OPEN FOLDER - Download helper file to show folder ==========
+        // ========== OPEN FOLDER ==========
         function openFolder() {
-            // Tạo file text nhỏ để trigger Downloads folder
-            var content = 'Video được lưu trong thư mục: ' + FOLDER_NAME + '\n';
-            content += 'Đường dẫn: Downloads/' + FOLDER_NAME + '/\n\n';
-            content += 'Ngày: ' + getDateStr() + '\n';
-            content += 'Tổng số video: ' + state.orders.length + '\n';
-            
-            var blob = new Blob([content], { type: 'text/plain' });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = FOLDER_NAME + '/_MO_THU_MUC_NAY_.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
-            showToast('📁 Mở thư mục Downloads/' + FOLDER_NAME, 'success');
+            // Hiện/ẩn hướng dẫn folder
+            var folderInfo = document.getElementById('folderInfo');
+            if (folderInfo.classList.contains('hidden')) {
+                folderInfo.classList.remove('hidden');
+                showToast('📁 Video lưu trong thư mục Downloads', 'success');
+            } else {
+                folderInfo.classList.add('hidden');
+            }
         }
         
-        // ========== UI FUNCTIONS - ĐỒNG BỘ ==========
+        // ========== UI FUNCTIONS ==========
         function updateCounter() {
             var today = getDateStr();
             var todayOrders = state.orders.filter(function(o) { return o.date === today; });
             
-            // Cập nhật số đơn hôm nay
             document.getElementById('scanCount').textContent = todayOrders.length;
-            
-            // Cập nhật tổng số đơn
             document.getElementById('totalCount').textContent = state.orders.length.toLocaleString();
-            
-            // Cập nhật số đơn trong history header
             document.getElementById('historyCount').textContent = state.orders.length.toLocaleString();
         }
         
@@ -1017,7 +1036,6 @@
                 });
             }
             
-            // Cập nhật count trong header
             document.getElementById('historyCount').textContent = filtered.length.toLocaleString();
             
             if (filtered.length === 0) {
@@ -1058,16 +1076,16 @@
             a.download = 'QRScanner_' + getDateStr() + '.csv';
             a.click();
             
-            showToast('✅ Đã xuất Excel (' + state.orders.length + ' đơn)', 'success');
+            showToast('✅ Đã xuất Excel', 'success');
         }
         
         function deleteOrders() {
-            if (confirm('Xóa toàn bộ ' + state.orders.length.toLocaleString() + ' đơn trong lịch sử?')) {
+            if (confirm('Xóa toàn bộ ' + state.orders.length + ' đơn?')) {
                 state.orders = [];
                 localStorage.setItem(STORAGE_KEY, '[]');
                 updateCounter();
                 renderHistory();
-                showToast('Đã xóa lịch sử', 'success');
+                showToast('Đã xóa', 'success');
             }
         }
         
@@ -1102,17 +1120,13 @@
         
         // ========== INIT ==========
         function init() {
-            console.log('[QR Scanner] Blog Edition v3.0');
-            console.log('[Config] Max orders: ' + MAX_ORDERS.toLocaleString());
-            console.log('[Config] Auto-delete: ' + AUTO_DELETE_DAYS + ' days');
-            console.log('[Config] Folder: ' + FOLDER_NAME);
+            console.log('[QR Scanner] Blog Edition v4.0');
             
             try {
                 var saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) state.orders = JSON.parse(saved);
             } catch (e) {}
             
-            // Auto delete old orders
             autoDeleteOldOrders();
             
             state.selectedQuality = localStorage.getItem('selectedQuality') || '1080p60';
@@ -1130,61 +1144,58 @@
             updateCounter();
             renderHistory();
             
-            // Event listeners
-            document.getElementById('startBtn').addEventListener('click', startCamera);
-            document.getElementById('stopBtn').addEventListener('click', stopCamera);
-            document.getElementById('btnOpenFolder').addEventListener('click', openFolder);
-            document.getElementById('exportExcelBtn').addEventListener('click', exportExcel);
-            document.getElementById('deleteBtn').addEventListener('click', deleteOrders);
-            document.getElementById('cameraTab').addEventListener('click', function() { selectDevice('camera'); });
-            document.getElementById('scannerTab').addEventListener('click', function() { selectDevice('scanner'); });
-            document.getElementById('searchInput').addEventListener('input', function(e) { renderHistory(e.target.value); });
+            // Events
+            document.getElementById('startBtn').onclick = startCamera;
+            document.getElementById('stopBtn').onclick = stopCamera;
+            document.getElementById('btnOpenFolder').onclick = openFolder;
+            document.getElementById('exportExcelBtn').onclick = exportExcel;
+            document.getElementById('deleteBtn').onclick = deleteOrders;
+            document.getElementById('cameraTab').onclick = function() { selectDevice('camera'); };
+            document.getElementById('scannerTab').onclick = function() { selectDevice('scanner'); };
+            document.getElementById('searchInput').oninput = function(e) { renderHistory(e.target.value); };
             
-            document.getElementById('cameraSelect').addEventListener('change', function() {
+            document.getElementById('cameraSelect').onchange = function() {
                 state.selectedCameraId = this.value;
                 localStorage.setItem('selectedCamera', this.value);
                 if (state.stream) { stopCamera(); setTimeout(startCamera, 300); }
-            });
+            };
             
-            document.getElementById('qualitySelect').addEventListener('change', function() {
+            document.getElementById('qualitySelect').onchange = function() {
                 state.selectedQuality = this.value;
                 localStorage.setItem('selectedQuality', this.value);
                 if (state.stream) { stopCamera(); setTimeout(startCamera, 300); }
-            });
+            };
             
-            document.getElementById('bitrateSelect').addEventListener('change', function() {
+            document.getElementById('bitrateSelect').onchange = function() {
                 state.selectedBitrate = this.value;
                 localStorage.setItem('selectedBitrate', this.value);
-            });
+            };
             
-            document.getElementById('preBufferSelect').addEventListener('change', function() {
+            document.getElementById('preBufferSelect').onchange = function() {
                 state.preBufferDuration = parseInt(this.value);
                 localStorage.setItem('preBufferDuration', this.value);
-            });
+            };
             
-            document.getElementById('postBufferSelect').addEventListener('change', function() {
+            document.getElementById('postBufferSelect').onchange = function() {
                 state.postBufferDuration = parseInt(this.value);
                 localStorage.setItem('postBufferDuration', this.value);
-            });
+            };
             
-            document.getElementById('audioToggle').addEventListener('change', function() {
+            document.getElementById('audioToggle').onchange = function() {
                 state.audioEnabled = this.checked;
                 localStorage.setItem('audioEnabled', this.checked);
                 if (state.stream) { stopCamera(); setTimeout(startCamera, 300); }
-            });
+            };
             
             document.addEventListener('keydown', handleBarcodeInput);
             
-            // Auto request camera
             setTimeout(function() {
                 navigator.mediaDevices.getUserMedia({ video: true, audio: true })
                     .then(function(stream) {
                         stream.getTracks().forEach(function(t) { t.stop(); });
                         getCameras();
                     })
-                    .catch(function(e) {
-                        console.log('Waiting for camera permission');
-                    });
+                    .catch(function() {});
             }, 500);
         }
         
