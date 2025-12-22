@@ -155,6 +155,7 @@
             padding: 12px 15px;
             justify-content: center;
             background: white;
+            flex-wrap: wrap;
         }
         
         .btn {
@@ -316,6 +317,7 @@
             justify-content: center;
             background: #f8f9fa;
             border-top: 1px solid #dee2e6;
+            flex-wrap: wrap;
         }
         
         /* ========== TOAST ========== */
@@ -353,7 +355,7 @@
     <div class="header">
         <h1>📷 QR Scanner Video Recording</h1>
         <div class="subtitle">Quay video đóng gói - Bằng chứng giao hàng</div>
-        <div class="header-info">🆓 FREE - Unlimited / Miễn phí - Không giới hạn</div>
+        <div class="header-info">🆓 FREE - Unlimited | 🗑️ Tự xóa đơn &gt; 60 ngày</div>
     </div>
     
     <!-- Device Tabs -->
@@ -390,9 +392,10 @@
                 </select>
             </div>
             <div class="control-group">
-                <label>Ghi trước quét:</label>
+                <label>Ghi hình trước khi quét:</label>
                 <select id="preBufferSelect">
                     <option value="3000">3 giây</option>
+                    <option value="4000">4 giây</option>
                     <option value="5000" selected>5 giây</option>
                 </select>
             </div>
@@ -400,9 +403,10 @@
         
         <div class="control-row">
             <div class="control-group">
-                <label>Ghi sau quét:</label>
+                <label>Ghi hình sau khi quét:</label>
                 <select id="postBufferSelect">
                     <option value="3000" selected>3 giây</option>
+                    <option value="4000">4 giây</option>
                     <option value="5000">5 giây</option>
                 </select>
             </div>
@@ -420,6 +424,7 @@
     <div class="action-buttons">
         <button id="startBtn" class="btn btn-primary">🎬 Bắt đầu</button>
         <button id="stopBtn" class="btn btn-danger hidden">⏹️ Dừng</button>
+        <button id="btnOpenFolder" class="btn btn-secondary">📁 Mở thư mục</button>
     </div>
     
     <!-- Video Container -->
@@ -480,7 +485,8 @@
         
         // ========== CONFIGURATION ==========
         var STORAGE_KEY = 'qrScannerOrdersBlog';
-        var MAX_ORDERS = 30000;
+        var MAX_ORDERS = 100000;  // 100,000 đơn
+        var AUTO_DELETE_DAYS = 60;  // Tự xóa sau 60 ngày
         var SCAN_LOCK_FIRST = 10000;
         var SCAN_LOCK_SECOND = 5000;
         
@@ -566,6 +572,24 @@
         function getTimeStr() {
             var d = new Date();
             return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+        }
+        
+        // ========== AUTO DELETE OLD ORDERS ==========
+        function autoDeleteOldOrders() {
+            var now = new Date();
+            var cutoffDate = new Date(now.getTime() - (AUTO_DELETE_DAYS * 24 * 60 * 60 * 1000));
+            
+            var beforeCount = state.orders.length;
+            state.orders = state.orders.filter(function(order) {
+                var orderDate = new Date(order.date);
+                return orderDate >= cutoffDate;
+            });
+            
+            var deletedCount = beforeCount - state.orders.length;
+            if (deletedCount > 0) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+                console.log('[Auto-Delete] Deleted ' + deletedCount + ' orders older than ' + AUTO_DELETE_DAYS + ' days');
+            }
         }
         
         // ========== CODEC ==========
@@ -936,6 +960,13 @@
             showToast('Camera đã tắt', 'warning');
         }
         
+        // ========== OPEN FOLDER ==========
+        function openFolder() {
+            showToast('📁 Video được lưu trong thư mục Downloads', 'success');
+            // Web browser không thể mở folder trực tiếp
+            // Chỉ có thể thông báo cho user
+        }
+        
         // ========== UI FUNCTIONS ==========
         function updateCounter() {
             var today = getDateStr();
@@ -1036,12 +1067,17 @@
         
         // ========== INIT ==========
         function init() {
-            console.log('[QR Scanner] Blog Edition v1.0');
+            console.log('[QR Scanner] Blog Edition v2.0');
+            console.log('[Config] Max orders: ' + MAX_ORDERS);
+            console.log('[Config] Auto-delete: ' + AUTO_DELETE_DAYS + ' days');
             
             try {
                 var saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) state.orders = JSON.parse(saved);
             } catch (e) {}
+            
+            // Auto delete old orders
+            autoDeleteOldOrders();
             
             state.selectedQuality = localStorage.getItem('selectedQuality') || '1080p60';
             state.selectedBitrate = localStorage.getItem('selectedBitrate') || '12';
@@ -1061,6 +1097,7 @@
             // Event listeners
             document.getElementById('startBtn').addEventListener('click', startCamera);
             document.getElementById('stopBtn').addEventListener('click', stopCamera);
+            document.getElementById('btnOpenFolder').addEventListener('click', openFolder);
             document.getElementById('exportExcelBtn').addEventListener('click', exportExcel);
             document.getElementById('deleteBtn').addEventListener('click', deleteOrders);
             document.getElementById('cameraTab').addEventListener('click', function() { selectDevice('camera'); });
