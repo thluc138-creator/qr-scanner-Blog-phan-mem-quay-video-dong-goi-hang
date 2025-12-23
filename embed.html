@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Scanner Video Recording</title>
+    <title>QR Scanner Video Recording System</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         html, body {
             font-family: 'Segoe UI', Arial, sans-serif;
             background: #f8f9fa;
-            /* KHÔNG có scroll riêng - để parent control */
             overflow: hidden;
             height: 100%;
         }
@@ -18,7 +17,7 @@
         .app-container {
             display: flex;
             flex-direction: column;
-            min-height: 100%;
+            height: 100%;
             background: white;
         }
         
@@ -28,12 +27,12 @@
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 12px 15px;
+            padding: 10px 15px;
             text-align: center;
             flex-shrink: 0;
         }
         
-        .header h1 { font-size: 16px; margin-bottom: 2px; }
+        .header h1 { font-size: 15px; margin-bottom: 2px; }
         .header .subtitle { font-size: 10px; opacity: 0.9; }
         
         /* ========== TABS ========== */
@@ -69,7 +68,7 @@
         
         /* ========== CONTROLS ========== */
         .controls {
-            padding: 12px 15px;
+            padding: 10px 12px;
             background: #fafafa;
             border-bottom: 1px solid #eee;
             flex-shrink: 0;
@@ -77,8 +76,8 @@
         
         .control-row {
             display: flex;
-            gap: 12px;
-            margin-bottom: 10px;
+            gap: 10px;
+            margin-bottom: 8px;
         }
         
         .control-row:last-child { margin-bottom: 0; }
@@ -90,18 +89,18 @@
         
         .control-group label {
             display: block;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             color: #444;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
         
         select {
             width: 100%;
-            padding: 8px 10px;
+            padding: 6px 8px;
             border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 12px;
+            border-radius: 5px;
+            font-size: 11px;
             background: white;
             cursor: pointer;
         }
@@ -114,13 +113,13 @@
         .toggle-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         
         .toggle {
             position: relative;
-            width: 36px;
-            height: 18px;
+            width: 32px;
+            height: 16px;
         }
         
         .toggle input { opacity: 0; width: 0; height: 0; }
@@ -130,7 +129,7 @@
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
             background: #ccc;
-            border-radius: 18px;
+            border-radius: 16px;
             transition: 0.3s;
         }
         
@@ -139,39 +138,39 @@
             position: absolute;
             height: 12px;
             width: 12px;
-            left: 3px;
-            bottom: 3px;
+            left: 2px;
+            bottom: 2px;
             background: white;
             border-radius: 50%;
             transition: 0.3s;
         }
         
         .toggle input:checked + .toggle-slider { background: #667eea; }
-        .toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
+        .toggle input:checked + .toggle-slider:before { transform: translateX(16px); }
         
-        .toggle-label { font-size: 12px; color: #555; }
+        .toggle-label { font-size: 11px; color: #555; }
         
         /* ========== BUTTONS ========== */
         .buttons {
             display: flex;
-            gap: 10px;
-            padding: 12px 15px;
+            gap: 8px;
+            padding: 10px 12px;
             background: white;
             justify-content: center;
             flex-shrink: 0;
         }
         
         .btn {
-            padding: 10px 24px;
+            padding: 8px 18px;
             border: none;
-            border-radius: 8px;
-            font-size: 13px;
+            border-radius: 6px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
         
         .btn-primary {
@@ -184,19 +183,9 @@
             box-shadow: 0 4px 12px rgba(102,126,234,0.4);
         }
         
-        .btn-secondary {
-            background: #f39c12;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #e67e22;
-        }
-        
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
+        .btn-secondary { background: #f39c12; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-small { padding: 5px 10px; font-size: 10px; }
         
         /* ========== VIDEO ========== */
         .video-section {
@@ -207,7 +196,7 @@
         
         #webcamVideo {
             width: 100%;
-            height: 280px;
+            height: 260px;
             object-fit: contain;
             display: block;
         }
@@ -216,7 +205,7 @@
             position: absolute;
             top: 8px;
             left: 8px;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             color: white;
             padding: 8px 10px;
             border-radius: 6px;
@@ -247,83 +236,98 @@
             50% { opacity: 0.6; }
         }
         
+        /* FPS Display trên UI */
         .fps-display {
             position: absolute;
             bottom: 8px;
-            right: 8px;
-            background: rgba(0,0,0,0.7);
-            color: #0f0;
-            padding: 3px 6px;
+            left: 8px;
+            background: rgba(0,0,0,0.8);
+            padding: 4px 8px;
             border-radius: 4px;
             font-family: monospace;
             font-size: 10px;
+            display: flex;
+            gap: 10px;
         }
+        
+        .fps-value { color: #00ff00; }
+        .fps-value.low { color: #ff0000; }
+        .fps-value.medium { color: #ffff00; }
+        .fps-value.high { color: #00ff00; }
+        
+        .scan-rate { color: #00bfff; }
         
         /* ========== STATS ========== */
         .stats {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
-            padding: 10px 15px;
+            padding: 8px 12px;
             text-align: center;
             flex-shrink: 0;
         }
         
-        .stats-title { font-size: 12px; margin-bottom: 2px; }
-        .stats-count { font-size: 20px; font-weight: bold; }
+        .stats-title { font-size: 11px; margin-bottom: 2px; }
+        .stats-count { font-size: 18px; font-weight: bold; }
         .stats-total { font-size: 10px; opacity: 0.9; }
         
         /* ========== HISTORY ========== */
         .history {
-            padding: 12px 15px;
+            padding: 10px 12px;
             background: white;
             flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         
         .history-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         
-        .history-header h3 { font-size: 13px; color: #333; }
+        .history-header h3 { font-size: 12px; color: #333; }
         
         .search-input {
-            padding: 5px 10px;
+            padding: 4px 8px;
             border: 1px solid #ddd;
-            border-radius: 15px;
-            font-size: 11px;
-            width: 120px;
+            border-radius: 12px;
+            font-size: 10px;
+            width: 100px;
         }
         
         .history-list {
             border: 1px solid #eee;
-            border-radius: 6px;
-            max-height: 150px;
+            border-radius: 5px;
+            flex: 1;
             overflow-y: auto;
         }
         
         .history-item {
             display: grid;
-            grid-template-columns: 35px 1fr 70px 50px;
-            gap: 5px;
-            padding: 6px 8px;
+            grid-template-columns: 28px 1fr 65px 50px 50px 45px 35px;
+            gap: 4px;
+            padding: 5px 6px;
             border-bottom: 1px solid #f5f5f5;
-            font-size: 10px;
+            font-size: 9px;
             align-items: center;
         }
         
         .history-item:last-child { border-bottom: none; }
         .history-item:hover { background: #f9f9f9; }
         
-        .h-num { color: #999; }
+        .h-num { color: #999; font-weight: 500; }
         .h-qr { font-weight: 600; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .h-date { color: #666; }
         .h-time { color: #667eea; font-weight: 500; }
+        .h-duration { color: #28a745; }
+        .h-size { color: #f39c12; }
+        .h-products { color: #e74c3c; font-weight: 600; }
         
         .empty-msg {
             text-align: center;
-            padding: 20px;
+            padding: 15px;
             color: #999;
             font-size: 11px;
         }
@@ -331,29 +335,24 @@
         /* ========== HISTORY ACTIONS ========== */
         .history-actions {
             display: flex;
-            gap: 8px;
-            padding: 10px 15px;
+            gap: 6px;
+            padding: 8px 12px;
             background: #f8f9fa;
             justify-content: center;
             flex-shrink: 0;
         }
         
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 11px;
-        }
-        
         /* ========== TOAST ========== */
         .toast {
             position: fixed;
-            bottom: 15px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            padding: 8px 16px;
+            padding: 8px 14px;
             background: #28a745;
             color: white;
-            border-radius: 20px;
-            font-size: 12px;
+            border-radius: 18px;
+            font-size: 11px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             transition: transform 0.3s;
             z-index: 1000;
@@ -369,8 +368,8 @@
     <div class="app-container">
         <!-- Header -->
         <div class="header">
-            <h1>📷 QR Scanner Video Recording</h1>
-            <div class="subtitle">Quay video đóng gói • Tự xóa đơn &gt; 60 ngày</div>
+            <h1>📷 QR Scanner Video Recording System</h1>
+            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.0 FULL</div>
         </div>
         
         <!-- Tabs -->
@@ -404,6 +403,17 @@
                     </select>
                 </div>
                 <div class="control-group">
+                    <label>Timestamp:</label>
+                    <select id="timestampPosition">
+                        <option value="top-right" selected>Góc trên phải</option>
+                        <option value="top-left">Góc trên trái</option>
+                        <option value="bottom-right">Góc dưới phải</option>
+                        <option value="bottom-left">Góc dưới trái</option>
+                    </select>
+                </div>
+            </div>
+            <div class="control-row">
+                <div class="control-group">
                     <label>Ghi trước quét:</label>
                     <select id="preBufferSelect">
                         <option value="3000">3 giây</option>
@@ -411,8 +421,6 @@
                         <option value="5000" selected>5 giây</option>
                     </select>
                 </div>
-            </div>
-            <div class="control-row">
                 <div class="control-group">
                     <label>Ghi sau quét:</label>
                     <select id="postBufferSelect">
@@ -421,6 +429,8 @@
                         <option value="5000">5 giây</option>
                     </select>
                 </div>
+            </div>
+            <div class="control-row">
                 <div class="toggle-row">
                     <label class="toggle">
                         <input type="checkbox" id="audioToggle" checked>
@@ -441,13 +451,22 @@
         <!-- Video -->
         <div class="video-section">
             <video id="webcamVideo" autoplay playsinline muted></video>
+            
             <div class="video-overlay" id="orderInfo">
-                <h4>📦 Đang ghi</h4>
-                <div>Mã: <strong id="currentQR">-</strong></div>
+                <h4>📦 Đang ghi video</h4>
+                <div>Mã: <strong id="currentQRDisplay">-</strong></div>
                 <div>Time: <span id="currentTime">00:00:00</span></div>
+                <div>SP: <span id="productsCount">0</span></div>
             </div>
-            <div class="rec-indicator hidden" id="recIndicator">⏺ REC <span id="recTime">00:00</span></div>
-            <div class="fps-display hidden" id="fpsDisplay">FPS: <span id="fpsValue">0</span></div>
+            
+            <div class="rec-indicator hidden" id="recIndicator">
+                ⏺ REC <span id="recTime">00:00</span>
+            </div>
+            
+            <div class="fps-display hidden" id="fpsDisplay">
+                <span>FPS: <span id="fpsValue" class="fps-value high">0</span></span>
+                <span>Scan: <span id="scanRate" class="scan-rate">0</span>/s</span>
+            </div>
         </div>
         
         <!-- Stats -->
@@ -461,7 +480,7 @@
         <div class="history">
             <div class="history-header">
                 <h3>📜 Lịch sử (<span id="historyCount">0</span>)</h3>
-                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Tìm mã...">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Tìm...">
             </div>
             <div class="history-list" id="historyList">
                 <div class="empty-msg">Chưa có lịch sử</div>
@@ -485,45 +504,94 @@
     (function() {
         'use strict';
         
-        // ========== CONFIG ==========
-        var STORAGE_KEY = 'qrScannerBlog';
+        // ==========================================
+        // CONFIGURATION - GIỐNG EXTENSION
+        // ==========================================
+        var STORAGE_KEY = 'qrScannerBlogV7';
         var MAX_ORDERS = 100000;
         var AUTO_DELETE_DAYS = 60;
         
-        var PRESETS = {
-            '1080p30': { w: 1920, h: 1080, fps: 30 },
-            '1080p60': { w: 1920, h: 1080, fps: 60 }
+        // Scan lock times - GIỐNG EXTENSION
+        var SCAN_LOCK_FIRST = 10000;   // 10s sau scan lần 1
+        var SCAN_LOCK_SECOND = 5000;   // 5s sau scan lần 2
+        var PROGRESS_DISPLAY_TIME = 1500;  // Hiển thị progress bar 1.5s
+        
+        // Video presets - GIỐNG EXTENSION
+        var VIDEO_PRESETS = {
+            '1080p30': { width: 1920, height: 1080, fps: 30, scanFPS: 3, scanScale: 0.5, label: 'Full HD 30fps' },
+            '1080p60': { width: 1920, height: 1080, fps: 60, scanFPS: 3, scanScale: 0.5, label: 'Full HD 60fps' }
         };
         
-        // ========== STATE ==========
+        var BITRATE_OPTIONS = {
+            '8': { value: 8000000, label: '8 Mbps' },
+            '10': { value: 10000000, label: '10 Mbps' },
+            '12': { value: 12000000, label: '12 Mbps' }
+        };
+        
+        // ==========================================
+        // STATE - GIỐNG EXTENSION
+        // ==========================================
         var state = {
             stream: null,
             recorder: null,
             chunks: [],
+            canvasStream: null,
             orders: [],
+            
+            // Recording state
             isRecording: false,
             isFirstScan: true,
             currentQR: null,
             scanBlocked: false,
-            startTime: null,
+            scanBlockedUntil: 0,
+            recordingStartTime: null,
+            scanTime: null,
             timerInterval: null,
+            
+            // Settings
             quality: '1080p60',
-            bitrate: 12000000,
+            bitrate: '12',
             audio: true,
             preBuf: 5000,
             postBuf: 3000,
             cameraId: null,
             device: 'camera',
-            canvas: null,
-            ctx: null,
+            timestampPos: 'top-right',
+            
+            // Canvas
+            recordingCanvas: null,
+            recordingCtx: null,
             scanCanvas: null,
             scanCtx: null,
             rafId: null,
-            canvasStream: null,
-            folderHandle: null  // File System API
+            
+            // FPS Counter - QUAN TRỌNG
+            frameCount: 0,
+            lastFpsTime: 0,
+            currentFPS: 0,
+            
+            // Scan throttle
+            lastScanTime: 0,
+            scanInterval: 333,  // 1000 / 3fps
+            actualScanCount: 0,
+            lastScanCountTime: 0,
+            actualScanRate: 0,
+            
+            // Display
+            displayQR: null,
+            displayTime: 0,
+            detectedProducts: [],
+            
+            // Codec
+            currentCodec: null,
+            
+            // File System API
+            folderHandle: null
         };
         
-        // ========== UTILS ==========
+        // ==========================================
+        // UTILITIES
+        // ==========================================
         function $(id) { return document.getElementById(id); }
         
         function toast(msg, type) {
@@ -559,6 +627,11 @@
             return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
         }
         
+        function dateStrVN() {
+            var d = new Date();
+            return pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + d.getFullYear();
+        }
+        
         function timeStr() {
             var d = new Date();
             return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
@@ -569,63 +642,567 @@
             return pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
         }
         
-        // ========== AUTO DELETE ==========
-        function autoDelete() {
+        // ==========================================
+        // CODEC
+        // ==========================================
+        function getCodec() {
+            var codecs = [
+                { mimeType: 'video/webm;codecs=vp8,opus', ext: 'webm', name: 'VP8' },
+                { mimeType: 'video/webm;codecs=vp8', ext: 'webm', name: 'VP8' },
+                { mimeType: 'video/webm', ext: 'webm', name: 'WebM' }
+            ];
+            for (var i = 0; i < codecs.length; i++) {
+                if (MediaRecorder.isTypeSupported(codecs[i].mimeType)) {
+                    state.currentCodec = codecs[i];
+                    return codecs[i];
+                }
+            }
+            state.currentCodec = { mimeType: 'video/webm', ext: 'webm', name: 'WebM' };
+            return state.currentCodec;
+        }
+        
+        // ==========================================
+        // CANVAS SETUP
+        // ==========================================
+        function setupCanvas() {
+            var preset = VIDEO_PRESETS[state.quality];
+            
+            if (!state.recordingCanvas) {
+                state.recordingCanvas = document.createElement('canvas');
+                state.recordingCtx = state.recordingCanvas.getContext('2d', { alpha: false, desynchronized: true });
+            }
+            state.recordingCanvas.width = preset.width;
+            state.recordingCanvas.height = preset.height;
+            
+            if (!state.scanCanvas) {
+                state.scanCanvas = document.createElement('canvas');
+                state.scanCtx = state.scanCanvas.getContext('2d', { willReadFrequently: true });
+            }
+            
+            var scale = preset.scanScale;
+            state.scanCanvas.width = Math.round(preset.width * scale);
+            state.scanCanvas.height = Math.round(preset.height * scale);
+            
+            state.scanInterval = Math.round(1000 / preset.scanFPS);
+            
+            // Reset FPS
+            state.frameCount = 0;
+            state.lastFpsTime = 0;
+            state.currentFPS = 0;
+            state.actualScanCount = 0;
+            state.lastScanCountTime = 0;
+            state.actualScanRate = 0;
+            
+            console.log('[Setup] Recording: ' + preset.width + 'x' + preset.height + ' @ ' + preset.fps + 'fps');
+            console.log('[Setup] Scan: ' + state.scanCanvas.width + 'x' + state.scanCanvas.height + ' @ ' + preset.scanFPS + 'fps');
+        }
+        
+        // ==========================================
+        // RENDER LOOP - CORE
+        // ==========================================
+        function renderLoop(timestamp) {
+            if (!state.stream) return;
+            
+            var video = $('webcamVideo');
+            var ctx = state.recordingCtx;
+            var canvas = state.recordingCanvas;
+            
+            if (!video || !ctx || video.readyState < 2) {
+                state.rafId = requestAnimationFrame(renderLoop);
+                return;
+            }
+            
+            // Vẽ video lên canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Vẽ timestamp + REC indicator
+            drawTimestamp(ctx);
+            
+            // Vẽ Progress bar khi quét được QR
+            if (state.displayQR && (Date.now() - state.displayTime < PROGRESS_DISPLAY_TIME)) {
+                drawProgressBar(ctx, state.displayQR);
+            }
+            
+            // Vẽ FPS + Scan rate lên canvas
+            drawFPSCounter(ctx, timestamp);
+            
+            // Vẽ Audio indicator
+            if (state.scanTime && state.audio) {
+                drawAudioIndicator(ctx);
+            }
+            
+            // QR Scanning - throttled
+            var now = performance.now();
+            if (now - state.lastScanTime >= state.scanInterval) {
+                state.lastScanTime = now;
+                state.actualScanCount++;
+                
+                if (state.device === 'camera') {
+                    scanQRCode();
+                }
+            }
+            
+            // Tính Scan Rate thực tế
+            if (now - state.lastScanCountTime >= 1000) {
+                state.actualScanRate = state.actualScanCount;
+                state.actualScanCount = 0;
+                state.lastScanCountTime = now;
+                
+                // Update UI
+                var scanEl = $('scanRate');
+                if (scanEl) scanEl.textContent = state.actualScanRate;
+            }
+            
+            state.rafId = requestAnimationFrame(renderLoop);
+        }
+        
+        // ==========================================
+        // DRAW TIMESTAMP + REC BLINK - GIỐNG EXTENSION
+        // ==========================================
+        function drawTimestamp(ctx) {
             var now = new Date();
-            var cutoff = new Date(now.getTime() - AUTO_DELETE_DAYS * 86400000);
-            var before = state.orders.length;
-            state.orders = state.orders.filter(function(o) {
-                return new Date(o.date) >= cutoff;
-            });
-            if (state.orders.length < before) {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+            var text = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN');
+            var position = state.timestampPos;
+            var canvas = state.recordingCanvas;
+            var margin = 113;
+            
+            ctx.font = 'bold 22px Arial';
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 3;
+            
+            var x = position.includes('left') ? margin : canvas.width - 260 - margin;
+            var y = position.includes('top') ? margin + 22 : canvas.height - margin;
+            
+            ctx.strokeText(text, x, y);
+            ctx.fillText(text, x, y);
+            
+            // REC indicator blink khi đang ghi đơn
+            if (state.scanTime) {
+                var blink = Math.floor(Date.now() / 500) % 2;
+                var recY = position.includes('top') ? margin + 57 : canvas.height - margin - 35;
+                
+                // Chấm đỏ blink
+                if (blink) {
+                    ctx.fillStyle = 'red';
+                    ctx.beginPath();
+                    ctx.arc(margin + 15, recY, 12, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+                
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 18px Arial';
+                ctx.fillText('REC', margin + 35, recY + 6);
             }
         }
         
-        // ========== FILE SYSTEM API - MỞ FOLDER ==========
-        async function openFolder() {
-            // Kiểm tra browser có hỗ trợ File System Access API không
-            if ('showDirectoryPicker' in window) {
-                try {
-                    // Yêu cầu user chọn folder để lưu video
-                    state.folderHandle = await window.showDirectoryPicker({
-                        mode: 'readwrite',
-                        startIn: 'downloads'
-                    });
-                    toast('✅ Đã chọn thư mục: ' + state.folderHandle.name, 'success');
-                    
-                    // Lưu permission để dùng lại
-                    localStorage.setItem('folderName', state.folderHandle.name);
-                    
-                } catch (e) {
-                    if (e.name !== 'AbortError') {
-                        toast('❌ Không thể mở thư mục', 'error');
+        // ==========================================
+        // DRAW PROGRESS BAR - GIỐNG EXTENSION
+        // ==========================================
+        function drawProgressBar(ctx, qrCode) {
+            var position = state.timestampPos;
+            var canvas = state.recordingCanvas;
+            var margin = 113;
+            var panelWidth = 500, panelHeight = 180;
+            
+            var panelX = position.includes('left') ? margin : canvas.width - panelWidth - margin;
+            var panelY = position.includes('top') ? margin + 80 : canvas.height - margin - panelHeight - 80;
+            var centerX = panelX + panelWidth / 2;
+            
+            // Background panel
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
+            
+            // Border xanh
+            ctx.strokeStyle = '#00FF00';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(panelX, panelY, panelWidth, panelHeight);
+            
+            // Title
+            ctx.fillStyle = '#00FF00';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('✅ QR CODE DETECTED', centerX, panelY + 30);
+            
+            // QR Code màu vàng
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 28px Arial';
+            var displayQR = qrCode.length > 20 ? qrCode.substring(0, 20) + '...' : qrCode;
+            ctx.fillText(displayQR, centerX, panelY + 65);
+            
+            // Barcode visual
+            ctx.fillStyle = '#00FF00';
+            ctx.font = 'bold 20px monospace';
+            ctx.fillText('████████████████', centerX, panelY + 100);
+            
+            // Progress bar
+            var barX = panelX + 20, barY = panelY + 120;
+            var barWidth = panelWidth - 40, barHeight = 35;
+            
+            // Bar background
+            ctx.fillStyle = 'rgba(50, 50, 50, 0.9)';
+            ctx.fillRect(barX, barY, barWidth, barHeight);
+            
+            // Gradient fill
+            var gradient = ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
+            gradient.addColorStop(0, '#00AA00');
+            gradient.addColorStop(0.5, '#00FF00');
+            gradient.addColorStop(1, '#00AA00');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(barX, barY, barWidth, barHeight);
+            
+            // Border
+            ctx.strokeStyle = '#00FF00';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(barX, barY, barWidth, barHeight);
+            
+            // 100% text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('100%', centerX, barY + barHeight / 2 + 7);
+            
+            // Products count
+            if (state.detectedProducts.length > 0) {
+                ctx.fillStyle = '#00BFFF';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText('📦 ' + state.detectedProducts.length + ' sản phẩm', centerX, panelY + panelHeight - 15);
+            }
+            
+            ctx.textAlign = 'left';
+        }
+        
+        // ==========================================
+        // DRAW FPS COUNTER - MÀU THEO GIÁ TRỊ
+        // ==========================================
+        function drawFPSCounter(ctx, timestamp) {
+            // Đếm frame
+            state.frameCount++;
+            
+            // Khởi tạo
+            if (state.lastFpsTime === 0) {
+                state.lastFpsTime = timestamp;
+            }
+            
+            // Cập nhật FPS mỗi giây
+            var elapsed = timestamp - state.lastFpsTime;
+            if (elapsed >= 1000) {
+                state.currentFPS = Math.round(state.frameCount * 1000 / elapsed);
+                state.frameCount = 0;
+                state.lastFpsTime = timestamp;
+                
+                // Update UI với màu
+                var fpsEl = $('fpsValue');
+                if (fpsEl) {
+                    fpsEl.textContent = state.currentFPS;
+                    fpsEl.className = 'fps-value ';
+                    if (state.currentFPS < 30) {
+                        fpsEl.className += 'low';
+                    } else if (state.currentFPS < 50) {
+                        fpsEl.className += 'medium';
+                    } else {
+                        fpsEl.className += 'high';
                     }
                 }
+            }
+            
+            // Vẽ lên canvas
+            var margin = 113;
+            var position = state.timestampPos;
+            var y = position.includes('bottom') ? margin + 20 : state.recordingCanvas.height - margin;
+            
+            // Màu theo FPS
+            var color = '#00FF00';  // Xanh = tốt
+            if (state.currentFPS > 0 && state.currentFPS < 30) {
+                color = '#FF0000';  // Đỏ = kém
+            } else if (state.currentFPS >= 30 && state.currentFPS < 50) {
+                color = '#FFFF00';  // Vàng = trung bình
+            }
+            
+            ctx.fillStyle = color;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('FPS: ' + state.currentFPS, margin, y);
+            
+            // Scan rate
+            ctx.fillStyle = '#00BFFF';
+            ctx.fillText('Scan: ' + state.actualScanRate + '/s', margin + 80, y);
+        }
+        
+        // ==========================================
+        // DRAW AUDIO INDICATOR
+        // ==========================================
+        function drawAudioIndicator(ctx) {
+            var margin = 113;
+            var position = state.timestampPos;
+            var y = position.includes('bottom') ? margin + 45 : state.recordingCanvas.height - margin - 25;
+            
+            ctx.fillStyle = '#FF0000';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('🎤 REC', margin, y);
+        }
+        
+        // ==========================================
+        // QR SCANNING
+        // ==========================================
+        function scanQRCode() {
+            try {
+                var video = $('webcamVideo');
+                if (!video || video.readyState < 2) return;
+                
+                var ctx = state.scanCtx;
+                var canvas = state.scanCanvas;
+                if (!ctx || !canvas) return;
+                
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                if (!imageData || typeof jsQR === 'undefined') return;
+                
+                var code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: 'dontInvert'
+                });
+                
+                if (code && code.data && code.data.trim()) {
+                    var qrData = code.data.trim();
+                    
+                    // Hiển thị progress bar
+                    state.displayQR = qrData;
+                    state.displayTime = Date.now();
+                    
+                    // Đếm sản phẩm
+                    if (state.scanTime && state.detectedProducts.indexOf(qrData) === -1) {
+                        state.detectedProducts.push(qrData);
+                        $('productsCount').textContent = state.detectedProducts.length;
+                    }
+                    
+                    // Xử lý QR
+                    if (!state.scanBlocked) {
+                        handleQRDetected(qrData);
+                    }
+                }
+            } catch (e) {}
+        }
+        
+        // ==========================================
+        // QR DETECTION HANDLER - GIỐNG EXTENSION
+        // ==========================================
+        function handleQRDetected(qrData) {
+            if (!qrData || state.scanBlocked) return;
+            
+            beep();
+            
+            if (state.isFirstScan) {
+                // === SCAN LẦN 1 ===
+                state.currentQR = qrData;
+                state.isFirstScan = false;
+                state.scanTime = Date.now();
+                state.detectedProducts = [qrData];
+                
+                var recordedMs = state.scanTime - state.recordingStartTime;
+                var effectivePreBuffer = Math.min(state.preBuf, recordedMs);
+                
+                $('currentQRDisplay').textContent = qrData;
+                $('productsCount').textContent = '1';
+                $('orderInfo').classList.add('show');
+                $('recIndicator').classList.remove('hidden');
+                
+                startDisplayTimer(effectivePreBuffer);
+                
+                toast('📹 Đang ghi (+' + Math.round(effectivePreBuffer/1000) + 's): ' + qrData, 'success');
+                
+                // Khóa scan 10 giây
+                state.scanBlocked = true;
+                state.scanBlockedUntil = Date.now() + SCAN_LOCK_FIRST;
+                
+                var countdown = 10;
+                var timer = setInterval(function() {
+                    countdown--;
+                    if (countdown > 0) {
+                        toast('⏱️ Chờ ' + countdown + 's để quét lần 2...', 'warning');
+                    } else {
+                        clearInterval(timer);
+                        state.scanBlocked = false;
+                        toast('✅ Quét lại mã để kết thúc!', 'success');
+                    }
+                }, 1000);
+                
             } else {
-                // Browser không hỗ trợ - hiện hướng dẫn
-                toast('📁 Video lưu tại: Downloads', 'warning');
-                alert('💡 Hướng dẫn mở thư mục Downloads:\n\n1. Nhấn Win + E\n2. Click "Downloads" ở menu trái\n\nHoặc mở: C:\\Users\\' + (navigator.userAgent.includes('Windows') ? '[Tên User]' : '') + '\\Downloads');
+                // === SCAN LẦN 2 ===
+                if (qrData !== state.currentQR) {
+                    toast('⚠️ Mã không khớp! Cần: ' + state.currentQR, 'error');
+                    return;
+                }
+                
+                startPostBuffer();
             }
         }
         
-        // ========== SAVE VIDEO ==========
+        // ==========================================
+        // RECORDING
+        // ==========================================
+        function startRecording() {
+            if (!state.stream || state.isRecording) return;
+            
+            setupCanvas();
+            
+            var preset = VIDEO_PRESETS[state.quality];
+            var bitrate = BITRATE_OPTIONS[state.bitrate].value;
+            
+            state.canvasStream = state.recordingCanvas.captureStream(preset.fps);
+            
+            if (state.audio && state.stream.getAudioTracks().length > 0) {
+                state.stream.getAudioTracks().forEach(function(track) {
+                    state.canvasStream.addTrack(track);
+                });
+            }
+            
+            var codec = getCodec();
+            
+            try {
+                state.recorder = new MediaRecorder(state.canvasStream, {
+                    mimeType: codec.mimeType,
+                    videoBitsPerSecond: bitrate
+                });
+            } catch (e) {
+                state.recorder = new MediaRecorder(state.canvasStream);
+            }
+            
+            state.chunks = [];
+            
+            state.recorder.ondataavailable = function(e) {
+                if (e.data.size > 0) state.chunks.push(e.data);
+            };
+            
+            state.recorder.onstop = function() {
+                saveRecording();
+            };
+            
+            state.recorder.start(1000);
+            state.isRecording = true;
+            state.recordingStartTime = Date.now();
+            
+            state.rafId = requestAnimationFrame(renderLoop);
+            
+            $('fpsDisplay').classList.remove('hidden');
+            
+            console.log('[Recording] Started: ' + codec.name + ' @ ' + BITRATE_OPTIONS[state.bitrate].label);
+        }
+        
+        function stopRecording() {
+            if (state.recorder && state.isRecording) {
+                state.recorder.stop();
+                state.isRecording = false;
+            }
+            
+            if (state.rafId) {
+                cancelAnimationFrame(state.rafId);
+                state.rafId = null;
+            }
+            
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+                state.timerInterval = null;
+            }
+            
+            $('orderInfo').classList.remove('show');
+            $('recIndicator').classList.add('hidden');
+        }
+        
+        // ==========================================
+        // POST-BUFFER - GIỐNG EXTENSION
+        // ==========================================
+        function startPostBuffer() {
+            var postBufferSec = state.postBuf / 1000;
+            
+            toast('📦 Ghi thêm ' + postBufferSec + 's...', 'success');
+            
+            $('recIndicator').classList.add('hidden');
+            $('orderInfo').classList.remove('show');
+            
+            state.scanBlocked = true;
+            
+            var countdown = postBufferSec;
+            var timer = setInterval(function() {
+                countdown--;
+                if (countdown > 0) {
+                    toast('📦 Post-buffer: ' + countdown + 's...', 'warning');
+                } else {
+                    clearInterval(timer);
+                    if (state.recorder && state.recorder.state === 'recording') {
+                        state.recorder.stop();
+                    }
+                }
+            }, 1000);
+        }
+        
+        // ==========================================
+        // SAVE RECORDING - ĐỊNH DẠNG ĐẦY ĐỦ
+        // ==========================================
+        async function saveRecording() {
+            var qrCode = state.currentQR;
+            
+            if (!qrCode) {
+                restartRecording();
+                return;
+            }
+            
+            if (state.chunks.length === 0) {
+                toast('⚠️ Không có dữ liệu video', 'warning');
+                restartRecording();
+                return;
+            }
+            
+            var ext = state.currentCodec ? state.currentCodec.ext : 'webm';
+            var mimeType = state.currentCodec ? state.currentCodec.mimeType : 'video/webm';
+            var filename = qrCode + '_' + dateStr() + '_' + fileTimeStr() + '.' + ext;
+            
+            var blob = new Blob(state.chunks, { type: mimeType });
+            var sizeMB = (blob.size / 1048576).toFixed(2);
+            var duration = state.chunks.length;
+            
+            // Lưu file
+            await saveVideo(blob, filename);
+            
+            // Tạo order với ĐỊNH DẠNG ĐẦY ĐỦ như Extension
+            var order = {
+                qr: qrCode,
+                date: dateStrVN(),                    // 23/12/2025
+                time: timeStr(),                      // 20:56:47
+                duration: formatTime(duration),       // 00:00:56
+                filename: filename,
+                size: sizeMB + 'MB',                  // 50.90MB
+                codec: state.currentCodec ? state.currentCodec.name : 'WebM',
+                audio: state.audio ? 'Có' : 'Không',
+                productsDetected: state.detectedProducts.length,  // 1 SP
+                timestamp: Date.now()
+            };
+            
+            state.orders.unshift(order);
+            if (state.orders.length > MAX_ORDERS) state.orders.pop();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+            
+            updateUI();
+            
+            toast('✅ Đã lưu: ' + qrCode + ' (' + sizeMB + 'MB, ' + state.detectedProducts.length + ' SP)', 'success');
+            
+            // Khóa 5 giây trước khi restart
+            state.scanBlockedUntil = Date.now() + SCAN_LOCK_SECOND;
+            
+            setTimeout(function() {
+                restartRecording();
+            }, SCAN_LOCK_SECOND);
+        }
+        
         async function saveVideo(blob, filename) {
-            // Nếu đã chọn folder qua File System API
             if (state.folderHandle) {
                 try {
                     var fileHandle = await state.folderHandle.getFileHandle(filename, { create: true });
                     var writable = await fileHandle.createWritable();
                     await writable.write(blob);
                     await writable.close();
-                    toast('✅ Đã lưu: ' + filename, 'success');
                     return;
-                } catch (e) {
-                    console.log('File System API error, fallback to download');
-                }
+                } catch (e) {}
             }
             
-            // Fallback: Download bình thường
             var url = URL.createObjectURL(blob);
             var a = document.createElement('a');
             a.href = url;
@@ -636,7 +1213,40 @@
             URL.revokeObjectURL(url);
         }
         
-        // ========== CAMERA ==========
+        function restartRecording() {
+            state.scanBlocked = false;
+            state.isFirstScan = true;
+            state.currentQR = null;
+            state.scanTime = null;
+            state.detectedProducts = [];
+            state.chunks = [];
+            
+            startRecording();
+            toast('🔄 Sẵn sàng quét đơn mới', 'success');
+        }
+        
+        function startDisplayTimer(preBufferMs) {
+            var displayTime = Math.floor(preBufferMs / 1000);
+            
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+            }
+            
+            state.timerInterval = setInterval(function() {
+                displayTime++;
+                var timeStr = formatTime(displayTime);
+                
+                var recTime = $('recTime');
+                if (recTime) recTime.textContent = timeStr.substring(3);  // MM:SS
+                
+                var curTimer = $('currentTime');
+                if (curTimer) curTimer.textContent = timeStr;
+            }, 1000);
+        }
+        
+        // ==========================================
+        // CAMERA
+        // ==========================================
         function getCameras() {
             navigator.mediaDevices.enumerateDevices().then(function(devs) {
                 var cams = devs.filter(function(d) { return d.kind === 'videoinput'; });
@@ -658,244 +1268,106 @@
         }
         
         function startCamera() {
-            var p = PRESETS[state.quality];
+            var preset = VIDEO_PRESETS[state.quality];
+            
             navigator.mediaDevices.getUserMedia({
                 video: {
                     deviceId: state.cameraId ? { exact: state.cameraId } : undefined,
-                    width: { ideal: p.w },
-                    height: { ideal: p.h },
-                    frameRate: { ideal: p.fps }
+                    width: { ideal: preset.width },
+                    height: { ideal: preset.height },
+                    frameRate: { ideal: preset.fps, min: 30 }
                 },
                 audio: state.audio
             }).then(function(stream) {
                 state.stream = stream;
                 $('webcamVideo').srcObject = stream;
+                
+                // Log camera info
+                var track = stream.getVideoTracks()[0];
+                var settings = track.getSettings();
+                console.log('[Camera] ' + settings.width + 'x' + settings.height + ' @ ' + settings.frameRate + 'fps');
+                
                 $('startBtn').classList.add('hidden');
                 $('stopBtn').classList.remove('hidden');
+                
                 setTimeout(startRecording, 500);
-                toast('✅ Camera đã bật!');
+                
+                toast('✅ Camera: ' + preset.label + ' - ' + BITRATE_OPTIONS[state.bitrate].label);
                 getCameras();
-            }).catch(function() {
-                toast('❌ Lỗi camera', 'error');
+                
+            }).catch(function(e) {
+                toast('❌ Lỗi camera: ' + e.message, 'error');
             });
         }
         
         function stopCamera() {
             stopRecording();
+            
             if (state.stream) {
                 state.stream.getTracks().forEach(function(t) { t.stop(); });
                 state.stream = null;
             }
+            
             $('webcamVideo').srcObject = null;
             $('startBtn').classList.remove('hidden');
             $('stopBtn').classList.add('hidden');
-            resetScan();
+            $('fpsDisplay').classList.add('hidden');
+            
+            state.scanBlocked = false;
+            state.isFirstScan = true;
+            state.currentQR = null;
+            
             toast('Camera đã tắt', 'warning');
         }
         
-        // ========== RECORDING ==========
-        function setupCanvas() {
-            var p = PRESETS[state.quality];
-            if (!state.canvas) {
-                state.canvas = document.createElement('canvas');
-                state.ctx = state.canvas.getContext('2d', { alpha: false });
-            }
-            state.canvas.width = p.w;
-            state.canvas.height = p.h;
-            
-            if (!state.scanCanvas) {
-                state.scanCanvas = document.createElement('canvas');
-                state.scanCtx = state.scanCanvas.getContext('2d', { willReadFrequently: true });
-            }
-            state.scanCanvas.width = p.w / 2;
-            state.scanCanvas.height = p.h / 2;
-        }
-        
-        function renderLoop() {
-            if (!state.stream) return;
-            var video = $('webcamVideo');
-            if (video.readyState >= 2) {
-                state.ctx.drawImage(video, 0, 0, state.canvas.width, state.canvas.height);
-                drawTimestamp();
-                if (state.device === 'camera') scanQR();
-            }
-            state.rafId = requestAnimationFrame(renderLoop);
-        }
-        
-        function drawTimestamp() {
-            var text = new Date().toLocaleString('vi-VN');
-            state.ctx.font = 'bold 24px Arial';
-            state.ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            state.ctx.fillText(text, 12, 32);
-            state.ctx.fillStyle = '#0f0';
-            state.ctx.fillText(text, 10, 30);
-        }
-        
-        function startRecording() {
-            if (!state.stream || state.isRecording) return;
-            setupCanvas();
-            var p = PRESETS[state.quality];
-            state.canvasStream = state.canvas.captureStream(p.fps);
-            if (state.audio && state.stream.getAudioTracks().length) {
-                state.stream.getAudioTracks().forEach(function(t) {
-                    state.canvasStream.addTrack(t);
-                });
-            }
-            
-            var mime = 'video/webm;codecs=vp8,opus';
-            if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm';
-            
-            state.recorder = new MediaRecorder(state.canvasStream, {
-                mimeType: mime,
-                videoBitsPerSecond: state.bitrate
-            });
-            
-            state.chunks = [];
-            state.recorder.ondataavailable = function(e) {
-                if (e.data.size > 0) state.chunks.push(e.data);
-            };
-            
-            state.recorder.start(1000);
-            state.isRecording = true;
-            state.startTime = Date.now();
-            
-            state.rafId = requestAnimationFrame(renderLoop);
-            state.timerInterval = setInterval(updateTimer, 1000);
-            
-            $('fpsDisplay').classList.remove('hidden');
-        }
-        
-        function stopRecording() {
-            if (state.recorder && state.isRecording) {
-                state.recorder.stop();
-                state.isRecording = false;
-            }
-            if (state.rafId) {
-                cancelAnimationFrame(state.rafId);
-                state.rafId = null;
-            }
-            if (state.timerInterval) {
-                clearInterval(state.timerInterval);
-                state.timerInterval = null;
-            }
-            $('orderInfo').classList.remove('show');
-            $('recIndicator').classList.add('hidden');
-            $('fpsDisplay').classList.add('hidden');
-        }
-        
-        function updateTimer() {
-            if (!state.startTime) return;
-            var sec = Math.floor((Date.now() - state.startTime) / 1000);
-            var m = Math.floor(sec / 60), s = sec % 60;
-            $('recTime').textContent = pad(m) + ':' + pad(s);
-            $('currentTime').textContent = formatTime(sec);
-        }
-        
-        // ========== QR SCAN ==========
-        function scanQR() {
-            if (state.scanBlocked) return;
-            var video = $('webcamVideo');
-            if (video.readyState < 2) return;
-            
-            state.scanCtx.drawImage(video, 0, 0, state.scanCanvas.width, state.scanCanvas.height);
-            var img = state.scanCtx.getImageData(0, 0, state.scanCanvas.width, state.scanCanvas.height);
-            
-            if (typeof jsQR === 'undefined') return;
-            var code = jsQR(img.data, state.scanCanvas.width, state.scanCanvas.height, { inversionAttempts: 'dontInvert' });
-            
-            if (code && code.data) processQR(code.data);
-        }
-        
-        function processQR(data) {
-            if (state.scanBlocked) return;
-            beep();
-            
-            if (state.isFirstScan) {
-                state.currentQR = data;
-                state.isFirstScan = false;
-                $('currentQR').textContent = data;
-                $('orderInfo').classList.add('show');
-                $('recIndicator').classList.remove('hidden');
-                toast('📹 Đang ghi: ' + data);
-                
-                state.scanBlocked = true;
-                var count = 10;
-                var iv = setInterval(function() {
-                    count--;
-                    if (count > 0) {
-                        toast('⏱️ Chờ ' + count + 's...', 'warning');
-                    } else {
-                        clearInterval(iv);
-                        state.scanBlocked = false;
-                        toast('✅ Quét lại để hoàn thành!');
+        // ==========================================
+        // OPEN FOLDER - FILE SYSTEM API
+        // ==========================================
+        async function openFolder() {
+            if ('showDirectoryPicker' in window) {
+                try {
+                    state.folderHandle = await window.showDirectoryPicker({
+                        mode: 'readwrite',
+                        startIn: 'downloads'
+                    });
+                    toast('✅ Đã chọn: ' + state.folderHandle.name, 'success');
+                } catch (e) {
+                    if (e.name !== 'AbortError') {
+                        toast('❌ Không thể mở thư mục', 'error');
                     }
-                }, 1000);
-            } else {
-                if (data !== state.currentQR) {
-                    toast('⚠️ Mã không khớp!', 'error');
-                    return;
                 }
-                toast('✅ Đang lưu...');
-                state.scanBlocked = true;
-                setTimeout(saveRecording, state.postBuf);
+            } else {
+                toast('📁 Video lưu tại: Downloads', 'warning');
+                alert('💡 Mở thư mục Downloads:\n\n1. Nhấn Win + E\n2. Click "Downloads"');
             }
         }
         
-        async function saveRecording() {
-            stopRecording();
-            if (!state.chunks.length) {
-                toast('❌ Không có video', 'error');
-                resetScan();
-                return;
-            }
-            
-            var blob = new Blob(state.chunks, { type: 'video/webm' });
-            var filename = state.currentQR + '_' + dateStr() + '_' + fileTimeStr() + '.webm';
-            
-            // Sử dụng function saveVideo mới
-            await saveVideo(blob, filename);
-            
-            var dur = Math.round((Date.now() - state.startTime) / 1000);
-            var order = {
-                qr: state.currentQR,
-                date: dateStr(),
-                time: timeStr(),
-                duration: formatTime(dur),
-                size: (blob.size / 1048576).toFixed(2) + ' MB',
-                file: filename
-            };
-            
-            state.orders.unshift(order);
-            if (state.orders.length > MAX_ORDERS) state.orders.pop();
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
-            
-            updateUI();
-            toast('✅ Đã lưu: ' + filename);
-            
-            resetScan();
-            setTimeout(startRecording, 500);
-        }
-        
-        function resetScan() {
-            state.isFirstScan = true;
-            state.currentQR = null;
-            state.scanBlocked = false;
-            state.chunks = [];
-        }
-        
-        // ========== UI ==========
+        // ==========================================
+        // UI FUNCTIONS
+        // ==========================================
         function updateUI() {
             var today = dateStr();
-            var todayOrders = state.orders.filter(function(o) { return o.date === today; });
+            var todayOrders = state.orders.filter(function(o) { 
+                // Convert date format for comparison
+                var parts = o.date.split('/');
+                if (parts.length === 3) {
+                    var orderDate = parts[2] + '-' + parts[1] + '-' + parts[0];
+                    return orderDate === today;
+                }
+                return false;
+            });
+            
             $('todayCount').textContent = todayOrders.length;
             $('totalCount').textContent = state.orders.length.toLocaleString();
             $('historyCount').textContent = state.orders.length.toLocaleString();
+            
             renderHistory();
         }
         
         function renderHistory(search) {
             var list = $('historyList');
             var filtered = state.orders;
+            
             if (search) {
                 filtered = state.orders.filter(function(o) {
                     return o.qr.toLowerCase().indexOf(search.toLowerCase()) !== -1;
@@ -907,6 +1379,7 @@
                 return;
             }
             
+            // Định dạng: #1  SPXVN...  23/12/2025  20:56:47  00:00:56  50.90MB  1 SP
             var html = '';
             filtered.slice(0, 50).forEach(function(o, i) {
                 html += '<div class="history-item">' +
@@ -914,6 +1387,9 @@
                     '<span class="h-qr">' + o.qr + '</span>' +
                     '<span class="h-date">' + o.date + '</span>' +
                     '<span class="h-time">' + o.time + '</span>' +
+                    '<span class="h-duration">' + o.duration + '</span>' +
+                    '<span class="h-size">' + (o.size || '-') + '</span>' +
+                    '<span class="h-products">' + (o.productsDetected || 0) + ' SP</span>' +
                 '</div>';
             });
             list.innerHTML = html;
@@ -924,16 +1400,32 @@
                 toast('Chưa có dữ liệu', 'warning');
                 return;
             }
-            var csv = '\uFEFF' + ['STT', 'Mã QR', 'Ngày', 'Giờ', 'Thời lượng', 'Dung lượng', 'File'].join(',') + '\n';
+            
+            var headers = ['STT', 'Mã QR', 'Ngày', 'Giờ', 'Thời lượng', 'Dung lượng', 'Số SP', 'Codec', 'Audio', 'File'];
+            var csv = '\uFEFF' + headers.join(',') + '\n';
+            
             state.orders.forEach(function(o, i) {
-                csv += [i + 1, '"' + o.qr + '"', o.date, o.time, o.duration, o.size, o.file].join(',') + '\n';
+                csv += [
+                    i + 1,
+                    '"' + o.qr + '"',
+                    o.date,
+                    o.time,
+                    o.duration,
+                    o.size || '-',
+                    o.productsDetected || 0,
+                    o.codec || '-',
+                    o.audio || '-',
+                    o.filename
+                ].join(',') + '\n';
             });
+            
             var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             var a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = 'QRScanner_' + dateStr() + '.csv';
             a.click();
-            toast('✅ Đã xuất Excel');
+            
+            toast('✅ Đã xuất Excel', 'success');
         }
         
         function deleteAll() {
@@ -941,27 +1433,53 @@
                 state.orders = [];
                 localStorage.setItem(STORAGE_KEY, '[]');
                 updateUI();
-                toast('Đã xóa');
+                toast('Đã xóa', 'success');
             }
         }
         
-        // ========== BARCODE SCANNER ==========
+        // ==========================================
+        // AUTO DELETE OLD ORDERS
+        // ==========================================
+        function autoDelete() {
+            var now = Date.now();
+            var cutoff = now - AUTO_DELETE_DAYS * 86400000;
+            var before = state.orders.length;
+            
+            state.orders = state.orders.filter(function(o) {
+                return o.timestamp && o.timestamp > cutoff;
+            });
+            
+            if (state.orders.length < before) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+                console.log('[Auto-Delete] Đã xóa ' + (before - state.orders.length) + ' đơn cũ');
+            }
+        }
+        
+        // ==========================================
+        // BARCODE SCANNER MODE
+        // ==========================================
         var barcodeBuffer = '', barcodeTimer = null;
+        
         function handleKeydown(e) {
             if (state.device !== 'scanner') return;
             if (barcodeTimer) clearTimeout(barcodeTimer);
+            
             if (e.key === 'Enter') {
-                if (barcodeBuffer.length > 3) processQR(barcodeBuffer);
+                if (barcodeBuffer.length > 3) handleQRDetected(barcodeBuffer);
                 barcodeBuffer = '';
             } else if (e.key.length === 1) {
                 barcodeBuffer += e.key;
             }
+            
             barcodeTimer = setTimeout(function() { barcodeBuffer = ''; }, 100);
         }
         
-        // ========== INIT ==========
+        // ==========================================
+        // INIT
+        // ==========================================
         function init() {
-            console.log('[QR Scanner] Blog v6.0');
+            console.log('[QR Scanner] Blog v7.0 FULL FEATURES');
+            console.log('[Features] Progress bar, Timestamp position, FPS colors, Scan rate, Products count');
             
             try {
                 var saved = localStorage.getItem(STORAGE_KEY);
@@ -970,17 +1488,25 @@
             
             autoDelete();
             
+            // Load settings
             state.quality = localStorage.getItem('quality') || '1080p60';
-            state.bitrate = parseInt(localStorage.getItem('bitrate') || '12') * 1000000;
+            state.bitrate = localStorage.getItem('bitrate') || '12';
             state.audio = localStorage.getItem('audio') !== 'false';
-            state.preBuf = parseInt(localStorage.getItem('preBuf') || '5000');
-            state.postBuf = parseInt(localStorage.getItem('postBuf') || '3000');
+            state.preBuf = parseInt(localStorage.getItem('preBuf')) || 5000;
+            state.postBuf = parseInt(localStorage.getItem('postBuf')) || 3000;
+            state.timestampPos = localStorage.getItem('timestampPos') || 'top-right';
             
+            // Apply to UI
             $('qualitySelect').value = state.quality;
-            $('bitrateSelect').value = state.bitrate / 1000000;
+            $('bitrateSelect').value = state.bitrate;
             $('audioToggle').checked = state.audio;
             $('preBufferSelect').value = state.preBuf;
             $('postBufferSelect').value = state.postBuf;
+            $('timestampPosition').value = state.timestampPos;
+            
+            // Update scan rate display
+            var preset = VIDEO_PRESETS[state.quality];
+            $('scanRate').textContent = preset.scanFPS;
             
             updateUI();
             
@@ -996,6 +1522,7 @@
                 $('tabCamera').classList.add('active');
                 $('tabScanner').classList.remove('active');
             };
+            
             $('tabScanner').onclick = function() {
                 state.device = 'scanner';
                 $('tabScanner').classList.add('active');
@@ -1013,12 +1540,19 @@
             $('qualitySelect').onchange = function() {
                 state.quality = this.value;
                 localStorage.setItem('quality', this.value);
+                var preset = VIDEO_PRESETS[this.value];
+                $('scanRate').textContent = preset.scanFPS;
                 if (state.stream) { stopCamera(); setTimeout(startCamera, 300); }
             };
             
             $('bitrateSelect').onchange = function() {
-                state.bitrate = parseInt(this.value) * 1000000;
+                state.bitrate = this.value;
                 localStorage.setItem('bitrate', this.value);
+            };
+            
+            $('timestampPosition').onchange = function() {
+                state.timestampPos = this.value;
+                localStorage.setItem('timestampPos', this.value);
             };
             
             $('preBufferSelect').onchange = function() {
@@ -1043,8 +1577,10 @@
             setTimeout(function() {
                 navigator.mediaDevices.getUserMedia({ video: true, audio: true })
                     .then(function(s) { s.getTracks().forEach(function(t) { t.stop(); }); getCameras(); })
-                    .catch(function() {});
+                    .catch(function() { getCameras(); });
             }, 500);
+            
+            toast('✅ v7.0 FULL - Sẵn sàng', 'success');
         }
         
         if (document.readyState === 'loading') {
