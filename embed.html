@@ -95,7 +95,7 @@
             margin-bottom: 3px;
         }
         
-        select {
+        select, input[type="date"] {
             width: 100%;
             padding: 6px 8px;
             border: 1px solid #ddd;
@@ -105,7 +105,7 @@
             cursor: pointer;
         }
         
-        select:focus {
+        select:focus, input:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -157,20 +157,21 @@
             padding: 10px 12px;
             background: white;
             justify-content: center;
+            flex-wrap: wrap;
             flex-shrink: 0;
         }
         
         .btn {
-            padding: 8px 18px;
+            padding: 8px 16px;
             border: none;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
         }
         
         .btn-primary {
@@ -184,8 +185,40 @@
         }
         
         .btn-secondary { background: #f39c12; color: white; }
+        .btn-success { background: #28a745; color: white; }
         .btn-danger { background: #e74c3c; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
         .btn-small { padding: 5px 10px; font-size: 10px; }
+        
+        /* ========== FOLDER INFO ========== */
+        .folder-info {
+            background: #e8f4fd;
+            border: 1px solid #b8daff;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 0 12px 8px;
+            font-size: 10px;
+        }
+        
+        .folder-info .title {
+            font-weight: 600;
+            color: #004085;
+            margin-bottom: 4px;
+        }
+        
+        .folder-info .path {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #333;
+            word-break: break-all;
+        }
+        
+        .folder-info .hint {
+            color: #666;
+            margin-top: 4px;
+        }
         
         /* ========== VIDEO ========== */
         .video-section {
@@ -196,7 +229,7 @@
         
         #webcamVideo {
             width: 100%;
-            height: 260px;
+            height: 240px;
             object-fit: contain;
             display: block;
         }
@@ -236,7 +269,6 @@
             50% { opacity: 0.6; }
         }
         
-        /* FPS Display trên UI */
         .fps-display {
             position: absolute;
             bottom: 8px;
@@ -254,7 +286,6 @@
         .fps-value.low { color: #ff0000; }
         .fps-value.medium { color: #ffff00; }
         .fps-value.high { color: #00ff00; }
-        
         .scan-rate { color: #00bfff; }
         
         /* ========== STATS ========== */
@@ -285,6 +316,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 6px;
+            flex-wrap: wrap;
+            gap: 6px;
         }
         
         .history-header h3 { font-size: 12px; color: #333; }
@@ -339,7 +372,59 @@
             padding: 8px 12px;
             background: #f8f9fa;
             justify-content: center;
+            flex-wrap: wrap;
             flex-shrink: 0;
+        }
+        
+        /* ========== DELETE MODAL ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+        }
+        
+        .modal-box h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .modal-box .date-inputs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-direction: column;
+        }
+        
+        .modal-box .date-inputs label {
+            font-size: 11px;
+            color: #666;
+            text-align: left;
+        }
+        
+        .modal-box .date-inputs input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        
+        .modal-box .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
         }
         
         /* ========== TOAST ========== */
@@ -369,7 +454,7 @@
         <!-- Header -->
         <div class="header">
             <h1>📷 QR Scanner Video Recording System</h1>
-            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.0 FULL</div>
+            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.1</div>
         </div>
         
         <!-- Tabs -->
@@ -445,7 +530,14 @@
         <div class="buttons">
             <button id="startBtn" class="btn btn-primary">🎬 Bắt đầu</button>
             <button id="stopBtn" class="btn btn-danger hidden">⏹️ Dừng</button>
-            <button id="folderBtn" class="btn btn-secondary">📁 Mở thư mục</button>
+            <button id="folderBtn" class="btn btn-secondary">📁 Thư mục lưu</button>
+        </div>
+        
+        <!-- Folder Info - Hiện link video đã lưu -->
+        <div class="folder-info hidden" id="folderInfo">
+            <div class="title">📁 Video được lưu tại:</div>
+            <div class="path" id="folderPath">C:\Users\[Username]\Downloads</div>
+            <div class="hint">💡 Nhấn <b>Win + E</b> → Click <b>Downloads</b> để mở</div>
         </div>
         
         <!-- Video -->
@@ -487,10 +579,32 @@
             </div>
         </div>
         
-        <!-- History Actions -->
+        <!-- History Actions - ĐẦY ĐỦ -->
         <div class="history-actions">
-            <button id="exportBtn" class="btn btn-secondary btn-small">📊 Xuất Excel</button>
-            <button id="deleteBtn" class="btn btn-danger btn-small">🗑️ Xóa tất cả</button>
+            <button id="exportBtn" class="btn btn-success btn-small">📊 Xuất Excel</button>
+            <button id="deleteByDateBtn" class="btn btn-info btn-small">📅 Xóa theo ngày</button>
+            <button id="deleteAllBtn" class="btn btn-danger btn-small">🗑️ Xóa tất cả</button>
+        </div>
+    </div>
+    
+    <!-- Delete by Date Modal -->
+    <div class="modal-overlay hidden" id="deleteModal">
+        <div class="modal-box">
+            <h3>📅 Xóa đơn theo ngày</h3>
+            <div class="date-inputs">
+                <div>
+                    <label>Từ ngày:</label>
+                    <input type="date" id="deleteFromDate">
+                </div>
+                <div>
+                    <label>Đến ngày:</label>
+                    <input type="date" id="deleteToDate">
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary btn-small" id="cancelDeleteBtn">Hủy</button>
+                <button class="btn btn-danger btn-small" id="confirmDeleteBtn">🗑️ Xóa</button>
+            </div>
         </div>
     </div>
     
@@ -505,18 +619,15 @@
         'use strict';
         
         // ==========================================
-        // CONFIGURATION - GIỐNG EXTENSION
+        // CONFIGURATION
         // ==========================================
         var STORAGE_KEY = 'qrScannerBlogV7';
         var MAX_ORDERS = 100000;
         var AUTO_DELETE_DAYS = 60;
+        var SCAN_LOCK_FIRST = 10000;
+        var SCAN_LOCK_SECOND = 5000;
+        var PROGRESS_DISPLAY_TIME = 1500;
         
-        // Scan lock times - GIỐNG EXTENSION
-        var SCAN_LOCK_FIRST = 10000;   // 10s sau scan lần 1
-        var SCAN_LOCK_SECOND = 5000;   // 5s sau scan lần 2
-        var PROGRESS_DISPLAY_TIME = 1500;  // Hiển thị progress bar 1.5s
-        
-        // Video presets - GIỐNG EXTENSION
         var VIDEO_PRESETS = {
             '1080p30': { width: 1920, height: 1080, fps: 30, scanFPS: 3, scanScale: 0.5, label: 'Full HD 30fps' },
             '1080p60': { width: 1920, height: 1080, fps: 60, scanFPS: 3, scanScale: 0.5, label: 'Full HD 60fps' }
@@ -529,7 +640,7 @@
         };
         
         // ==========================================
-        // STATE - GIỐNG EXTENSION
+        // STATE
         // ==========================================
         var state = {
             stream: null,
@@ -537,8 +648,8 @@
             chunks: [],
             canvasStream: null,
             orders: [],
+            savedVideos: [],  // Lưu danh sách video đã lưu
             
-            // Recording state
             isRecording: false,
             isFirstScan: true,
             currentQR: null,
@@ -548,7 +659,6 @@
             scanTime: null,
             timerInterval: null,
             
-            // Settings
             quality: '1080p60',
             bitrate: '12',
             audio: true,
@@ -558,35 +668,29 @@
             device: 'camera',
             timestampPos: 'top-right',
             
-            // Canvas
             recordingCanvas: null,
             recordingCtx: null,
             scanCanvas: null,
             scanCtx: null,
             rafId: null,
             
-            // FPS Counter - QUAN TRỌNG
             frameCount: 0,
             lastFpsTime: 0,
             currentFPS: 0,
             
-            // Scan throttle
             lastScanTime: 0,
-            scanInterval: 333,  // 1000 / 3fps
+            scanInterval: 333,
             actualScanCount: 0,
             lastScanCountTime: 0,
             actualScanRate: 0,
             
-            // Display
             displayQR: null,
             displayTime: 0,
             detectedProducts: [],
             
-            // Codec
             currentCodec: null,
-            
-            // File System API
-            folderHandle: null
+            folderHandle: null,
+            lastSavedFile: null
         };
         
         // ==========================================
@@ -642,6 +746,15 @@
             return pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
         }
         
+        // Convert VN date to ISO for comparison
+        function vnDateToISO(vnDate) {
+            var parts = vnDate.split('/');
+            if (parts.length === 3) {
+                return parts[2] + '-' + parts[1] + '-' + parts[0];
+            }
+            return vnDate;
+        }
+        
         // ==========================================
         // CODEC
         // ==========================================
@@ -685,20 +798,16 @@
             
             state.scanInterval = Math.round(1000 / preset.scanFPS);
             
-            // Reset FPS
             state.frameCount = 0;
             state.lastFpsTime = 0;
             state.currentFPS = 0;
             state.actualScanCount = 0;
             state.lastScanCountTime = 0;
             state.actualScanRate = 0;
-            
-            console.log('[Setup] Recording: ' + preset.width + 'x' + preset.height + ' @ ' + preset.fps + 'fps');
-            console.log('[Setup] Scan: ' + state.scanCanvas.width + 'x' + state.scanCanvas.height + ' @ ' + preset.scanFPS + 'fps');
         }
         
         // ==========================================
-        // RENDER LOOP - CORE
+        // RENDER LOOP
         // ==========================================
         function renderLoop(timestamp) {
             if (!state.stream) return;
@@ -712,26 +821,19 @@
                 return;
             }
             
-            // Vẽ video lên canvas
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            // Vẽ timestamp + REC indicator
             drawTimestamp(ctx);
             
-            // Vẽ Progress bar khi quét được QR
             if (state.displayQR && (Date.now() - state.displayTime < PROGRESS_DISPLAY_TIME)) {
                 drawProgressBar(ctx, state.displayQR);
             }
             
-            // Vẽ FPS + Scan rate lên canvas
             drawFPSCounter(ctx, timestamp);
             
-            // Vẽ Audio indicator
             if (state.scanTime && state.audio) {
                 drawAudioIndicator(ctx);
             }
             
-            // QR Scanning - throttled
             var now = performance.now();
             if (now - state.lastScanTime >= state.scanInterval) {
                 state.lastScanTime = now;
@@ -742,13 +844,11 @@
                 }
             }
             
-            // Tính Scan Rate thực tế
             if (now - state.lastScanCountTime >= 1000) {
                 state.actualScanRate = state.actualScanCount;
                 state.actualScanCount = 0;
                 state.lastScanCountTime = now;
                 
-                // Update UI
                 var scanEl = $('scanRate');
                 if (scanEl) scanEl.textContent = state.actualScanRate;
             }
@@ -757,7 +857,7 @@
         }
         
         // ==========================================
-        // DRAW TIMESTAMP + REC BLINK - GIỐNG EXTENSION
+        // DRAW FUNCTIONS
         // ==========================================
         function drawTimestamp(ctx) {
             var now = new Date();
@@ -777,12 +877,10 @@
             ctx.strokeText(text, x, y);
             ctx.fillText(text, x, y);
             
-            // REC indicator blink khi đang ghi đơn
             if (state.scanTime) {
                 var blink = Math.floor(Date.now() / 500) % 2;
                 var recY = position.includes('top') ? margin + 57 : canvas.height - margin - 35;
                 
-                // Chấm đỏ blink
                 if (blink) {
                     ctx.fillStyle = 'red';
                     ctx.beginPath();
@@ -796,9 +894,6 @@
             }
         }
         
-        // ==========================================
-        // DRAW PROGRESS BAR - GIỐNG EXTENSION
-        // ==========================================
         function drawProgressBar(ctx, qrCode) {
             var position = state.timestampPos;
             var canvas = state.recordingCanvas;
@@ -809,41 +904,33 @@
             var panelY = position.includes('top') ? margin + 80 : canvas.height - margin - panelHeight - 80;
             var centerX = panelX + panelWidth / 2;
             
-            // Background panel
             ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
             ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
             
-            // Border xanh
             ctx.strokeStyle = '#00FF00';
             ctx.lineWidth = 3;
             ctx.strokeRect(panelX, panelY, panelWidth, panelHeight);
             
-            // Title
             ctx.fillStyle = '#00FF00';
             ctx.font = 'bold 24px Arial';
             ctx.textAlign = 'center';
             ctx.fillText('✅ QR CODE DETECTED', centerX, panelY + 30);
             
-            // QR Code màu vàng
             ctx.fillStyle = '#FFD700';
             ctx.font = 'bold 28px Arial';
             var displayQR = qrCode.length > 20 ? qrCode.substring(0, 20) + '...' : qrCode;
             ctx.fillText(displayQR, centerX, panelY + 65);
             
-            // Barcode visual
             ctx.fillStyle = '#00FF00';
             ctx.font = 'bold 20px monospace';
             ctx.fillText('████████████████', centerX, panelY + 100);
             
-            // Progress bar
             var barX = panelX + 20, barY = panelY + 120;
             var barWidth = panelWidth - 40, barHeight = 35;
             
-            // Bar background
             ctx.fillStyle = 'rgba(50, 50, 50, 0.9)';
             ctx.fillRect(barX, barY, barWidth, barHeight);
             
-            // Gradient fill
             var gradient = ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
             gradient.addColorStop(0, '#00AA00');
             gradient.addColorStop(0.5, '#00FF00');
@@ -851,17 +938,14 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(barX, barY, barWidth, barHeight);
             
-            // Border
             ctx.strokeStyle = '#00FF00';
             ctx.lineWidth = 2;
             ctx.strokeRect(barX, barY, barWidth, barHeight);
             
-            // 100% text
             ctx.fillStyle = '#FFFFFF';
             ctx.font = 'bold 20px Arial';
             ctx.fillText('100%', centerX, barY + barHeight / 2 + 7);
             
-            // Products count
             if (state.detectedProducts.length > 0) {
                 ctx.fillStyle = '#00BFFF';
                 ctx.font = 'bold 14px Arial';
@@ -871,26 +955,19 @@
             ctx.textAlign = 'left';
         }
         
-        // ==========================================
-        // DRAW FPS COUNTER - MÀU THEO GIÁ TRỊ
-        // ==========================================
         function drawFPSCounter(ctx, timestamp) {
-            // Đếm frame
             state.frameCount++;
             
-            // Khởi tạo
             if (state.lastFpsTime === 0) {
                 state.lastFpsTime = timestamp;
             }
             
-            // Cập nhật FPS mỗi giây
             var elapsed = timestamp - state.lastFpsTime;
             if (elapsed >= 1000) {
                 state.currentFPS = Math.round(state.frameCount * 1000 / elapsed);
                 state.frameCount = 0;
                 state.lastFpsTime = timestamp;
                 
-                // Update UI với màu
                 var fpsEl = $('fpsValue');
                 if (fpsEl) {
                     fpsEl.textContent = state.currentFPS;
@@ -905,31 +982,25 @@
                 }
             }
             
-            // Vẽ lên canvas
             var margin = 113;
             var position = state.timestampPos;
             var y = position.includes('bottom') ? margin + 20 : state.recordingCanvas.height - margin;
             
-            // Màu theo FPS
-            var color = '#00FF00';  // Xanh = tốt
+            var color = '#00FF00';
             if (state.currentFPS > 0 && state.currentFPS < 30) {
-                color = '#FF0000';  // Đỏ = kém
+                color = '#FF0000';
             } else if (state.currentFPS >= 30 && state.currentFPS < 50) {
-                color = '#FFFF00';  // Vàng = trung bình
+                color = '#FFFF00';
             }
             
             ctx.fillStyle = color;
             ctx.font = 'bold 14px Arial';
             ctx.fillText('FPS: ' + state.currentFPS, margin, y);
             
-            // Scan rate
             ctx.fillStyle = '#00BFFF';
             ctx.fillText('Scan: ' + state.actualScanRate + '/s', margin + 80, y);
         }
         
-        // ==========================================
-        // DRAW AUDIO INDICATOR
-        // ==========================================
         function drawAudioIndicator(ctx) {
             var margin = 113;
             var position = state.timestampPos;
@@ -964,17 +1035,14 @@
                 if (code && code.data && code.data.trim()) {
                     var qrData = code.data.trim();
                     
-                    // Hiển thị progress bar
                     state.displayQR = qrData;
                     state.displayTime = Date.now();
                     
-                    // Đếm sản phẩm
                     if (state.scanTime && state.detectedProducts.indexOf(qrData) === -1) {
                         state.detectedProducts.push(qrData);
                         $('productsCount').textContent = state.detectedProducts.length;
                     }
                     
-                    // Xử lý QR
                     if (!state.scanBlocked) {
                         handleQRDetected(qrData);
                     }
@@ -982,16 +1050,12 @@
             } catch (e) {}
         }
         
-        // ==========================================
-        // QR DETECTION HANDLER - GIỐNG EXTENSION
-        // ==========================================
         function handleQRDetected(qrData) {
             if (!qrData || state.scanBlocked) return;
             
             beep();
             
             if (state.isFirstScan) {
-                // === SCAN LẦN 1 ===
                 state.currentQR = qrData;
                 state.isFirstScan = false;
                 state.scanTime = Date.now();
@@ -1009,7 +1073,6 @@
                 
                 toast('📹 Đang ghi (+' + Math.round(effectivePreBuffer/1000) + 's): ' + qrData, 'success');
                 
-                // Khóa scan 10 giây
                 state.scanBlocked = true;
                 state.scanBlockedUntil = Date.now() + SCAN_LOCK_FIRST;
                 
@@ -1026,7 +1089,6 @@
                 }, 1000);
                 
             } else {
-                // === SCAN LẦN 2 ===
                 if (qrData !== state.currentQR) {
                     toast('⚠️ Mã không khớp! Cần: ' + state.currentQR, 'error');
                     return;
@@ -1083,8 +1145,6 @@
             state.rafId = requestAnimationFrame(renderLoop);
             
             $('fpsDisplay').classList.remove('hidden');
-            
-            console.log('[Recording] Started: ' + codec.name + ' @ ' + BITRATE_OPTIONS[state.bitrate].label);
         }
         
         function stopRecording() {
@@ -1107,9 +1167,6 @@
             $('recIndicator').classList.add('hidden');
         }
         
-        // ==========================================
-        // POST-BUFFER - GIỐNG EXTENSION
-        // ==========================================
         function startPostBuffer() {
             var postBufferSec = state.postBuf / 1000;
             
@@ -1135,7 +1192,7 @@
         }
         
         // ==========================================
-        // SAVE RECORDING - ĐỊNH DẠNG ĐẦY ĐỦ
+        // SAVE RECORDING
         // ==========================================
         async function saveRecording() {
             var qrCode = state.currentQR;
@@ -1162,17 +1219,28 @@
             // Lưu file
             await saveVideo(blob, filename);
             
-            // Tạo order với ĐỊNH DẠNG ĐẦY ĐỦ như Extension
+            // Lưu thông tin file vừa lưu
+            state.lastSavedFile = filename;
+            state.savedVideos.push({
+                filename: filename,
+                qr: qrCode,
+                date: dateStrVN(),
+                time: timeStr()
+            });
+            
+            // Cập nhật folder info
+            updateFolderInfo(filename);
+            
             var order = {
                 qr: qrCode,
-                date: dateStrVN(),                    // 23/12/2025
-                time: timeStr(),                      // 20:56:47
-                duration: formatTime(duration),       // 00:00:56
+                date: dateStrVN(),
+                time: timeStr(),
+                duration: formatTime(duration),
                 filename: filename,
-                size: sizeMB + 'MB',                  // 50.90MB
+                size: sizeMB + 'MB',
                 codec: state.currentCodec ? state.currentCodec.name : 'WebM',
                 audio: state.audio ? 'Có' : 'Không',
-                productsDetected: state.detectedProducts.length,  // 1 SP
+                productsDetected: state.detectedProducts.length,
                 timestamp: Date.now()
             };
             
@@ -1184,7 +1252,6 @@
             
             toast('✅ Đã lưu: ' + qrCode + ' (' + sizeMB + 'MB, ' + state.detectedProducts.length + ' SP)', 'success');
             
-            // Khóa 5 giây trước khi restart
             state.scanBlockedUntil = Date.now() + SCAN_LOCK_SECOND;
             
             setTimeout(function() {
@@ -1213,6 +1280,19 @@
             URL.revokeObjectURL(url);
         }
         
+        function updateFolderInfo(filename) {
+            var folderInfo = $('folderInfo');
+            var folderPath = $('folderPath');
+            
+            if (state.folderHandle) {
+                folderPath.textContent = state.folderHandle.name + '/' + filename;
+            } else {
+                folderPath.textContent = 'Downloads/' + filename;
+            }
+            
+            folderInfo.classList.remove('hidden');
+        }
+        
         function restartRecording() {
             state.scanBlocked = false;
             state.isFirstScan = true;
@@ -1234,13 +1314,13 @@
             
             state.timerInterval = setInterval(function() {
                 displayTime++;
-                var timeStr = formatTime(displayTime);
+                var timeString = formatTime(displayTime);
                 
                 var recTime = $('recTime');
-                if (recTime) recTime.textContent = timeStr.substring(3);  // MM:SS
+                if (recTime) recTime.textContent = timeString.substring(3);
                 
                 var curTimer = $('currentTime');
-                if (curTimer) curTimer.textContent = timeStr;
+                if (curTimer) curTimer.textContent = timeString;
             }, 1000);
         }
         
@@ -1282,11 +1362,6 @@
                 state.stream = stream;
                 $('webcamVideo').srcObject = stream;
                 
-                // Log camera info
-                var track = stream.getVideoTracks()[0];
-                var settings = track.getSettings();
-                console.log('[Camera] ' + settings.width + 'x' + settings.height + ' @ ' + settings.frameRate + 'fps');
-                
                 $('startBtn').classList.add('hidden');
                 $('stopBtn').classList.remove('hidden');
                 
@@ -1321,24 +1396,43 @@
         }
         
         // ==========================================
-        // OPEN FOLDER - FILE SYSTEM API
+        // OPEN FOLDER - HIỆN LINK VIDEO
         // ==========================================
         async function openFolder() {
+            var folderInfo = $('folderInfo');
+            var folderPath = $('folderPath');
+            
+            // Toggle hiển thị folder info
+            if (!folderInfo.classList.contains('hidden')) {
+                folderInfo.classList.add('hidden');
+                return;
+            }
+            
+            // Hiện folder info
+            if (state.lastSavedFile) {
+                if (state.folderHandle) {
+                    folderPath.textContent = state.folderHandle.name + '/' + state.lastSavedFile;
+                } else {
+                    folderPath.textContent = 'Downloads/' + state.lastSavedFile;
+                }
+            } else {
+                folderPath.textContent = 'Downloads/ (chưa có video)';
+            }
+            
+            folderInfo.classList.remove('hidden');
+            
+            // Thử mở File System API
             if ('showDirectoryPicker' in window) {
                 try {
                     state.folderHandle = await window.showDirectoryPicker({
                         mode: 'readwrite',
                         startIn: 'downloads'
                     });
+                    folderPath.textContent = state.folderHandle.name + '/';
                     toast('✅ Đã chọn: ' + state.folderHandle.name, 'success');
                 } catch (e) {
-                    if (e.name !== 'AbortError') {
-                        toast('❌ Không thể mở thư mục', 'error');
-                    }
+                    // User cancelled
                 }
-            } else {
-                toast('📁 Video lưu tại: Downloads', 'warning');
-                alert('💡 Mở thư mục Downloads:\n\n1. Nhấn Win + E\n2. Click "Downloads"');
             }
         }
         
@@ -1348,13 +1442,8 @@
         function updateUI() {
             var today = dateStr();
             var todayOrders = state.orders.filter(function(o) { 
-                // Convert date format for comparison
-                var parts = o.date.split('/');
-                if (parts.length === 3) {
-                    var orderDate = parts[2] + '-' + parts[1] + '-' + parts[0];
-                    return orderDate === today;
-                }
-                return false;
+                var isoDate = vnDateToISO(o.date);
+                return isoDate === today;
             });
             
             $('todayCount').textContent = todayOrders.length;
@@ -1379,7 +1468,6 @@
                 return;
             }
             
-            // Định dạng: #1  SPXVN...  23/12/2025  20:56:47  00:00:56  50.90MB  1 SP
             var html = '';
             filtered.slice(0, 50).forEach(function(o, i) {
                 html += '<div class="history-item">' +
@@ -1395,6 +1483,9 @@
             list.innerHTML = html;
         }
         
+        // ==========================================
+        // EXPORT EXCEL
+        // ==========================================
         function exportExcel() {
             if (!state.orders.length) {
                 toast('Chưa có dữ liệu', 'warning');
@@ -1425,7 +1516,53 @@
             a.download = 'QRScanner_' + dateStr() + '.csv';
             a.click();
             
-            toast('✅ Đã xuất Excel', 'success');
+            toast('✅ Đã xuất Excel: ' + state.orders.length + ' đơn', 'success');
+        }
+        
+        // ==========================================
+        // DELETE FUNCTIONS
+        // ==========================================
+        function showDeleteModal() {
+            var today = new Date();
+            var lastWeek = new Date(today.getTime() - 7 * 86400000);
+            
+            $('deleteFromDate').value = lastWeek.toISOString().split('T')[0];
+            $('deleteToDate').value = today.toISOString().split('T')[0];
+            
+            $('deleteModal').classList.remove('hidden');
+        }
+        
+        function hideDeleteModal() {
+            $('deleteModal').classList.add('hidden');
+        }
+        
+        function deleteByDate() {
+            var fromDate = $('deleteFromDate').value;
+            var toDate = $('deleteToDate').value;
+            
+            if (!fromDate || !toDate) {
+                toast('Vui lòng chọn ngày', 'warning');
+                return;
+            }
+            
+            var beforeCount = state.orders.length;
+            
+            state.orders = state.orders.filter(function(o) {
+                var isoDate = vnDateToISO(o.date);
+                return isoDate < fromDate || isoDate > toDate;
+            });
+            
+            var deletedCount = beforeCount - state.orders.length;
+            
+            if (deletedCount > 0) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+                updateUI();
+                toast('✅ Đã xóa ' + deletedCount + ' đơn từ ' + fromDate + ' đến ' + toDate, 'success');
+            } else {
+                toast('Không có đơn nào trong khoảng thời gian này', 'warning');
+            }
+            
+            hideDeleteModal();
         }
         
         function deleteAll() {
@@ -1433,7 +1570,7 @@
                 state.orders = [];
                 localStorage.setItem(STORAGE_KEY, '[]');
                 updateUI();
-                toast('Đã xóa', 'success');
+                toast('✅ Đã xóa tất cả', 'success');
             }
         }
         
@@ -1478,8 +1615,7 @@
         // INIT
         // ==========================================
         function init() {
-            console.log('[QR Scanner] Blog v7.0 FULL FEATURES');
-            console.log('[Features] Progress bar, Timestamp position, FPS colors, Scan rate, Products count');
+            console.log('[QR Scanner] Blog v7.1 - Full Features + Excel + Delete by Date');
             
             try {
                 var saved = localStorage.getItem(STORAGE_KEY);
@@ -1488,7 +1624,6 @@
             
             autoDelete();
             
-            // Load settings
             state.quality = localStorage.getItem('quality') || '1080p60';
             state.bitrate = localStorage.getItem('bitrate') || '12';
             state.audio = localStorage.getItem('audio') !== 'false';
@@ -1496,7 +1631,6 @@
             state.postBuf = parseInt(localStorage.getItem('postBuf')) || 3000;
             state.timestampPos = localStorage.getItem('timestampPos') || 'top-right';
             
-            // Apply to UI
             $('qualitySelect').value = state.quality;
             $('bitrateSelect').value = state.bitrate;
             $('audioToggle').checked = state.audio;
@@ -1504,7 +1638,6 @@
             $('postBufferSelect').value = state.postBuf;
             $('timestampPosition').value = state.timestampPos;
             
-            // Update scan rate display
             var preset = VIDEO_PRESETS[state.quality];
             $('scanRate').textContent = preset.scanFPS;
             
@@ -1514,8 +1647,13 @@
             $('startBtn').onclick = startCamera;
             $('stopBtn').onclick = stopCamera;
             $('folderBtn').onclick = openFolder;
+            
+            // EXPORT & DELETE BUTTONS
             $('exportBtn').onclick = exportExcel;
-            $('deleteBtn').onclick = deleteAll;
+            $('deleteByDateBtn').onclick = showDeleteModal;
+            $('deleteAllBtn').onclick = deleteAll;
+            $('cancelDeleteBtn').onclick = hideDeleteModal;
+            $('confirmDeleteBtn').onclick = deleteByDate;
             
             $('tabCamera').onclick = function() {
                 state.device = 'camera';
@@ -1573,14 +1711,18 @@
             
             document.addEventListener('keydown', handleKeydown);
             
-            // Request camera permission
+            // Click outside modal to close
+            $('deleteModal').onclick = function(e) {
+                if (e.target === this) hideDeleteModal();
+            };
+            
             setTimeout(function() {
                 navigator.mediaDevices.getUserMedia({ video: true, audio: true })
                     .then(function(s) { s.getTracks().forEach(function(t) { t.stop(); }); getCameras(); })
                     .catch(function() { getCameras(); });
             }, 500);
             
-            toast('✅ v7.0 FULL - Sẵn sàng', 'success');
+            toast('✅ v7.1 - Sẵn sàng', 'success');
         }
         
         if (document.readyState === 'loading') {
