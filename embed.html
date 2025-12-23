@@ -23,19 +23,19 @@
         
         .hidden { display: none !important; }
         
-        /* ========== HEADER ========== */
+        /* ========== HEADER - Font +40% ========== */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 10px 15px;
+            padding: 12px 15px;
             text-align: center;
             flex-shrink: 0;
         }
         
-        .header h1 { font-size: 18px; margin-bottom: 2px; }
-        .header .subtitle { font-size: 12px; opacity: 0.9; }
+        .header h1 { font-size: 22px; margin-bottom: 3px; }
+        .header .subtitle { font-size: 14px; opacity: 0.9; }
         
-        /* ========== TABS ========== */
+        /* ========== TABS - Font +40% ========== */
         .tabs {
             display: flex;
             background: #16213e;
@@ -45,12 +45,12 @@
         
         .tab {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
             cursor: pointer;
             background: transparent;
             border: none;
-            font-size: 14px;
+            font-size: 17px;
             font-weight: 500;
             color: #888;
             transition: all 0.3s;
@@ -66,9 +66,9 @@
             margin-bottom: -2px;
         }
         
-        /* ========== CONTROLS - Compact ========== */
+        /* ========== CONTROLS - Font +40% ========== */
         .controls {
-            padding: 8px 12px;
+            padding: 10px 15px;
             background: #16213e;
             border-bottom: 1px solid #2a3f5f;
             flex-shrink: 0;
@@ -76,8 +76,8 @@
         
         .control-row {
             display: flex;
-            gap: 10px;
-            margin-bottom: 6px;
+            gap: 12px;
+            margin-bottom: 8px;
         }
         
         .control-row:last-child { margin-bottom: 0; }
@@ -89,18 +89,18 @@
         
         .control-group label {
             display: block;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 600;
             color: #aaa;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
         }
         
         select, input[type="date"] {
             width: 100%;
-            padding: 5px 8px;
+            padding: 7px 10px;
             border: 1px solid #3a4f6f;
-            border-radius: 5px;
-            font-size: 12px;
+            border-radius: 6px;
+            font-size: 15px;
             background: #1a1a2e;
             color: white;
             cursor: pointer;
@@ -114,13 +114,13 @@
         .toggle-row {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
         
         .toggle {
             position: relative;
-            width: 36px;
-            height: 18px;
+            width: 40px;
+            height: 20px;
         }
         
         .toggle input { opacity: 0; width: 0; height: 0; }
@@ -130,15 +130,15 @@
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
             background: #444;
-            border-radius: 18px;
+            border-radius: 20px;
             transition: 0.3s;
         }
         
         .toggle-slider:before {
             content: "";
             position: absolute;
-            height: 14px;
-            width: 14px;
+            height: 16px;
+            width: 16px;
             left: 2px;
             bottom: 2px;
             background: white;
@@ -147,15 +147,15 @@
         }
         
         .toggle input:checked + .toggle-slider { background: #667eea; }
-        .toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
+        .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
         
-        .toggle-label { font-size: 12px; color: #ccc; }
+        .toggle-label { font-size: 15px; color: #ccc; }
         
-        /* ========== BUTTONS ========== */
+        /* ========== BUTTONS - Font +40% ========== */
         .buttons {
             display: flex;
-            gap: 8px;
-            padding: 8px 12px;
+            gap: 10px;
+            padding: 10px 15px;
             background: #16213e;
             justify-content: center;
             flex-wrap: wrap;
@@ -163,16 +163,16 @@
         }
         
         .btn {
-            padding: 8px 16px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 6px;
-            font-size: 13px;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
         
         .btn-primary {
@@ -181,89 +181,89 @@
         }
         
         .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102,126,234,0.5);
         }
         
         .btn-secondary { background: #f39c12; color: white; }
         .btn-success { background: #28a745; color: white; }
         .btn-danger { background: #e74c3c; color: white; }
         .btn-info { background: #17a2b8; color: white; }
-        .btn-small { padding: 5px 10px; font-size: 11px; }
+        .btn-small { padding: 8px 14px; font-size: 14px; }
         
         /* ========== FOLDER INFO ========== */
         .folder-info {
             background: #1f3a5f;
             border: 1px solid #3a5f8f;
-            border-radius: 6px;
-            padding: 8px 12px;
-            margin: 0 12px 6px;
-            font-size: 11px;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 0 15px 8px;
+            font-size: 14px;
         }
         
         .folder-info .title {
             font-weight: 600;
             color: #4dabf7;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
         }
         
         .folder-info .path {
             background: #0d1520;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 6px 10px;
+            border-radius: 5px;
             font-family: monospace;
             color: #7bed9f;
             word-break: break-all;
-            font-size: 11px;
+            font-size: 13px;
         }
         
         .folder-info .hint {
             color: #888;
-            margin-top: 3px;
-            font-size: 10px;
+            margin-top: 5px;
+            font-size: 12px;
         }
         
-        /* ========== VIDEO - Full Display ========== */
+        /* ========== VIDEO - FULL COVER ========== */
         .video-section {
             position: relative;
             background: #000;
             flex-shrink: 0;
-            height: 320px;
+            height: 340px;
         }
         
         #webcamVideo {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;  /* COVER để lấp đầy, không có khoảng trống */
             display: block;
         }
         
         .video-overlay {
             position: absolute;
-            top: 8px;
-            left: 8px;
+            top: 10px;
+            left: 10px;
             background: rgba(0,0,0,0.9);
             color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
             opacity: 0;
             transition: opacity 0.3s;
-            border-left: 3px solid #28a745;
+            border-left: 4px solid #28a745;
         }
         
         .video-overlay.show { opacity: 1; }
-        .video-overlay h4 { color: #28a745; font-size: 13px; margin-bottom: 3px; }
+        .video-overlay h4 { color: #28a745; font-size: 15px; margin-bottom: 4px; }
         
         .rec-indicator {
             position: absolute;
-            top: 8px;
-            right: 8px;
+            top: 10px;
+            right: 10px;
             background: rgba(231,76,60,0.95);
             color: white;
-            padding: 5px 12px;
-            border-radius: 12px;
-            font-size: 12px;
+            padding: 6px 14px;
+            border-radius: 15px;
+            font-size: 14px;
             font-weight: bold;
             animation: pulse 1s infinite;
         }
@@ -275,15 +275,15 @@
         
         .fps-display {
             position: absolute;
-            bottom: 8px;
-            left: 8px;
+            bottom: 10px;
+            left: 10px;
             background: rgba(0,0,0,0.85);
-            padding: 4px 10px;
-            border-radius: 5px;
+            padding: 6px 12px;
+            border-radius: 6px;
             font-family: monospace;
-            font-size: 12px;
+            font-size: 14px;
             display: flex;
-            gap: 12px;
+            gap: 15px;
         }
         
         .fps-value { color: #00ff00; }
@@ -292,11 +292,11 @@
         .fps-value.high { color: #00ff00; }
         .scan-rate { color: #00bfff; }
         
-        /* ========== STATS - Compact, Below Video ========== */
+        /* ========== STATS - Font +40% ========== */
         .stats {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
-            padding: 8px 12px;
+            padding: 10px 15px;
             text-align: center;
             flex-shrink: 0;
             display: flex;
@@ -305,13 +305,13 @@
             gap: 15px;
         }
         
-        .stats-title { font-size: 12px; }
-        .stats-count { font-size: 20px; font-weight: bold; }
-        .stats-total { font-size: 11px; opacity: 0.9; }
+        .stats-title { font-size: 15px; }
+        .stats-count { font-size: 24px; font-weight: bold; }
+        .stats-total { font-size: 14px; opacity: 0.9; }
         
-        /* ========== HISTORY - 10 items with scroll ========== */
+        /* ========== HISTORY - Font +40%, Scrollbar Always Visible ========== */
         .history {
-            padding: 8px 12px;
+            padding: 10px 15px;
             background: #16213e;
             flex: 1;
             min-height: 0;
@@ -324,58 +324,58 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             flex-shrink: 0;
         }
         
-        .history-header h3 { font-size: 14px; color: #fff; }
+        .history-header h3 { font-size: 17px; color: #fff; }
         
         .search-input {
-            padding: 4px 10px;
+            padding: 6px 12px;
             border: 1px solid #3a4f6f;
-            border-radius: 12px;
-            font-size: 11px;
-            width: 100px;
+            border-radius: 15px;
+            font-size: 14px;
+            width: 120px;
             background: #1a1a2e;
             color: white;
         }
         
         .history-list {
             border: 1px solid #2a3f5f;
-            border-radius: 5px;
+            border-radius: 6px;
             flex: 1;
-            overflow-y: auto;
+            overflow-y: scroll;  /* Always show scrollbar */
             background: #1a1a2e;
-            min-height: 200px;
-            max-height: 280px;
+            min-height: 180px;
         }
         
-        /* Custom scrollbar for history */
+        /* Custom scrollbar - ALWAYS VISIBLE */
         .history-list::-webkit-scrollbar {
-            width: 8px;
+            width: 10px;
         }
         
         .history-list::-webkit-scrollbar-track {
-            background: #1a1a2e;
-            border-radius: 4px;
+            background: #2a3f5f;
+            border-radius: 5px;
         }
         
         .history-list::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 5px;
+            border: 2px solid #2a3f5f;
         }
         
         .history-list::-webkit-scrollbar-thumb:hover {
-            background: #764ba2;
+            background: linear-gradient(135deg, #764ba2, #667eea);
         }
         
         .history-item {
             display: grid;
-            grid-template-columns: 30px 1fr 75px 55px 55px 50px 40px;
-            gap: 4px;
-            padding: 6px 8px;
+            grid-template-columns: 35px 1fr 80px 60px 60px 55px 45px;
+            gap: 6px;
+            padding: 8px 10px;
             border-bottom: 1px solid #2a3f5f;
-            font-size: 11px;
+            font-size: 13px;
             align-items: center;
         }
         
@@ -392,16 +392,16 @@
         
         .empty-msg {
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             color: #666;
-            font-size: 12px;
+            font-size: 15px;
         }
         
         /* ========== HISTORY ACTIONS ========== */
         .history-actions {
             display: flex;
-            gap: 6px;
-            padding: 8px 12px;
+            gap: 8px;
+            padding: 10px 15px;
             background: #0d1520;
             justify-content: center;
             flex-wrap: wrap;
@@ -422,43 +422,43 @@
         .modal-box {
             background: #1a1a2e;
             border: 1px solid #3a4f6f;
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 15px;
+            padding: 25px;
             width: 90%;
-            max-width: 350px;
+            max-width: 380px;
             text-align: center;
         }
         
         .modal-box h3 {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             color: #fff;
-            font-size: 16px;
+            font-size: 18px;
         }
         
         .modal-box .date-inputs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 18px;
             flex-direction: column;
         }
         
         .modal-box .date-inputs label {
-            font-size: 12px;
+            font-size: 14px;
             color: #aaa;
             text-align: left;
         }
         
         .modal-box .date-inputs input {
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #3a4f6f;
-            border-radius: 6px;
+            border-radius: 8px;
             background: #0d1520;
             color: white;
         }
         
         .modal-box .modal-buttons {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             justify-content: center;
         }
         
@@ -468,12 +468,12 @@
             bottom: 15px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            padding: 8px 16px;
+            padding: 10px 20px;
             background: #28a745;
             color: white;
-            border-radius: 18px;
-            font-size: 13px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border-radius: 25px;
+            font-size: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             transition: transform 0.3s;
             z-index: 1000;
             white-space: nowrap;
@@ -489,7 +489,7 @@
         <!-- Header -->
         <div class="header">
             <h1>📷 QR Scanner Video Recording</h1>
-            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.3</div>
+            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.4</div>
         </div>
         
         <!-- Tabs -->
@@ -498,7 +498,7 @@
             <button class="tab" id="tabScanner">📟 Barcode Scanner</button>
         </div>
         
-        <!-- Controls - Compact -->
+        <!-- Controls -->
         <div class="controls">
             <div class="control-row">
                 <div class="control-group">
@@ -573,7 +573,7 @@
             <div class="hint">💡 Nhấn <b>Win + E</b> → Click <b>Downloads</b> để mở</div>
         </div>
         
-        <!-- Video - Full Display, Not Covered -->
+        <!-- Video - FULL COVER -->
         <div class="video-section">
             <video id="webcamVideo" autoplay playsinline muted></video>
             
@@ -594,14 +594,14 @@
             </div>
         </div>
         
-        <!-- Stats - Below Video, Compact Horizontal -->
+        <!-- Stats -->
         <div class="stats">
             <span class="stats-title">📊 Hôm nay:</span>
             <span class="stats-count"><span id="todayCount">0</span> đơn</span>
             <span class="stats-total">| Tổng: <span id="totalCount">0</span> / 100,000</span>
         </div>
         
-        <!-- History - 10 items with scroll -->
+        <!-- History with Scrollbar -->
         <div class="history">
             <div class="history-header">
                 <h3>📜 Lịch sử (<span id="historyCount">0</span>)</h3>
@@ -1052,7 +1052,6 @@
             var filtered = search ? state.orders.filter(function(o) { return o.qr.toLowerCase().indexOf(search.toLowerCase()) !== -1; }) : state.orders;
             if (!filtered.length) { list.innerHTML = '<div class="empty-msg">Chưa có lịch sử</div>'; return; }
             var html = '';
-            // Show all items, scroll will handle overflow
             filtered.forEach(function(o, i) {
                 html += '<div class="history-item"><span class="h-num">#' + (i + 1) + '</span><span class="h-qr">' + o.qr +
                     '</span><span class="h-date">' + o.date + '</span><span class="h-time">' + o.time +
@@ -1120,7 +1119,7 @@
         }
         
         function init() {
-            console.log('[QR Scanner] Blog v7.3 - Layout Fixed');
+            console.log('[QR Scanner] Blog v7.4 - Video Cover, Font +40%, Scrollbar');
             try { var saved = localStorage.getItem(STORAGE_KEY); if (saved) state.orders = JSON.parse(saved); } catch(e) {}
             autoDelete();
             state.quality = localStorage.getItem('quality') || '1080p60';
@@ -1154,7 +1153,7 @@
                     .then(function(s) { s.getTracks().forEach(function(t) { t.stop(); }); getCameras(); })
                     .catch(function() { getCameras(); });
             }, 500);
-            toast('✅ v7.3 - Sẵn sàng', 'success');
+            toast('✅ v7.4 - Sẵn sàng', 'success');
         }
         
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
