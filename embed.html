@@ -23,19 +23,19 @@
         
         .hidden { display: none !important; }
         
-        /* ========== HEADER - Font +40% ========== */
+        /* ========== HEADER ========== */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 12px 15px;
+            padding: 10px 15px;
             text-align: center;
             flex-shrink: 0;
         }
         
-        .header h1 { font-size: 21px; margin-bottom: 3px; }
-        .header .subtitle { font-size: 14px; opacity: 0.9; }
+        .header h1 { font-size: 18px; margin-bottom: 2px; }
+        .header .subtitle { font-size: 12px; opacity: 0.9; }
         
-        /* ========== TABS - Font +40% ========== */
+        /* ========== TABS ========== */
         .tabs {
             display: flex;
             background: #16213e;
@@ -45,12 +45,12 @@
         
         .tab {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             cursor: pointer;
             background: transparent;
             border: none;
-            font-size: 17px;
+            font-size: 14px;
             font-weight: 500;
             color: #888;
             transition: all 0.3s;
@@ -66,9 +66,9 @@
             margin-bottom: -2px;
         }
         
-        /* ========== CONTROLS - Font +40% ========== */
+        /* ========== CONTROLS - Compact ========== */
         .controls {
-            padding: 12px 15px;
+            padding: 8px 12px;
             background: #16213e;
             border-bottom: 1px solid #2a3f5f;
             flex-shrink: 0;
@@ -76,8 +76,8 @@
         
         .control-row {
             display: flex;
-            gap: 12px;
-            margin-bottom: 10px;
+            gap: 10px;
+            margin-bottom: 6px;
         }
         
         .control-row:last-child { margin-bottom: 0; }
@@ -89,18 +89,18 @@
         
         .control-group label {
             display: block;
-            font-size: 14px;
+            font-size: 11px;
             font-weight: 600;
             color: #aaa;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         
         select, input[type="date"] {
             width: 100%;
-            padding: 8px 10px;
+            padding: 5px 8px;
             border: 1px solid #3a4f6f;
-            border-radius: 6px;
-            font-size: 15px;
+            border-radius: 5px;
+            font-size: 12px;
             background: #1a1a2e;
             color: white;
             cursor: pointer;
@@ -114,13 +114,13 @@
         .toggle-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         
         .toggle {
             position: relative;
-            width: 40px;
-            height: 20px;
+            width: 36px;
+            height: 18px;
         }
         
         .toggle input { opacity: 0; width: 0; height: 0; }
@@ -130,15 +130,15 @@
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
             background: #444;
-            border-radius: 20px;
+            border-radius: 18px;
             transition: 0.3s;
         }
         
         .toggle-slider:before {
             content: "";
             position: absolute;
-            height: 16px;
-            width: 16px;
+            height: 14px;
+            width: 14px;
             left: 2px;
             bottom: 2px;
             background: white;
@@ -147,15 +147,15 @@
         }
         
         .toggle input:checked + .toggle-slider { background: #667eea; }
-        .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+        .toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
         
-        .toggle-label { font-size: 15px; color: #ccc; }
+        .toggle-label { font-size: 12px; color: #ccc; }
         
-        /* ========== BUTTONS - Font +40% ========== */
+        /* ========== BUTTONS ========== */
         .buttons {
             display: flex;
-            gap: 10px;
-            padding: 12px 15px;
+            gap: 8px;
+            padding: 8px 12px;
             background: #16213e;
             justify-content: center;
             flex-wrap: wrap;
@@ -163,16 +163,16 @@
         }
         
         .btn {
-            padding: 10px 20px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 8px;
-            font-size: 15px;
+            border-radius: 6px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
         
         .btn-primary {
@@ -181,92 +181,89 @@
         }
         
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(102,126,234,0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
         }
         
         .btn-secondary { background: #f39c12; color: white; }
         .btn-success { background: #28a745; color: white; }
         .btn-danger { background: #e74c3c; color: white; }
         .btn-info { background: #17a2b8; color: white; }
-        .btn-small { padding: 7px 14px; font-size: 14px; }
+        .btn-small { padding: 5px 10px; font-size: 11px; }
         
         /* ========== FOLDER INFO ========== */
         .folder-info {
             background: #1f3a5f;
             border: 1px solid #3a5f8f;
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin: 0 15px 10px;
-            font-size: 14px;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 0 12px 6px;
+            font-size: 11px;
         }
         
         .folder-info .title {
             font-weight: 600;
             color: #4dabf7;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         
         .folder-info .path {
             background: #0d1520;
-            padding: 6px 10px;
-            border-radius: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
             font-family: monospace;
             color: #7bed9f;
             word-break: break-all;
-            font-size: 13px;
+            font-size: 11px;
         }
         
         .folder-info .hint {
             color: #888;
-            margin-top: 5px;
-            font-size: 13px;
+            margin-top: 3px;
+            font-size: 10px;
         }
         
-        /* ========== VIDEO - FULL WIDTH ========== */
+        /* ========== VIDEO - Full Display ========== */
         .video-section {
             position: relative;
             background: #000;
-            flex: 1;
-            min-height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-shrink: 0;
+            height: 320px;
         }
         
         #webcamVideo {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             display: block;
         }
         
         .video-overlay {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 8px;
+            left: 8px;
             background: rgba(0,0,0,0.9);
             color: white;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
             opacity: 0;
             transition: opacity 0.3s;
-            border-left: 4px solid #28a745;
+            border-left: 3px solid #28a745;
         }
         
         .video-overlay.show { opacity: 1; }
-        .video-overlay h4 { color: #28a745; font-size: 15px; margin-bottom: 4px; }
+        .video-overlay h4 { color: #28a745; font-size: 13px; margin-bottom: 3px; }
         
         .rec-indicator {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 8px;
+            right: 8px;
             background: rgba(231,76,60,0.95);
             color: white;
-            padding: 6px 14px;
-            border-radius: 15px;
-            font-size: 14px;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 12px;
             font-weight: bold;
             animation: pulse 1s infinite;
         }
@@ -278,15 +275,15 @@
         
         .fps-display {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
+            bottom: 8px;
+            left: 8px;
             background: rgba(0,0,0,0.85);
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 4px 10px;
+            border-radius: 5px;
             font-family: monospace;
-            font-size: 14px;
+            font-size: 12px;
             display: flex;
-            gap: 15px;
+            gap: 12px;
         }
         
         .fps-value { color: #00ff00; }
@@ -295,66 +292,90 @@
         .fps-value.high { color: #00ff00; }
         .scan-rate { color: #00bfff; }
         
-        /* ========== STATS - Font +40% ========== */
+        /* ========== STATS - Compact, Below Video ========== */
         .stats {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
-            padding: 10px 15px;
+            padding: 8px 12px;
             text-align: center;
             flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
         }
         
-        .stats-title { font-size: 15px; margin-bottom: 3px; }
-        .stats-count { font-size: 25px; font-weight: bold; }
-        .stats-total { font-size: 14px; opacity: 0.9; }
+        .stats-title { font-size: 12px; }
+        .stats-count { font-size: 20px; font-weight: bold; }
+        .stats-total { font-size: 11px; opacity: 0.9; }
         
-        /* ========== HISTORY - Font +40% ========== */
+        /* ========== HISTORY - 10 items with scroll ========== */
         .history {
-            padding: 12px 15px;
+            padding: 8px 12px;
             background: #16213e;
-            flex-shrink: 0;
-            max-height: 200px;
-            overflow: hidden;
+            flex: 1;
+            min-height: 0;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
         
         .history-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
-            flex-wrap: wrap;
-            gap: 8px;
+            margin-bottom: 6px;
+            flex-shrink: 0;
         }
         
-        .history-header h3 { font-size: 17px; color: #fff; }
+        .history-header h3 { font-size: 14px; color: #fff; }
         
         .search-input {
-            padding: 6px 12px;
+            padding: 4px 10px;
             border: 1px solid #3a4f6f;
-            border-radius: 15px;
-            font-size: 14px;
-            width: 120px;
+            border-radius: 12px;
+            font-size: 11px;
+            width: 100px;
             background: #1a1a2e;
             color: white;
         }
         
         .history-list {
             border: 1px solid #2a3f5f;
-            border-radius: 6px;
+            border-radius: 5px;
             flex: 1;
             overflow-y: auto;
             background: #1a1a2e;
+            min-height: 200px;
+            max-height: 280px;
+        }
+        
+        /* Custom scrollbar for history */
+        .history-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .history-list::-webkit-scrollbar-track {
+            background: #1a1a2e;
+            border-radius: 4px;
+        }
+        
+        .history-list::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+        
+        .history-list::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
         }
         
         .history-item {
             display: grid;
-            grid-template-columns: 35px 1fr 80px 60px 60px 55px 45px;
-            gap: 6px;
-            padding: 8px 10px;
+            grid-template-columns: 30px 1fr 75px 55px 55px 50px 40px;
+            gap: 4px;
+            padding: 6px 8px;
             border-bottom: 1px solid #2a3f5f;
-            font-size: 13px;
+            font-size: 11px;
             align-items: center;
         }
         
@@ -373,14 +394,14 @@
             text-align: center;
             padding: 20px;
             color: #666;
-            font-size: 15px;
+            font-size: 12px;
         }
         
         /* ========== HISTORY ACTIONS ========== */
         .history-actions {
             display: flex;
-            gap: 8px;
-            padding: 10px 15px;
+            gap: 6px;
+            padding: 8px 12px;
             background: #0d1520;
             justify-content: center;
             flex-wrap: wrap;
@@ -401,43 +422,43 @@
         .modal-box {
             background: #1a1a2e;
             border: 1px solid #3a4f6f;
-            border-radius: 15px;
-            padding: 25px;
+            border-radius: 12px;
+            padding: 20px;
             width: 90%;
-            max-width: 380px;
+            max-width: 350px;
             text-align: center;
         }
         
         .modal-box h3 {
-            margin-bottom: 18px;
+            margin-bottom: 15px;
             color: #fff;
-            font-size: 18px;
+            font-size: 16px;
         }
         
         .modal-box .date-inputs {
             display: flex;
-            gap: 12px;
-            margin-bottom: 18px;
+            gap: 10px;
+            margin-bottom: 15px;
             flex-direction: column;
         }
         
         .modal-box .date-inputs label {
-            font-size: 14px;
+            font-size: 12px;
             color: #aaa;
             text-align: left;
         }
         
         .modal-box .date-inputs input {
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #3a4f6f;
-            border-radius: 8px;
+            border-radius: 6px;
             background: #0d1520;
             color: white;
         }
         
         .modal-box .modal-buttons {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             justify-content: center;
         }
         
@@ -447,12 +468,12 @@
             bottom: 15px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            padding: 10px 18px;
+            padding: 8px 16px;
             background: #28a745;
             color: white;
-            border-radius: 20px;
-            font-size: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border-radius: 18px;
+            font-size: 13px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: transform 0.3s;
             z-index: 1000;
             white-space: nowrap;
@@ -468,7 +489,7 @@
         <!-- Header -->
         <div class="header">
             <h1>📷 QR Scanner Video Recording</h1>
-            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.2</div>
+            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.3</div>
         </div>
         
         <!-- Tabs -->
@@ -477,7 +498,7 @@
             <button class="tab" id="tabScanner">📟 Barcode Scanner</button>
         </div>
         
-        <!-- Controls -->
+        <!-- Controls - Compact -->
         <div class="controls">
             <div class="control-row">
                 <div class="control-group">
@@ -513,7 +534,7 @@
             </div>
             <div class="control-row">
                 <div class="control-group">
-                    <label>Ghi trước quét:</label>
+                    <label>Ghi trước:</label>
                     <select id="preBufferSelect">
                         <option value="3000">3 giây</option>
                         <option value="4000">4 giây</option>
@@ -521,15 +542,13 @@
                     </select>
                 </div>
                 <div class="control-group">
-                    <label>Ghi sau quét:</label>
+                    <label>Ghi sau:</label>
                     <select id="postBufferSelect">
                         <option value="3000" selected>3 giây</option>
                         <option value="4000">4 giây</option>
                         <option value="5000">5 giây</option>
                     </select>
                 </div>
-            </div>
-            <div class="control-row">
                 <div class="toggle-row">
                     <label class="toggle">
                         <input type="checkbox" id="audioToggle" checked>
@@ -554,7 +573,7 @@
             <div class="hint">💡 Nhấn <b>Win + E</b> → Click <b>Downloads</b> để mở</div>
         </div>
         
-        <!-- Video - FULL WIDTH -->
+        <!-- Video - Full Display, Not Covered -->
         <div class="video-section">
             <video id="webcamVideo" autoplay playsinline muted></video>
             
@@ -575,14 +594,14 @@
             </div>
         </div>
         
-        <!-- Stats -->
+        <!-- Stats - Below Video, Compact Horizontal -->
         <div class="stats">
-            <div class="stats-title">📊 Hôm nay</div>
-            <div class="stats-count"><span id="todayCount">0</span> đơn</div>
-            <div class="stats-total">Tổng: <span id="totalCount">0</span> / 100,000</div>
+            <span class="stats-title">📊 Hôm nay:</span>
+            <span class="stats-count"><span id="todayCount">0</span> đơn</span>
+            <span class="stats-total">| Tổng: <span id="totalCount">0</span> / 100,000</span>
         </div>
         
-        <!-- History -->
+        <!-- History - 10 items with scroll -->
         <div class="history">
             <div class="history-header">
                 <h3>📜 Lịch sử (<span id="historyCount">0</span>)</h3>
@@ -1033,7 +1052,8 @@
             var filtered = search ? state.orders.filter(function(o) { return o.qr.toLowerCase().indexOf(search.toLowerCase()) !== -1; }) : state.orders;
             if (!filtered.length) { list.innerHTML = '<div class="empty-msg">Chưa có lịch sử</div>'; return; }
             var html = '';
-            filtered.slice(0, 50).forEach(function(o, i) {
+            // Show all items, scroll will handle overflow
+            filtered.forEach(function(o, i) {
                 html += '<div class="history-item"><span class="h-num">#' + (i + 1) + '</span><span class="h-qr">' + o.qr +
                     '</span><span class="h-date">' + o.date + '</span><span class="h-time">' + o.time +
                     '</span><span class="h-duration">' + o.duration + '</span><span class="h-size">' + (o.size || '-') +
@@ -1100,7 +1120,7 @@
         }
         
         function init() {
-            console.log('[QR Scanner] Blog v7.2 - Font +40%, Video Full Width');
+            console.log('[QR Scanner] Blog v7.3 - Layout Fixed');
             try { var saved = localStorage.getItem(STORAGE_KEY); if (saved) state.orders = JSON.parse(saved); } catch(e) {}
             autoDelete();
             state.quality = localStorage.getItem('quality') || '1080p60';
@@ -1134,7 +1154,7 @@
                     .then(function(s) { s.getTracks().forEach(function(t) { t.stop(); }); getCameras(); })
                     .catch(function() { getCameras(); });
             }, 500);
-            toast('✅ v7.2 - Sẵn sàng', 'success');
+            toast('✅ v7.3 - Sẵn sàng', 'success');
         }
         
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
