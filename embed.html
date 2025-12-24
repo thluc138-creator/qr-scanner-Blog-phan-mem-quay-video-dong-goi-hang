@@ -22,7 +22,7 @@
         
         .hidden { display: none !important; }
         
-        /* ========== HEADER - Compact ========== */
+        /* ========== HEADER ========== */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -63,7 +63,7 @@
             margin-bottom: -2px;
         }
         
-        /* ========== CONTROLS - Compact ========== */
+        /* ========== CONTROLS ========== */
         .controls {
             padding: 8px 12px;
             background: #16213e;
@@ -218,12 +218,11 @@
             font-size: 10px;
         }
         
-        /* ========== VIDEO - FULL SCREEN FROM CAMERA ========== */
+        /* ========== VIDEO ========== */
         .video-section {
             position: relative;
             background: #000;
             width: 100%;
-            /* Flexible height - fills available space */
             flex: 1;
             min-height: 280px;
         }
@@ -231,7 +230,7 @@
         #webcamVideo {
             width: 100%;
             height: 100%;
-            object-fit: cover;  /* Fill entire area */
+            object-fit: cover;
             display: block;
         }
         
@@ -289,7 +288,7 @@
         .fps-value.high { color: #00ff00; }
         .scan-rate { color: #00bfff; }
         
-        /* ========== STATS - Compact ========== */
+        /* ========== STATS ========== */
         .stats {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
@@ -305,10 +304,14 @@
         .stats-count { font-size: 20px; font-weight: bold; }
         .stats-total { font-size: 12px; opacity: 0.9; }
         
-        /* ========== HISTORY ========== */
+        /* ========== HISTORY - FIX SCROLL ========== */
         .history {
             padding: 8px 12px;
             background: #16213e;
+            display: flex;
+            flex-direction: column;
+            /* Giới hạn chiều cao để có scroll */
+            max-height: 300px;
         }
         
         .history-header {
@@ -316,6 +319,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 6px;
+            flex-shrink: 0;
         }
         
         .history-header h3 { font-size: 15px; color: #fff; }
@@ -330,17 +334,26 @@
             color: white;
         }
         
+        /* FIX: History list có scroll */
         .history-list {
             border: 1px solid #2a3f5f;
             border-radius: 5px;
-            max-height: 220px;
-            overflow-y: auto;
+            overflow-y: auto !important;
+            overflow-x: hidden;
             background: #1a1a2e;
+            flex: 1;
+            min-height: 100px;
+            max-height: 220px;
         }
         
+        /* Scrollbar style */
         .history-list::-webkit-scrollbar { width: 8px; }
         .history-list::-webkit-scrollbar-track { background: #2a3f5f; border-radius: 4px; }
-        .history-list::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 4px; }
+        .history-list::-webkit-scrollbar-thumb { 
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            border-radius: 4px; 
+        }
+        .history-list::-webkit-scrollbar-thumb:hover { background: #764ba2; }
         
         .history-item {
             display: grid;
@@ -461,7 +474,7 @@
         <!-- Header -->
         <div class="header">
             <h1>📷 QR Scanner Video Recording</h1>
-            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.7</div>
+            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.11</div>
         </div>
         
         <!-- Tabs -->
@@ -545,7 +558,7 @@
             <div class="hint">💡 Nhấn <b>Win + E</b> → Click <b>Downloads</b> để mở</div>
         </div>
         
-        <!-- Video - FULL SCREEN -->
+        <!-- Video -->
         <div class="video-section">
             <video id="webcamVideo" autoplay playsinline muted></video>
             
@@ -573,7 +586,7 @@
             <span class="stats-total">| Tổng: <span id="totalCount">0</span> / 100,000</span>
         </div>
         
-        <!-- History -->
+        <!-- History - FIX: max-height và overflow -->
         <div class="history">
             <div class="history-header">
                 <h3>📜 Lịch sử (<span id="historyCount">0</span>)</h3>
@@ -623,6 +636,7 @@
     (function() {
         'use strict';
         
+        // ========== CONFIGURATION ==========
         var STORAGE_KEY = 'qrScannerBlogV7';
         var MAX_ORDERS = 100000;
         var AUTO_DELETE_DAYS = 60;
@@ -641,17 +655,66 @@
             '12': { value: 12000000, label: '12 Mbps' }
         };
         
+        // ========== STATE - FIX: Thêm biến để track trạng thái ==========
         var state = {
-            stream: null, recorder: null, chunks: [], canvasStream: null, orders: [], savedVideos: [],
-            isRecording: false, isFirstScan: true, currentQR: null, scanBlocked: false,
-            scanBlockedUntil: 0, recordingStartTime: null, scanTime: null, timerInterval: null,
-            quality: '1080p60', bitrate: '12', audio: true, preBuf: 5000, postBuf: 3000,
-            cameraId: null, device: 'camera', timestampPos: 'top-right',
-            recordingCanvas: null, recordingCtx: null, scanCanvas: null, scanCtx: null, rafId: null,
-            frameCount: 0, lastFpsTime: 0, currentFPS: 0,
-            lastScanTime: 0, scanInterval: 333, actualScanCount: 0, lastScanCountTime: 0, actualScanRate: 0,
-            displayQR: null, displayTime: 0, detectedProducts: [],
-            currentCodec: null, folderHandle: null, lastSavedFile: null
+            stream: null,
+            recorder: null,
+            chunks: [],
+            canvasStream: null,
+            orders: [],
+            savedVideos: [],
+            
+            // FIX: Biến quan trọng để kiểm soát scan
+            isRecording: false,
+            isFirstScan: true,
+            currentQR: null,
+            scanBlocked: false,
+            scanBlockedUntil: 0,
+            recordingStartTime: null,
+            scanTime: null,
+            timerInterval: null,
+            
+            // Settings
+            quality: '1080p60',
+            bitrate: '12',
+            audio: true,
+            preBuf: 5000,
+            postBuf: 3000,
+            cameraId: null,
+            device: 'camera',
+            timestampPos: 'top-right',
+            
+            // Canvas
+            recordingCanvas: null,
+            recordingCtx: null,
+            scanCanvas: null,
+            scanCtx: null,
+            rafId: null,
+            
+            // FPS tracking
+            frameCount: 0,
+            lastFpsTime: 0,
+            currentFPS: 0,
+            
+            // Scan tracking
+            lastScanTime: 0,
+            scanInterval: 333,
+            actualScanCount: 0,
+            lastScanCountTime: 0,
+            actualScanRate: 0,
+            
+            // QR display
+            displayQR: null,
+            displayTime: 0,
+            detectedProducts: [],
+            
+            // File
+            currentCodec: null,
+            folderHandle: null,
+            lastSavedFile: null,
+            
+            // FIX: Debug counter
+            scanCycleCount: 0
         };
         
         function $(id) { return document.getElementById(id); }
@@ -714,28 +777,54 @@
             state.scanCanvas.width = Math.round(preset.width * preset.scanScale);
             state.scanCanvas.height = Math.round(preset.height * preset.scanScale);
             state.scanInterval = Math.round(1000 / preset.scanFPS);
-            state.frameCount = 0; state.lastFpsTime = 0; state.currentFPS = 0;
-            state.actualScanCount = 0; state.lastScanCountTime = 0; state.actualScanRate = 0;
+            
+            // Reset counters
+            state.frameCount = 0;
+            state.lastFpsTime = 0;
+            state.currentFPS = 0;
+            state.actualScanCount = 0;
+            state.lastScanCountTime = 0;
+            state.actualScanRate = 0;
         }
         
+        // ========== RENDER LOOP ==========
         function renderLoop(timestamp) {
             if (!state.stream) return;
+            
             var video = $('webcamVideo'), ctx = state.recordingCtx, canvas = state.recordingCanvas;
-            if (!video || !ctx || video.readyState < 2) { state.rafId = requestAnimationFrame(renderLoop); return; }
+            if (!video || !ctx || video.readyState < 2) { 
+                state.rafId = requestAnimationFrame(renderLoop); 
+                return; 
+            }
+            
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             drawTimestamp(ctx);
-            if (state.displayQR && (Date.now() - state.displayTime < PROGRESS_DISPLAY_TIME)) drawProgressBar(ctx, state.displayQR);
+            
+            if (state.displayQR && (Date.now() - state.displayTime < PROGRESS_DISPLAY_TIME)) {
+                drawProgressBar(ctx, state.displayQR);
+            }
+            
             drawFPSCounter(ctx, timestamp);
+            
             if (state.scanTime && state.audio) drawAudioIndicator(ctx);
+            
+            // QR Scanning - throttled
             var now = performance.now();
             if (now - state.lastScanTime >= state.scanInterval) {
-                state.lastScanTime = now; state.actualScanCount++;
+                state.lastScanTime = now;
+                state.actualScanCount++;
                 if (state.device === 'camera') scanQRCode();
             }
+            
+            // Update scan rate display
             if (now - state.lastScanCountTime >= 1000) {
-                state.actualScanRate = state.actualScanCount; state.actualScanCount = 0; state.lastScanCountTime = now;
-                var scanEl = $('scanRate'); if (scanEl) scanEl.textContent = state.actualScanRate;
+                state.actualScanRate = state.actualScanCount;
+                state.actualScanCount = 0;
+                state.lastScanCountTime = now;
+                var scanEl = $('scanRate');
+                if (scanEl) scanEl.textContent = state.actualScanRate;
             }
+            
             state.rafId = requestAnimationFrame(renderLoop);
         }
         
@@ -743,15 +832,21 @@
             var now = new Date();
             var text = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN');
             var position = state.timestampPos, canvas = state.recordingCanvas, margin = 113;
-            ctx.font = 'bold 22px Arial'; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 3;
+            ctx.font = 'bold 22px Arial';
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 3;
             var x = position.includes('left') ? margin : canvas.width - 260 - margin;
             var y = position.includes('top') ? margin + 22 : canvas.height - margin;
-            ctx.strokeText(text, x, y); ctx.fillText(text, x, y);
+            ctx.strokeText(text, x, y);
+            ctx.fillText(text, x, y);
             if (state.scanTime) {
                 var blink = Math.floor(Date.now() / 500) % 2;
                 var recY = position.includes('top') ? margin + 57 : canvas.height - margin - 35;
                 if (blink) { ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(margin + 15, recY, 12, 0, 2 * Math.PI); ctx.fill(); }
-                ctx.fillStyle = 'white'; ctx.font = 'bold 18px Arial'; ctx.fillText('REC', margin + 35, recY + 6);
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 18px Arial';
+                ctx.fillText('REC', margin + 35, recY + 6);
             }
         }
         
@@ -761,23 +856,39 @@
             var panelX = position.includes('left') ? margin : canvas.width - panelWidth - margin;
             var panelY = position.includes('top') ? margin + 80 : canvas.height - margin - panelHeight - 80;
             var centerX = panelX + panelWidth / 2;
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)'; ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
-            ctx.strokeStyle = '#00FF00'; ctx.lineWidth = 3; ctx.strokeRect(panelX, panelY, panelWidth, panelHeight);
-            ctx.fillStyle = '#00FF00'; ctx.font = 'bold 24px Arial'; ctx.textAlign = 'center';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
+            ctx.strokeStyle = '#00FF00';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(panelX, panelY, panelWidth, panelHeight);
+            ctx.fillStyle = '#00FF00';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
             ctx.fillText('✅ QR CODE DETECTED', centerX, panelY + 30);
-            ctx.fillStyle = '#FFD700'; ctx.font = 'bold 28px Arial';
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 28px Arial';
             ctx.fillText(qrCode.length > 20 ? qrCode.substring(0, 20) + '...' : qrCode, centerX, panelY + 65);
-            ctx.fillStyle = '#00FF00'; ctx.font = 'bold 20px monospace';
+            ctx.fillStyle = '#00FF00';
+            ctx.font = 'bold 20px monospace';
             ctx.fillText('████████████████', centerX, panelY + 100);
             var barX = panelX + 20, barY = panelY + 120, barWidth = panelWidth - 40, barHeight = 35;
-            ctx.fillStyle = 'rgba(50, 50, 50, 0.9)'; ctx.fillRect(barX, barY, barWidth, barHeight);
+            ctx.fillStyle = 'rgba(50, 50, 50, 0.9)';
+            ctx.fillRect(barX, barY, barWidth, barHeight);
             var gradient = ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
-            gradient.addColorStop(0, '#00AA00'); gradient.addColorStop(0.5, '#00FF00'); gradient.addColorStop(1, '#00AA00');
-            ctx.fillStyle = gradient; ctx.fillRect(barX, barY, barWidth, barHeight);
-            ctx.strokeStyle = '#00FF00'; ctx.lineWidth = 2; ctx.strokeRect(barX, barY, barWidth, barHeight);
-            ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 20px Arial'; ctx.fillText('100%', centerX, barY + barHeight / 2 + 7);
+            gradient.addColorStop(0, '#00AA00');
+            gradient.addColorStop(0.5, '#00FF00');
+            gradient.addColorStop(1, '#00AA00');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(barX, barY, barWidth, barHeight);
+            ctx.strokeStyle = '#00FF00';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(barX, barY, barWidth, barHeight);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('100%', centerX, barY + barHeight / 2 + 7);
             if (state.detectedProducts.length > 0) {
-                ctx.fillStyle = '#00BFFF'; ctx.font = 'bold 14px Arial';
+                ctx.fillStyle = '#00BFFF';
+                ctx.font = 'bold 14px Arial';
                 ctx.fillText('📦 ' + state.detectedProducts.length + ' sản phẩm', centerX, panelY + panelHeight - 15);
             }
             ctx.textAlign = 'left';
@@ -789,7 +900,8 @@
             var elapsed = timestamp - state.lastFpsTime;
             if (elapsed >= 1000) {
                 state.currentFPS = Math.round(state.frameCount * 1000 / elapsed);
-                state.frameCount = 0; state.lastFpsTime = timestamp;
+                state.frameCount = 0;
+                state.lastFpsTime = timestamp;
                 var fpsEl = $('fpsValue');
                 if (fpsEl) {
                     fpsEl.textContent = state.currentFPS;
@@ -799,126 +911,247 @@
             var margin = 113, position = state.timestampPos;
             var y = position.includes('bottom') ? margin + 20 : state.recordingCanvas.height - margin;
             var color = state.currentFPS > 0 && state.currentFPS < 30 ? '#FF0000' : state.currentFPS < 50 ? '#FFFF00' : '#00FF00';
-            ctx.fillStyle = color; ctx.font = 'bold 14px Arial'; ctx.fillText('FPS: ' + state.currentFPS, margin, y);
-            ctx.fillStyle = '#00BFFF'; ctx.fillText('Scan: ' + state.actualScanRate + '/s', margin + 80, y);
+            ctx.fillStyle = color;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('FPS: ' + state.currentFPS, margin, y);
+            ctx.fillStyle = '#00BFFF';
+            ctx.fillText('Scan: ' + state.actualScanRate + '/s', margin + 80, y);
         }
         
         function drawAudioIndicator(ctx) {
             var margin = 113, position = state.timestampPos;
             var y = position.includes('bottom') ? margin + 45 : state.recordingCanvas.height - margin - 25;
-            ctx.fillStyle = '#FF0000'; ctx.font = 'bold 14px Arial'; ctx.fillText('🎤 REC', margin, y);
+            ctx.fillStyle = '#FF0000';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('🎤 REC', margin, y);
         }
         
+        // ========== QR SCANNING ==========
         function scanQRCode() {
+            // FIX: Kiểm tra kỹ điều kiện trước khi scan
+            if (state.scanBlocked) {
+                return; // Đang bị block
+            }
+            
             try {
                 var video = $('webcamVideo');
                 if (!video || video.readyState < 2) return;
+                
                 var ctx = state.scanCtx, canvas = state.scanCanvas;
                 if (!ctx || !canvas) return;
+                
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 if (!imageData || typeof jsQR === 'undefined') return;
+                
                 var code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+                
                 if (code && code.data && code.data.trim()) {
                     var qrData = code.data.trim();
-                    state.displayQR = qrData; state.displayTime = Date.now();
+                    state.displayQR = qrData;
+                    state.displayTime = Date.now();
+                    
+                    // Track sản phẩm trong đơn hiện tại
                     if (state.scanTime && state.detectedProducts.indexOf(qrData) === -1) {
                         state.detectedProducts.push(qrData);
                         $('productsCount').textContent = state.detectedProducts.length;
                     }
-                    if (!state.scanBlocked) handleQRDetected(qrData);
+                    
+                    // Xử lý QR detected
+                    handleQRDetected(qrData);
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.error('[Scan Error]', e);
+            }
         }
         
+        // ========== HANDLE QR DETECTED - FIX LOGIC ==========
         function handleQRDetected(qrData) {
             if (!qrData || state.scanBlocked) return;
+            
             beep();
+            console.log('[QR] Detected:', qrData, 'isFirstScan:', state.isFirstScan, 'cycle:', state.scanCycleCount);
+            
             if (state.isFirstScan) {
-                state.currentQR = qrData; state.isFirstScan = false; state.scanTime = Date.now();
+                // FIRST SCAN - Bắt đầu ghi đơn mới
+                state.currentQR = qrData;
+                state.isFirstScan = false;
+                state.scanTime = Date.now();
                 state.detectedProducts = [qrData];
+                
                 var recordedMs = state.scanTime - state.recordingStartTime;
                 var effectivePreBuffer = Math.min(state.preBuf, recordedMs);
-                $('currentQRDisplay').textContent = qrData; $('productsCount').textContent = '1';
-                $('orderInfo').classList.add('show'); $('recIndicator').classList.remove('hidden');
+                
+                $('currentQRDisplay').textContent = qrData;
+                $('productsCount').textContent = '1';
+                $('orderInfo').classList.add('show');
+                $('recIndicator').classList.remove('hidden');
+                
                 startDisplayTimer(effectivePreBuffer);
                 toast('📹 Đang ghi (+' + Math.round(effectivePreBuffer/1000) + 's): ' + qrData, 'success');
-                state.scanBlocked = true; state.scanBlockedUntil = Date.now() + SCAN_LOCK_FIRST;
+                
+                // Block scan 10 giây
+                state.scanBlocked = true;
+                state.scanBlockedUntil = Date.now() + SCAN_LOCK_FIRST;
+                
                 var countdown = 10;
                 var timer = setInterval(function() {
                     countdown--;
-                    if (countdown > 0) toast('⏱️ Chờ ' + countdown + 's để quét lần 2...', 'warning');
-                    else { clearInterval(timer); state.scanBlocked = false; toast('✅ Quét lại mã để kết thúc!', 'success'); }
+                    if (countdown > 0) {
+                        toast('⏱️ Chờ ' + countdown + 's để quét lần 2...', 'warning');
+                    } else {
+                        clearInterval(timer);
+                        state.scanBlocked = false;
+                        toast('✅ Quét lại mã để kết thúc!', 'success');
+                    }
                 }, 1000);
+                
             } else {
-                if (qrData !== state.currentQR) { toast('⚠️ Mã không khớp! Cần: ' + state.currentQR, 'error'); return; }
+                // SECOND SCAN - Kết thúc đơn
+                if (qrData !== state.currentQR) {
+                    toast('⚠️ Mã không khớp! Cần: ' + state.currentQR, 'error');
+                    return;
+                }
                 startPostBuffer();
             }
         }
         
+        // ========== START RECORDING ==========
         function startRecording() {
             if (!state.stream || state.isRecording) return;
+            
             setupCanvas();
             var preset = VIDEO_PRESETS[state.quality], bitrate = BITRATE_OPTIONS[state.bitrate].value;
+            
             state.canvasStream = state.recordingCanvas.captureStream(preset.fps);
             if (state.audio && state.stream.getAudioTracks().length > 0) {
                 state.stream.getAudioTracks().forEach(function(track) { state.canvasStream.addTrack(track); });
             }
+            
             var codec = getCodec();
-            try { state.recorder = new MediaRecorder(state.canvasStream, { mimeType: codec.mimeType, videoBitsPerSecond: bitrate }); }
-            catch (e) { state.recorder = new MediaRecorder(state.canvasStream); }
+            try { 
+                state.recorder = new MediaRecorder(state.canvasStream, { mimeType: codec.mimeType, videoBitsPerSecond: bitrate }); 
+            } catch (e) { 
+                state.recorder = new MediaRecorder(state.canvasStream); 
+            }
+            
             state.chunks = [];
-            state.recorder.ondataavailable = function(e) { if (e.data.size > 0) state.chunks.push(e.data); };
-            state.recorder.onstop = function() { saveRecording(); };
-            state.recorder.start(1000); state.isRecording = true; state.recordingStartTime = Date.now();
+            state.recorder.ondataavailable = function(e) { 
+                if (e.data.size > 0) state.chunks.push(e.data); 
+            };
+            state.recorder.onstop = function() { 
+                saveRecording(); 
+            };
+            
+            state.recorder.start(1000);
+            state.isRecording = true;
+            state.recordingStartTime = Date.now();
             state.rafId = requestAnimationFrame(renderLoop);
             $('fpsDisplay').classList.remove('hidden');
+            
+            console.log('[Recording] Started, cycle:', state.scanCycleCount);
         }
         
         function stopRecording() {
-            if (state.recorder && state.isRecording) { state.recorder.stop(); state.isRecording = false; }
-            if (state.rafId) { cancelAnimationFrame(state.rafId); state.rafId = null; }
-            if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
-            $('orderInfo').classList.remove('show'); $('recIndicator').classList.add('hidden');
+            if (state.recorder && state.isRecording) {
+                state.recorder.stop();
+                state.isRecording = false;
+            }
+            if (state.rafId) {
+                cancelAnimationFrame(state.rafId);
+                state.rafId = null;
+            }
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+                state.timerInterval = null;
+            }
+            $('orderInfo').classList.remove('show');
+            $('recIndicator').classList.add('hidden');
         }
         
+        // ========== POST BUFFER ==========
         function startPostBuffer() {
             var postBufferSec = state.postBuf / 1000;
             toast('📦 Ghi thêm ' + postBufferSec + 's...', 'success');
-            $('recIndicator').classList.add('hidden'); $('orderInfo').classList.remove('show');
+            $('recIndicator').classList.add('hidden');
+            $('orderInfo').classList.remove('show');
+            
             state.scanBlocked = true;
+            
             var countdown = postBufferSec;
             var timer = setInterval(function() {
                 countdown--;
-                if (countdown > 0) toast('📦 Post-buffer: ' + countdown + 's...', 'warning');
-                else { clearInterval(timer); if (state.recorder && state.recorder.state === 'recording') state.recorder.stop(); }
+                if (countdown > 0) {
+                    toast('📦 Post-buffer: ' + countdown + 's...', 'warning');
+                } else {
+                    clearInterval(timer);
+                    if (state.recorder && state.recorder.state === 'recording') {
+                        state.recorder.stop();
+                    }
+                }
             }, 1000);
         }
         
+        // ========== SAVE RECORDING - FIX: Clear memory ==========
         async function saveRecording() {
             var qrCode = state.currentQR;
-            if (!qrCode) { restartRecording(); return; }
-            if (state.chunks.length === 0) { toast('⚠️ Không có dữ liệu video', 'warning'); restartRecording(); return; }
+            
+            if (!qrCode) {
+                console.log('[Save] No QR code, restarting...');
+                restartRecording();
+                return;
+            }
+            
+            if (state.chunks.length === 0) {
+                toast('⚠️ Không có dữ liệu video', 'warning');
+                restartRecording();
+                return;
+            }
+            
             var ext = state.currentCodec ? state.currentCodec.ext : 'webm';
             var mimeType = state.currentCodec ? state.currentCodec.mimeType : 'video/webm';
             var filename = qrCode + '_' + dateStr() + '_' + fileTimeStr() + '.' + ext;
+            
             var blob = new Blob(state.chunks, { type: mimeType });
             var sizeMB = (blob.size / 1048576).toFixed(2);
             var duration = state.chunks.length;
+            
             await saveVideo(blob, filename);
             state.lastSavedFile = filename;
             state.savedVideos.push({ filename: filename, qr: qrCode, date: dateStrVN(), time: timeStr() });
             updateFolderInfo(filename);
-            var order = { qr: qrCode, date: dateStrVN(), time: timeStr(), duration: formatTime(duration), filename: filename,
-                size: sizeMB + 'MB', codec: state.currentCodec ? state.currentCodec.name : 'WebM',
-                audio: state.audio ? 'Có' : 'Không', productsDetected: state.detectedProducts.length, timestamp: Date.now() };
+            
+            var order = {
+                qr: qrCode,
+                date: dateStrVN(),
+                time: timeStr(),
+                duration: formatTime(duration),
+                filename: filename,
+                size: sizeMB + 'MB',
+                codec: state.currentCodec ? state.currentCodec.name : 'WebM',
+                audio: state.audio ? 'Có' : 'Không',
+                productsDetected: state.detectedProducts.length,
+                timestamp: Date.now()
+            };
+            
             state.orders.unshift(order);
             if (state.orders.length > MAX_ORDERS) state.orders.pop();
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+            
             updateUI();
             toast('✅ Đã lưu: ' + qrCode + ' (' + sizeMB + 'MB, ' + state.detectedProducts.length + ' SP)', 'success');
+            
+            // FIX: Clear chunks để giải phóng memory
+            state.chunks = [];
+            
+            state.scanCycleCount++;
+            console.log('[Save] Completed, cycle:', state.scanCycleCount);
+            
+            // Đợi 5 giây rồi restart
             state.scanBlockedUntil = Date.now() + SCAN_LOCK_SECOND;
-            setTimeout(function() { restartRecording(); }, SCAN_LOCK_SECOND);
+            setTimeout(function() {
+                restartRecording();
+            }, SCAN_LOCK_SECOND);
         }
         
         async function saveVideo(blob, filename) {
@@ -926,13 +1159,21 @@
                 try {
                     var fileHandle = await state.folderHandle.getFileHandle(filename, { create: true });
                     var writable = await fileHandle.createWritable();
-                    await writable.write(blob); await writable.close(); return;
-                } catch (e) {}
+                    await writable.write(blob);
+                    await writable.close();
+                    return;
+                } catch (e) {
+                    console.error('[Save] Folder API error:', e);
+                }
             }
             var url = URL.createObjectURL(blob);
-            var a = document.createElement('a'); a.href = url; a.download = filename;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
         }
         
         function updateFolderInfo(filename) {
@@ -941,64 +1182,126 @@
             folderInfo.classList.remove('hidden');
         }
         
+        // ========== RESTART RECORDING - FIX: Reset hoàn toàn ==========
         function restartRecording() {
-            state.scanBlocked = false; state.isFirstScan = true; state.currentQR = null;
-            state.scanTime = null; state.detectedProducts = []; state.chunks = [];
-            startRecording(); toast('🔄 Sẵn sàng quét đơn mới', 'success');
+            console.log('[Restart] Cycle:', state.scanCycleCount);
+            
+            // FIX: Reset TẤT CẢ trạng thái quan trọng
+            state.scanBlocked = false;
+            state.isFirstScan = true;
+            state.currentQR = null;
+            state.scanTime = null;
+            state.detectedProducts = [];
+            state.chunks = [];  // Clear memory
+            state.displayQR = null;
+            state.displayTime = 0;
+            
+            // Clear timer nếu còn
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+                state.timerInterval = null;
+            }
+            
+            // Restart recording
+            startRecording();
+            
+            toast('🔄 Sẵn sàng quét đơn mới (đơn thứ ' + (state.scanCycleCount + 1) + ')', 'success');
         }
         
         function startDisplayTimer(preBufferMs) {
             var displayTime = Math.floor(preBufferMs / 1000);
             if (state.timerInterval) clearInterval(state.timerInterval);
+            
             state.timerInterval = setInterval(function() {
                 displayTime++;
                 var timeString = formatTime(displayTime);
-                var recTime = $('recTime'); if (recTime) recTime.textContent = timeString.substring(3);
-                var curTimer = $('currentTime'); if (curTimer) curTimer.textContent = timeString;
+                var recTime = $('recTime');
+                if (recTime) recTime.textContent = timeString.substring(3);
+                var curTimer = $('currentTime');
+                if (curTimer) curTimer.textContent = timeString;
             }, 1000);
         }
         
+        // ========== CAMERA ==========
         function getCameras() {
             navigator.mediaDevices.enumerateDevices().then(function(devs) {
                 var cams = devs.filter(function(d) { return d.kind === 'videoinput'; });
-                var sel = $('cameraSelect'); sel.innerHTML = '';
+                var sel = $('cameraSelect');
+                sel.innerHTML = '';
                 cams.forEach(function(c, i) {
-                    var opt = document.createElement('option'); opt.value = c.deviceId;
-                    opt.textContent = c.label || 'Camera ' + (i + 1); sel.appendChild(opt);
+                    var opt = document.createElement('option');
+                    opt.value = c.deviceId;
+                    opt.textContent = c.label || 'Camera ' + (i + 1);
+                    sel.appendChild(opt);
                 });
                 if (cams.length && !state.cameraId) state.cameraId = cams[0].deviceId;
                 var saved = localStorage.getItem('camera');
-                if (saved && cams.find(function(c) { return c.deviceId === saved; })) { state.cameraId = saved; sel.value = saved; }
+                if (saved && cams.find(function(c) { return c.deviceId === saved; })) {
+                    state.cameraId = saved;
+                    sel.value = saved;
+                }
             });
         }
         
         function startCamera() {
             var preset = VIDEO_PRESETS[state.quality];
             navigator.mediaDevices.getUserMedia({
-                video: { deviceId: state.cameraId ? { exact: state.cameraId } : undefined,
-                    width: { ideal: preset.width }, height: { ideal: preset.height },
-                    frameRate: { ideal: preset.fps, min: 30 } }, audio: state.audio
+                video: {
+                    deviceId: state.cameraId ? { exact: state.cameraId } : undefined,
+                    width: { ideal: preset.width },
+                    height: { ideal: preset.height },
+                    frameRate: { ideal: preset.fps, min: 30 }
+                },
+                audio: state.audio
             }).then(function(stream) {
-                state.stream = stream; $('webcamVideo').srcObject = stream;
-                $('startBtn').classList.add('hidden'); $('stopBtn').classList.remove('hidden');
+                state.stream = stream;
+                $('webcamVideo').srcObject = stream;
+                $('startBtn').classList.add('hidden');
+                $('stopBtn').classList.remove('hidden');
+                
+                // FIX: Reset state khi start camera
+                state.scanCycleCount = 0;
+                state.isFirstScan = true;
+                state.currentQR = null;
+                state.scanBlocked = false;
+                state.scanTime = null;
+                state.detectedProducts = [];
+                state.chunks = [];
+                
                 setTimeout(startRecording, 500);
                 toast('✅ Camera: ' + preset.label + ' - ' + BITRATE_OPTIONS[state.bitrate].label);
                 getCameras();
-            }).catch(function(e) { toast('❌ Lỗi camera: ' + e.message, 'error'); });
+            }).catch(function(e) {
+                toast('❌ Lỗi camera: ' + e.message, 'error');
+            });
         }
         
         function stopCamera() {
             stopRecording();
-            if (state.stream) { state.stream.getTracks().forEach(function(t) { t.stop(); }); state.stream = null; }
+            if (state.stream) {
+                state.stream.getTracks().forEach(function(t) { t.stop(); });
+                state.stream = null;
+            }
             $('webcamVideo').srcObject = null;
-            $('startBtn').classList.remove('hidden'); $('stopBtn').classList.add('hidden'); $('fpsDisplay').classList.add('hidden');
-            state.scanBlocked = false; state.isFirstScan = true; state.currentQR = null;
+            $('startBtn').classList.remove('hidden');
+            $('stopBtn').classList.add('hidden');
+            $('fpsDisplay').classList.add('hidden');
+            
+            // Reset state
+            state.scanBlocked = false;
+            state.isFirstScan = true;
+            state.currentQR = null;
+            state.chunks = [];
+            
             toast('Camera đã tắt', 'warning');
         }
         
         async function openFolder() {
             var folderInfo = $('folderInfo'), folderPath = $('folderPath');
-            if (!folderInfo.classList.contains('hidden')) { folderInfo.classList.add('hidden'); return; }
+            if (!folderInfo.classList.contains('hidden')) {
+                folderInfo.classList.add('hidden');
+                return;
+            }
             folderPath.textContent = state.lastSavedFile ? 'Downloads/' + state.lastSavedFile : 'Downloads/ (chưa có video)';
             folderInfo.classList.remove('hidden');
             if ('showDirectoryPicker' in window) {
@@ -1010,6 +1313,7 @@
             }
         }
         
+        // ========== UI ==========
         function updateUI() {
             var today = dateStr();
             var todayOrders = state.orders.filter(function(o) { return vnDateToISO(o.date) === today; });
@@ -1022,28 +1326,42 @@
         function renderHistory(search) {
             var list = $('historyList');
             var filtered = search ? state.orders.filter(function(o) { return o.qr.toLowerCase().indexOf(search.toLowerCase()) !== -1; }) : state.orders;
-            if (!filtered.length) { list.innerHTML = '<div class="empty-msg">Chưa có lịch sử</div>'; return; }
+            
+            if (!filtered.length) {
+                list.innerHTML = '<div class="empty-msg">Chưa có lịch sử</div>';
+                return;
+            }
+            
             var html = '';
             filtered.forEach(function(o, i) {
-                html += '<div class="history-item"><span class="h-num">#' + (i + 1) + '</span><span class="h-qr">' + o.qr +
-                    '</span><span class="h-date">' + o.date + '</span><span class="h-time">' + o.time +
-                    '</span><span class="h-duration">' + o.duration + '</span><span class="h-size">' + (o.size || '-') +
-                    '</span><span class="h-products">' + (o.productsDetected || 0) + ' SP</span></div>';
+                html += '<div class="history-item">' +
+                    '<span class="h-num">#' + (i + 1) + '</span>' +
+                    '<span class="h-qr">' + o.qr + '</span>' +
+                    '<span class="h-date">' + o.date + '</span>' +
+                    '<span class="h-time">' + o.time + '</span>' +
+                    '<span class="h-duration">' + o.duration + '</span>' +
+                    '<span class="h-size">' + (o.size || '-') + '</span>' +
+                    '<span class="h-products">' + (o.productsDetected || 0) + ' SP</span>' +
+                    '</div>';
             });
             list.innerHTML = html;
         }
         
         function exportExcel() {
-            if (!state.orders.length) { toast('Chưa có dữ liệu', 'warning'); return; }
+            if (!state.orders.length) {
+                toast('Chưa có dữ liệu', 'warning');
+                return;
+            }
             var headers = ['STT', 'Mã QR', 'Ngày', 'Giờ', 'Thời lượng', 'Dung lượng', 'Số SP', 'Codec', 'Audio', 'File'];
             var csv = '\uFEFF' + headers.join(',') + '\n';
             state.orders.forEach(function(o, i) {
-                csv += [i + 1, '"' + o.qr + '"', o.date, o.time, o.duration, o.size || '-',
-                    o.productsDetected || 0, o.codec || '-', o.audio || '-', o.filename].join(',') + '\n';
+                csv += [i + 1, '"' + o.qr + '"', o.date, o.time, o.duration, o.size || '-', o.productsDetected || 0, o.codec || '-', o.audio || '-', o.filename].join(',') + '\n';
             });
             var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = 'QRScanner_' + dateStr() + '.csv'; a.click();
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'QRScanner_' + dateStr() + '.csv';
+            a.click();
             toast('✅ Đã xuất Excel: ' + state.orders.length + ' đơn', 'success');
         }
         
@@ -1058,78 +1376,182 @@
         
         function deleteByDate() {
             var fromDate = $('deleteFromDate').value, toDate = $('deleteToDate').value;
-            if (!fromDate || !toDate) { toast('Vui lòng chọn ngày', 'warning'); return; }
+            if (!fromDate || !toDate) {
+                toast('Vui lòng chọn ngày', 'warning');
+                return;
+            }
             var beforeCount = state.orders.length;
-            state.orders = state.orders.filter(function(o) { var isoDate = vnDateToISO(o.date); return isoDate < fromDate || isoDate > toDate; });
+            state.orders = state.orders.filter(function(o) {
+                var isoDate = vnDateToISO(o.date);
+                return isoDate < fromDate || isoDate > toDate;
+            });
             var deletedCount = beforeCount - state.orders.length;
             if (deletedCount > 0) {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders)); updateUI();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+                updateUI();
                 toast('✅ Đã xóa ' + deletedCount + ' đơn', 'success');
-            } else { toast('Không có đơn nào trong khoảng này', 'warning'); }
+            } else {
+                toast('Không có đơn nào trong khoảng này', 'warning');
+            }
             hideDeleteModal();
         }
         
         function deleteAll() {
             if (confirm('Xóa tất cả ' + state.orders.length + ' đơn?')) {
-                state.orders = []; localStorage.setItem(STORAGE_KEY, '[]'); updateUI(); toast('✅ Đã xóa tất cả', 'success');
+                state.orders = [];
+                localStorage.setItem(STORAGE_KEY, '[]');
+                updateUI();
+                toast('✅ Đã xóa tất cả', 'success');
             }
         }
         
         function autoDelete() {
-            var cutoff = Date.now() - AUTO_DELETE_DAYS * 86400000, before = state.orders.length;
+            var cutoff = Date.now() - AUTO_DELETE_DAYS * 86400000;
+            var before = state.orders.length;
             state.orders = state.orders.filter(function(o) { return o.timestamp && o.timestamp > cutoff; });
-            if (state.orders.length < before) localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+            if (state.orders.length < before) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+            }
         }
         
+        // ========== BARCODE SCANNER ==========
         var barcodeBuffer = '', barcodeTimer = null;
         function handleKeydown(e) {
             if (state.device !== 'scanner') return;
             if (barcodeTimer) clearTimeout(barcodeTimer);
-            if (e.key === 'Enter') { if (barcodeBuffer.length > 3) handleQRDetected(barcodeBuffer); barcodeBuffer = ''; }
-            else if (e.key.length === 1) barcodeBuffer += e.key;
+            if (e.key === 'Enter') {
+                if (barcodeBuffer.length > 3) handleQRDetected(barcodeBuffer);
+                barcodeBuffer = '';
+            } else if (e.key.length === 1) {
+                barcodeBuffer += e.key;
+            }
             barcodeTimer = setTimeout(function() { barcodeBuffer = ''; }, 100);
         }
         
+        // ========== INIT ==========
         function init() {
-            console.log('[QR Scanner] Blog v7.7 - Video Full Screen');
-            try { var saved = localStorage.getItem(STORAGE_KEY); if (saved) state.orders = JSON.parse(saved); } catch(e) {}
+            console.log('[QR Scanner] Blog v7.11 - Fix scan + scroll');
+            
+            try {
+                var saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) state.orders = JSON.parse(saved);
+            } catch(e) {}
+            
             autoDelete();
+            
+            // Load settings
             state.quality = localStorage.getItem('quality') || '1080p60';
             state.bitrate = localStorage.getItem('bitrate') || '12';
             state.audio = localStorage.getItem('audio') !== 'false';
             state.preBuf = parseInt(localStorage.getItem('preBuf')) || 5000;
             state.postBuf = parseInt(localStorage.getItem('postBuf')) || 3000;
             state.timestampPos = localStorage.getItem('timestampPos') || 'top-right';
-            $('qualitySelect').value = state.quality; $('bitrateSelect').value = state.bitrate;
-            $('audioToggle').checked = state.audio; $('preBufferSelect').value = state.preBuf;
-            $('postBufferSelect').value = state.postBuf; $('timestampPosition').value = state.timestampPos;
+            
+            $('qualitySelect').value = state.quality;
+            $('bitrateSelect').value = state.bitrate;
+            $('audioToggle').checked = state.audio;
+            $('preBufferSelect').value = state.preBuf;
+            $('postBufferSelect').value = state.postBuf;
+            $('timestampPosition').value = state.timestampPos;
             $('scanRate').textContent = VIDEO_PRESETS[state.quality].scanFPS;
+            
             updateUI();
-            $('startBtn').onclick = startCamera; $('stopBtn').onclick = stopCamera; $('folderBtn').onclick = openFolder;
-            $('exportBtn').onclick = exportExcel; $('deleteByDateBtn').onclick = showDeleteModal;
-            $('deleteAllBtn').onclick = deleteAll; $('cancelDeleteBtn').onclick = hideDeleteModal; $('confirmDeleteBtn').onclick = deleteByDate;
-            $('tabCamera').onclick = function() { state.device = 'camera'; $('tabCamera').classList.add('active'); $('tabScanner').classList.remove('active'); };
-            $('tabScanner').onclick = function() { state.device = 'scanner'; $('tabScanner').classList.add('active'); $('tabCamera').classList.remove('active'); };
+            
+            // Event listeners
+            $('startBtn').onclick = startCamera;
+            $('stopBtn').onclick = stopCamera;
+            $('folderBtn').onclick = openFolder;
+            $('exportBtn').onclick = exportExcel;
+            $('deleteByDateBtn').onclick = showDeleteModal;
+            $('deleteAllBtn').onclick = deleteAll;
+            $('cancelDeleteBtn').onclick = hideDeleteModal;
+            $('confirmDeleteBtn').onclick = deleteByDate;
+            
+            $('tabCamera').onclick = function() {
+                state.device = 'camera';
+                $('tabCamera').classList.add('active');
+                $('tabScanner').classList.remove('active');
+            };
+            $('tabScanner').onclick = function() {
+                state.device = 'scanner';
+                $('tabScanner').classList.add('active');
+                $('tabCamera').classList.remove('active');
+            };
+            
             $('searchInput').oninput = function(e) { renderHistory(e.target.value); };
-            $('cameraSelect').onchange = function() { state.cameraId = this.value; localStorage.setItem('camera', this.value); if (state.stream) { stopCamera(); setTimeout(startCamera, 300); } };
-            $('qualitySelect').onchange = function() { state.quality = this.value; localStorage.setItem('quality', this.value); $('scanRate').textContent = VIDEO_PRESETS[this.value].scanFPS; if (state.stream) { stopCamera(); setTimeout(startCamera, 300); } };
-            $('bitrateSelect').onchange = function() { state.bitrate = this.value; localStorage.setItem('bitrate', this.value); };
-            $('timestampPosition').onchange = function() { state.timestampPos = this.value; localStorage.setItem('timestampPos', this.value); };
-            $('preBufferSelect').onchange = function() { state.preBuf = parseInt(this.value); localStorage.setItem('preBuf', this.value); };
-            $('postBufferSelect').onchange = function() { state.postBuf = parseInt(this.value); localStorage.setItem('postBuf', this.value); };
-            $('audioToggle').onchange = function() { state.audio = this.checked; localStorage.setItem('audio', this.checked); if (state.stream) { stopCamera(); setTimeout(startCamera, 300); } };
+            
+            $('cameraSelect').onchange = function() {
+                state.cameraId = this.value;
+                localStorage.setItem('camera', this.value);
+                if (state.stream) {
+                    stopCamera();
+                    setTimeout(startCamera, 300);
+                }
+            };
+            
+            $('qualitySelect').onchange = function() {
+                state.quality = this.value;
+                localStorage.setItem('quality', this.value);
+                $('scanRate').textContent = VIDEO_PRESETS[this.value].scanFPS;
+                if (state.stream) {
+                    stopCamera();
+                    setTimeout(startCamera, 300);
+                }
+            };
+            
+            $('bitrateSelect').onchange = function() {
+                state.bitrate = this.value;
+                localStorage.setItem('bitrate', this.value);
+            };
+            
+            $('timestampPosition').onchange = function() {
+                state.timestampPos = this.value;
+                localStorage.setItem('timestampPos', this.value);
+            };
+            
+            $('preBufferSelect').onchange = function() {
+                state.preBuf = parseInt(this.value);
+                localStorage.setItem('preBuf', this.value);
+            };
+            
+            $('postBufferSelect').onchange = function() {
+                state.postBuf = parseInt(this.value);
+                localStorage.setItem('postBuf', this.value);
+            };
+            
+            $('audioToggle').onchange = function() {
+                state.audio = this.checked;
+                localStorage.setItem('audio', this.checked);
+                if (state.stream) {
+                    stopCamera();
+                    setTimeout(startCamera, 300);
+                }
+            };
+            
             document.addEventListener('keydown', handleKeydown);
-            $('deleteModal').onclick = function(e) { if (e.target === this) hideDeleteModal(); };
+            
+            $('deleteModal').onclick = function(e) {
+                if (e.target === this) hideDeleteModal();
+            };
+            
+            // Init camera list
             setTimeout(function() {
                 navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                    .then(function(s) { s.getTracks().forEach(function(t) { t.stop(); }); getCameras(); })
+                    .then(function(s) {
+                        s.getTracks().forEach(function(t) { t.stop(); });
+                        getCameras();
+                    })
                     .catch(function() { getCameras(); });
             }, 500);
-            toast('✅ v7.7 - Sẵn sàng', 'success');
+            
+            toast('✅ v7.11 - Sẵn sàng', 'success');
         }
         
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-        else init();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     })();
     </script>
 </body>
