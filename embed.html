@@ -22,18 +22,18 @@
         
         .hidden { display: none !important; }
         
-        /* ========== HEADER - Font +40% ========== */
+        /* ========== HEADER - Compact ========== */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 12px 15px;
+            padding: 8px 12px;
             text-align: center;
         }
         
-        .header h1 { font-size: 22px; margin-bottom: 3px; }
-        .header .subtitle { font-size: 14px; opacity: 0.9; }
+        .header h1 { font-size: 18px; margin-bottom: 2px; }
+        .header .subtitle { font-size: 12px; opacity: 0.9; }
         
-        /* ========== TABS - Font +40% ========== */
+        /* ========== TABS ========== */
         .tabs {
             display: flex;
             background: #16213e;
@@ -42,12 +42,12 @@
         
         .tab {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             cursor: pointer;
             background: transparent;
             border: none;
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 500;
             color: #888;
             transition: all 0.3s;
@@ -63,17 +63,17 @@
             margin-bottom: -2px;
         }
         
-        /* ========== CONTROLS - Font +40% ========== */
+        /* ========== CONTROLS - Compact ========== */
         .controls {
-            padding: 10px 15px;
+            padding: 8px 12px;
             background: #16213e;
             border-bottom: 1px solid #2a3f5f;
         }
         
         .control-row {
             display: flex;
-            gap: 12px;
-            margin-bottom: 8px;
+            gap: 10px;
+            margin-bottom: 6px;
         }
         
         .control-row:last-child { margin-bottom: 0; }
@@ -85,18 +85,18 @@
         
         .control-group label {
             display: block;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             color: #aaa;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
         
         select, input[type="date"] {
             width: 100%;
-            padding: 7px 10px;
+            padding: 6px 8px;
             border: 1px solid #3a4f6f;
-            border-radius: 6px;
-            font-size: 15px;
+            border-radius: 5px;
+            font-size: 13px;
             background: #1a1a2e;
             color: white;
             cursor: pointer;
@@ -110,13 +110,13 @@
         .toggle-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         
         .toggle {
             position: relative;
-            width: 40px;
-            height: 20px;
+            width: 36px;
+            height: 18px;
         }
         
         .toggle input { opacity: 0; width: 0; height: 0; }
@@ -126,15 +126,15 @@
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
             background: #444;
-            border-radius: 20px;
+            border-radius: 18px;
             transition: 0.3s;
         }
         
         .toggle-slider:before {
             content: "";
             position: absolute;
-            height: 16px;
-            width: 16px;
+            height: 14px;
+            width: 14px;
             left: 2px;
             bottom: 2px;
             background: white;
@@ -143,31 +143,31 @@
         }
         
         .toggle input:checked + .toggle-slider { background: #667eea; }
-        .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+        .toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
         
-        .toggle-label { font-size: 15px; color: #ccc; }
+        .toggle-label { font-size: 13px; color: #ccc; }
         
-        /* ========== BUTTONS - Font +40% ========== */
+        /* ========== BUTTONS ========== */
         .buttons {
             display: flex;
-            gap: 10px;
-            padding: 10px 15px;
+            gap: 8px;
+            padding: 8px 12px;
             background: #16213e;
             justify-content: center;
             flex-wrap: wrap;
         }
         
         .btn {
-            padding: 10px 20px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 6px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
         
         .btn-primary {
@@ -176,88 +176,91 @@
         }
         
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(102,126,234,0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
         }
         
         .btn-secondary { background: #f39c12; color: white; }
         .btn-success { background: #28a745; color: white; }
         .btn-danger { background: #e74c3c; color: white; }
         .btn-info { background: #17a2b8; color: white; }
-        .btn-small { padding: 8px 14px; font-size: 14px; }
+        .btn-small { padding: 6px 12px; font-size: 12px; }
         
         /* ========== FOLDER INFO ========== */
         .folder-info {
             background: #1f3a5f;
             border: 1px solid #3a5f8f;
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin: 0 15px 8px;
-            font-size: 14px;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 0 12px 6px;
+            font-size: 12px;
         }
         
         .folder-info .title {
             font-weight: 600;
             color: #4dabf7;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         
         .folder-info .path {
             background: #0d1520;
-            padding: 6px 10px;
-            border-radius: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
             font-family: monospace;
             color: #7bed9f;
             word-break: break-all;
-            font-size: 13px;
+            font-size: 11px;
         }
         
         .folder-info .hint {
             color: #888;
-            margin-top: 5px;
-            font-size: 12px;
+            margin-top: 3px;
+            font-size: 10px;
         }
         
-        /* ========== VIDEO - FULL COVER ========== */
+        /* ========== VIDEO - FULL SCREEN FROM CAMERA ========== */
         .video-section {
             position: relative;
             background: #000;
-            height: 320px;
+            width: 100%;
+            /* Flexible height - fills available space */
+            flex: 1;
+            min-height: 280px;
         }
         
         #webcamVideo {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: cover;  /* Fill entire area */
             display: block;
         }
         
         .video-overlay {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 8px;
+            left: 8px;
             background: rgba(0,0,0,0.9);
             color: white;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
             opacity: 0;
             transition: opacity 0.3s;
-            border-left: 4px solid #28a745;
+            border-left: 3px solid #28a745;
         }
         
         .video-overlay.show { opacity: 1; }
-        .video-overlay h4 { color: #28a745; font-size: 15px; margin-bottom: 4px; }
+        .video-overlay h4 { color: #28a745; font-size: 13px; margin-bottom: 3px; }
         
         .rec-indicator {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 8px;
+            right: 8px;
             background: rgba(231,76,60,0.95);
             color: white;
-            padding: 6px 14px;
-            border-radius: 15px;
-            font-size: 14px;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 12px;
             font-weight: bold;
             animation: pulse 1s infinite;
         }
@@ -269,15 +272,15 @@
         
         .fps-display {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
+            bottom: 8px;
+            left: 8px;
             background: rgba(0,0,0,0.85);
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 4px 10px;
+            border-radius: 5px;
             font-family: monospace;
-            font-size: 14px;
+            font-size: 12px;
             display: flex;
-            gap: 15px;
+            gap: 12px;
         }
         
         .fps-value { color: #00ff00; }
@@ -286,25 +289,25 @@
         .fps-value.high { color: #00ff00; }
         .scan-rate { color: #00bfff; }
         
-        /* ========== STATS - Font +40% ========== */
+        /* ========== STATS - Compact ========== */
         .stats {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
-            padding: 10px 15px;
+            padding: 8px 12px;
             text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
         
-        .stats-title { font-size: 15px; }
-        .stats-count { font-size: 24px; font-weight: bold; }
-        .stats-total { font-size: 14px; opacity: 0.9; }
+        .stats-title { font-size: 13px; }
+        .stats-count { font-size: 20px; font-weight: bold; }
+        .stats-total { font-size: 12px; opacity: 0.9; }
         
-        /* ========== HISTORY - VISIBLE & SCROLLABLE ========== */
+        /* ========== HISTORY ========== */
         .history {
-            padding: 10px 15px;
+            padding: 8px 12px;
             background: #16213e;
         }
         
@@ -312,56 +315,40 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         
-        .history-header h3 { font-size: 17px; color: #fff; }
+        .history-header h3 { font-size: 15px; color: #fff; }
         
         .search-input {
-            padding: 6px 12px;
+            padding: 5px 10px;
             border: 1px solid #3a4f6f;
-            border-radius: 15px;
-            font-size: 14px;
-            width: 120px;
+            border-radius: 12px;
+            font-size: 12px;
+            width: 100px;
             background: #1a1a2e;
             color: white;
         }
         
         .history-list {
             border: 1px solid #2a3f5f;
-            border-radius: 6px;
-            max-height: 250px;
+            border-radius: 5px;
+            max-height: 220px;
             overflow-y: auto;
             background: #1a1a2e;
         }
         
-        /* Custom scrollbar */
-        .history-list::-webkit-scrollbar {
-            width: 10px;
-        }
-        
-        .history-list::-webkit-scrollbar-track {
-            background: #2a3f5f;
-            border-radius: 5px;
-        }
-        
-        .history-list::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 5px;
-            border: 2px solid #2a3f5f;
-        }
-        
-        .history-list::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #764ba2, #667eea);
-        }
+        .history-list::-webkit-scrollbar { width: 8px; }
+        .history-list::-webkit-scrollbar-track { background: #2a3f5f; border-radius: 4px; }
+        .history-list::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 4px; }
         
         .history-item {
             display: grid;
-            grid-template-columns: 35px 1fr 80px 60px 60px 55px 45px;
-            gap: 6px;
-            padding: 8px 10px;
+            grid-template-columns: 30px 1fr 75px 55px 55px 50px 40px;
+            gap: 4px;
+            padding: 6px 8px;
             border-bottom: 1px solid #2a3f5f;
-            font-size: 13px;
+            font-size: 11px;
             align-items: center;
         }
         
@@ -378,16 +365,16 @@
         
         .empty-msg {
             text-align: center;
-            padding: 30px;
+            padding: 20px;
             color: #666;
-            font-size: 15px;
+            font-size: 13px;
         }
         
         /* ========== HISTORY ACTIONS ========== */
         .history-actions {
             display: flex;
-            gap: 8px;
-            padding: 10px 15px;
+            gap: 6px;
+            padding: 8px 12px;
             background: #0d1520;
             justify-content: center;
             flex-wrap: wrap;
@@ -407,58 +394,58 @@
         .modal-box {
             background: #1a1a2e;
             border: 1px solid #3a4f6f;
-            border-radius: 15px;
-            padding: 25px;
+            border-radius: 12px;
+            padding: 20px;
             width: 90%;
-            max-width: 380px;
+            max-width: 350px;
             text-align: center;
         }
         
         .modal-box h3 {
-            margin-bottom: 18px;
+            margin-bottom: 15px;
             color: #fff;
-            font-size: 18px;
+            font-size: 16px;
         }
         
         .modal-box .date-inputs {
             display: flex;
-            gap: 12px;
-            margin-bottom: 18px;
+            gap: 10px;
+            margin-bottom: 15px;
             flex-direction: column;
         }
         
         .modal-box .date-inputs label {
-            font-size: 14px;
+            font-size: 12px;
             color: #aaa;
             text-align: left;
         }
         
         .modal-box .date-inputs input {
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #3a4f6f;
-            border-radius: 8px;
+            border-radius: 6px;
             background: #0d1520;
             color: white;
         }
         
         .modal-box .modal-buttons {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             justify-content: center;
         }
         
         /* ========== TOAST ========== */
         .toast {
             position: fixed;
-            bottom: 15px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            padding: 10px 20px;
+            padding: 8px 16px;
             background: #28a745;
             color: white;
-            border-radius: 25px;
-            font-size: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border-radius: 20px;
+            font-size: 13px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: transform 0.3s;
             z-index: 1000;
             white-space: nowrap;
@@ -474,7 +461,7 @@
         <!-- Header -->
         <div class="header">
             <h1>📷 QR Scanner Video Recording</h1>
-            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.5</div>
+            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.7</div>
         </div>
         
         <!-- Tabs -->
@@ -558,7 +545,7 @@
             <div class="hint">💡 Nhấn <b>Win + E</b> → Click <b>Downloads</b> để mở</div>
         </div>
         
-        <!-- Video -->
+        <!-- Video - FULL SCREEN -->
         <div class="video-section">
             <video id="webcamVideo" autoplay playsinline muted></video>
             
@@ -1104,7 +1091,7 @@
         }
         
         function init() {
-            console.log('[QR Scanner] Blog v7.5');
+            console.log('[QR Scanner] Blog v7.7 - Video Full Screen');
             try { var saved = localStorage.getItem(STORAGE_KEY); if (saved) state.orders = JSON.parse(saved); } catch(e) {}
             autoDelete();
             state.quality = localStorage.getItem('quality') || '1080p60';
@@ -1138,7 +1125,7 @@
                     .then(function(s) { s.getTracks().forEach(function(t) { t.stop(); }); getCameras(); })
                     .catch(function() { getCameras(); });
             }, 500);
-            toast('✅ v7.5 - Sẵn sàng', 'success');
+            toast('✅ v7.7 - Sẵn sàng', 'success');
         }
         
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
