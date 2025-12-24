@@ -10,14 +10,13 @@
         html, body {
             font-family: 'Segoe UI', Arial, sans-serif;
             background: #1a1a2e;
-            overflow: hidden;
             height: 100%;
         }
         
         .app-container {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            min-height: 100%;
             background: #1a1a2e;
         }
         
@@ -29,7 +28,6 @@
             color: white;
             padding: 12px 15px;
             text-align: center;
-            flex-shrink: 0;
         }
         
         .header h1 { font-size: 22px; margin-bottom: 3px; }
@@ -40,7 +38,6 @@
             display: flex;
             background: #16213e;
             border-bottom: 2px solid #667eea;
-            flex-shrink: 0;
         }
         
         .tab {
@@ -71,7 +68,6 @@
             padding: 10px 15px;
             background: #16213e;
             border-bottom: 1px solid #2a3f5f;
-            flex-shrink: 0;
         }
         
         .control-row {
@@ -159,7 +155,6 @@
             background: #16213e;
             justify-content: center;
             flex-wrap: wrap;
-            flex-shrink: 0;
         }
         
         .btn {
@@ -227,14 +222,13 @@
         .video-section {
             position: relative;
             background: #000;
-            flex-shrink: 0;
-            height: 340px;
+            height: 320px;
         }
         
         #webcamVideo {
             width: 100%;
             height: 100%;
-            object-fit: cover;  /* COVER để lấp đầy, không có khoảng trống */
+            object-fit: cover;
             display: block;
         }
         
@@ -298,7 +292,6 @@
             color: white;
             padding: 10px 15px;
             text-align: center;
-            flex-shrink: 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -309,15 +302,10 @@
         .stats-count { font-size: 24px; font-weight: bold; }
         .stats-total { font-size: 14px; opacity: 0.9; }
         
-        /* ========== HISTORY - Font +40%, Scrollbar Always Visible ========== */
+        /* ========== HISTORY - VISIBLE & SCROLLABLE ========== */
         .history {
             padding: 10px 15px;
             background: #16213e;
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
         }
         
         .history-header {
@@ -325,7 +313,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
-            flex-shrink: 0;
         }
         
         .history-header h3 { font-size: 17px; color: #fff; }
@@ -343,13 +330,12 @@
         .history-list {
             border: 1px solid #2a3f5f;
             border-radius: 6px;
-            flex: 1;
-            overflow-y: scroll;  /* Always show scrollbar */
+            max-height: 250px;
+            overflow-y: auto;
             background: #1a1a2e;
-            min-height: 180px;
         }
         
-        /* Custom scrollbar - ALWAYS VISIBLE */
+        /* Custom scrollbar */
         .history-list::-webkit-scrollbar {
             width: 10px;
         }
@@ -405,7 +391,6 @@
             background: #0d1520;
             justify-content: center;
             flex-wrap: wrap;
-            flex-shrink: 0;
         }
         
         /* ========== DELETE MODAL ========== */
@@ -489,7 +474,7 @@
         <!-- Header -->
         <div class="header">
             <h1>📷 QR Scanner Video Recording</h1>
-            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.4</div>
+            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.5</div>
         </div>
         
         <!-- Tabs -->
@@ -573,7 +558,7 @@
             <div class="hint">💡 Nhấn <b>Win + E</b> → Click <b>Downloads</b> để mở</div>
         </div>
         
-        <!-- Video - FULL COVER -->
+        <!-- Video -->
         <div class="video-section">
             <video id="webcamVideo" autoplay playsinline muted></video>
             
@@ -601,7 +586,7 @@
             <span class="stats-total">| Tổng: <span id="totalCount">0</span> / 100,000</span>
         </div>
         
-        <!-- History with Scrollbar -->
+        <!-- History -->
         <div class="history">
             <div class="history-header">
                 <h3>📜 Lịch sử (<span id="historyCount">0</span>)</h3>
@@ -1119,7 +1104,7 @@
         }
         
         function init() {
-            console.log('[QR Scanner] Blog v7.4 - Video Cover, Font +40%, Scrollbar');
+            console.log('[QR Scanner] Blog v7.5');
             try { var saved = localStorage.getItem(STORAGE_KEY); if (saved) state.orders = JSON.parse(saved); } catch(e) {}
             autoDelete();
             state.quality = localStorage.getItem('quality') || '1080p60';
@@ -1153,7 +1138,7 @@
                     .then(function(s) { s.getTracks().forEach(function(t) { t.stop(); }); getCameras(); })
                     .catch(function() { getCameras(); });
             }, 500);
-            toast('✅ v7.4 - Sẵn sàng', 'success');
+            toast('✅ v7.5 - Sẵn sàng', 'success');
         }
         
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
