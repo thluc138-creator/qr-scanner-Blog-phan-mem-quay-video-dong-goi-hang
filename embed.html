@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Scanner Video Recording System</title>
+    <title>QR Scanner Video Recording System v7.13</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -230,53 +230,59 @@
         #webcamVideo {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            display: block;
+            object-fit: contain;
+            background: #000;
         }
         
         .video-overlay {
             position: absolute;
-            top: 8px;
-            left: 8px;
-            background: rgba(0,0,0,0.9);
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
             color: white;
             padding: 8px 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 12px;
-            opacity: 0;
-            transition: opacity 0.3s;
             border-left: 3px solid #28a745;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
         }
         
-        .video-overlay.show { opacity: 1; }
-        .video-overlay h4 { color: #28a745; font-size: 13px; margin-bottom: 3px; }
+        .video-overlay.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .video-overlay h4 { font-size: 13px; margin-bottom: 4px; }
+        .video-overlay strong { color: #ffd700; font-size: 14px; }
         
         .rec-indicator {
             position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(231,76,60,0.95);
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 0, 0, 0.9);
             color: white;
-            padding: 5px 12px;
-            border-radius: 12px;
+            padding: 4px 10px;
+            border-radius: 4px;
             font-size: 12px;
             font-weight: bold;
-            animation: pulse 1s infinite;
+            animation: blink 1s infinite;
         }
         
-        @keyframes pulse {
+        @keyframes blink {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+            50% { opacity: 0.5; }
         }
         
         .fps-display {
             position: absolute;
-            bottom: 8px;
-            left: 8px;
-            background: rgba(0,0,0,0.85);
-            padding: 4px 10px;
-            border-radius: 5px;
-            font-family: monospace;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
             font-size: 12px;
             display: flex;
             gap: 12px;
@@ -305,14 +311,14 @@
         .stats-count { font-size: 20px; font-weight: bold; }
         .stats-total { font-size: 12px; opacity: 0.9; }
         
-        /* ========== HISTORY - HIỂN THỊ 10 ĐƠN ========== */
+        /* ========== HISTORY - HIỂN THỊ 15 ĐƠN VỚI SCROLLBAR ========== */
         .history {
             padding: 8px 12px;
             background: #16213e;
             display: flex;
             flex-direction: column;
             flex: 1;
-            min-height: 350px;
+            min-height: 480px;
         }
         
         .history-header {
@@ -335,7 +341,7 @@
             color: white;
         }
         
-        /* HISTORY LIST - Hiển thị 10 đơn (mỗi đơn ~32px) */
+        /* HISTORY LIST - Hiển thị 15 đơn (mỗi đơn ~32px = 480px) */
         .history-list {
             border: 1px solid #2a3f5f;
             border-radius: 5px;
@@ -343,18 +349,32 @@
             overflow-x: hidden;
             background: #1a1a2e;
             flex: 1;
-            min-height: 320px;
-            max-height: 400px;
+            min-height: 480px;
+            max-height: 520px;
         }
         
-        /* Scrollbar style */
-        .history-list::-webkit-scrollbar { width: 8px; }
-        .history-list::-webkit-scrollbar-track { background: #2a3f5f; border-radius: 4px; }
+        /* Scrollbar style - Rõ ràng hơn */
+        .history-list::-webkit-scrollbar { 
+            width: 10px; 
+        }
+        .history-list::-webkit-scrollbar-track { 
+            background: #2a3f5f; 
+            border-radius: 5px; 
+        }
         .history-list::-webkit-scrollbar-thumb { 
             background: linear-gradient(135deg, #667eea, #764ba2); 
-            border-radius: 4px; 
+            border-radius: 5px;
+            border: 2px solid #2a3f5f;
         }
-        .history-list::-webkit-scrollbar-thumb:hover { background: #764ba2; }
+        .history-list::-webkit-scrollbar-thumb:hover { 
+            background: #764ba2; 
+        }
+        
+        /* Firefox scrollbar */
+        .history-list {
+            scrollbar-width: thin;
+            scrollbar-color: #667eea #2a3f5f;
+        }
         
         .history-item {
             display: grid;
@@ -452,57 +472,78 @@
         /* ========== TOAST ========== */
         .toast {
             position: fixed;
-            bottom: 10px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            padding: 8px 16px;
-            background: #28a745;
+            background: #333;
             color: white;
-            border-radius: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
             font-size: 13px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: transform 0.3s;
-            z-index: 1000;
-            white-space: nowrap;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+            max-width: 90%;
+            text-align: center;
         }
         
-        .toast.show { transform: translateX(-50%) translateY(0); }
-        .toast.warning { background: #f39c12; }
-        .toast.error { background: #e74c3c; }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.success { background: linear-gradient(135deg, #28a745, #20c997); }
+        .toast.warning { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .toast.error { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        
+        /* ========== DEBUG OVERLAY ========== */
+        .debug-overlay {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.85);
+            color: #0f0;
+            padding: 5px 8px;
+            font-size: 9px;
+            font-family: monospace;
+            border-radius: 4px;
+            z-index: 9999;
+            max-width: 200px;
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
         <!-- Header -->
         <div class="header">
-            <h1>📷 QR Scanner Video Recording</h1>
-            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.12</div>
+            <h1>📦 QR Scanner Video</h1>
+            <div class="subtitle">v7.13 - Quét không giới hạn</div>
         </div>
         
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab active" id="tabCamera">📷 Camera Scan</button>
-            <button class="tab" id="tabScanner">📟 Barcode Scanner</button>
+            <button class="tab active" id="tabCamera">📷 Camera</button>
+            <button class="tab" id="tabScanner">⌨️ Scanner</button>
         </div>
         
         <!-- Controls -->
         <div class="controls">
             <div class="control-row">
                 <div class="control-group">
-                    <label>Camera:</label>
+                    <label>📹 Camera</label>
                     <select id="cameraSelect"><option>Đang tải...</option></select>
                 </div>
                 <div class="control-group">
-                    <label>Chất lượng:</label>
+                    <label>📐 Chất lượng</label>
                     <select id="qualitySelect">
-                        <option value="1080p30">Full HD 30fps</option>
-                        <option value="1080p60" selected>Full HD 60fps</option>
+                        <option value="1080p30">1080p 30fps</option>
+                        <option value="1080p60" selected>1080p 60fps</option>
                     </select>
                 </div>
             </div>
             <div class="control-row">
                 <div class="control-group">
-                    <label>Bitrate:</label>
+                    <label>💾 Bitrate</label>
                     <select id="bitrateSelect">
                         <option value="8">8 Mbps</option>
                         <option value="10">10 Mbps</option>
@@ -510,38 +551,42 @@
                     </select>
                 </div>
                 <div class="control-group">
-                    <label>Timestamp:</label>
+                    <label>📍 Timestamp</label>
                     <select id="timestampPosition">
-                        <option value="top-right" selected>Góc trên phải</option>
-                        <option value="top-left">Góc trên trái</option>
-                        <option value="bottom-right">Góc dưới phải</option>
-                        <option value="bottom-left">Góc dưới trái</option>
+                        <option value="top-left">Trên trái</option>
+                        <option value="top-right" selected>Trên phải</option>
+                        <option value="bottom-left">Dưới trái</option>
+                        <option value="bottom-right">Dưới phải</option>
                     </select>
                 </div>
             </div>
             <div class="control-row">
                 <div class="control-group">
-                    <label>Ghi trước:</label>
+                    <label>⏪ Pre-buffer</label>
                     <select id="preBufferSelect">
                         <option value="3000">3 giây</option>
-                        <option value="4000">4 giây</option>
                         <option value="5000" selected>5 giây</option>
+                        <option value="7000">7 giây</option>
+                        <option value="10000">10 giây</option>
                     </select>
                 </div>
                 <div class="control-group">
-                    <label>Ghi sau:</label>
+                    <label>⏩ Post-buffer</label>
                     <select id="postBufferSelect">
+                        <option value="2000">2 giây</option>
                         <option value="3000" selected>3 giây</option>
-                        <option value="4000">4 giây</option>
                         <option value="5000">5 giây</option>
                     </select>
                 </div>
-                <div class="toggle-row">
-                    <label class="toggle">
-                        <input type="checkbox" id="audioToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <span class="toggle-label">🎤 Ghi âm</span>
+                <div class="control-group">
+                    <label>&nbsp;</label>
+                    <div class="toggle-row">
+                        <label class="toggle">
+                            <input type="checkbox" id="audioToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">🎤 Audio</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -588,7 +633,7 @@
             <span class="stats-total">| Tổng: <span id="totalCount">0</span> / 100,000</span>
         </div>
         
-        <!-- History - Hiển thị 10 đơn -->
+        <!-- History - Hiển thị 15 đơn với scrollbar -->
         <div class="history">
             <div class="history-header">
                 <h3>📜 Lịch sử (<span id="historyCount">0</span>)</h3>
@@ -631,6 +676,9 @@
     <!-- Toast -->
     <div id="toast" class="toast"></div>
     
+    <!-- Debug Overlay -->
+    <div class="debug-overlay" id="debugOverlay">v7.13 | Ready</div>
+    
     <!-- jsQR -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     
@@ -643,7 +691,7 @@
         var MAX_ORDERS = 100000;
         var AUTO_DELETE_DAYS = 60;
         var SCAN_LOCK_FIRST = 10000;   // 10 giây chờ quét lần 2
-        var SCAN_LOCK_SECOND = 3000;   // 3 giây sau khi lưu (giảm từ 5s)
+        var SCAN_LOCK_SECOND = 2000;   // 2 giây sau khi lưu (giảm để responsive hơn)
         var PROGRESS_DISPLAY_TIME = 1500;
         
         var VIDEO_PRESETS = {
@@ -666,7 +714,7 @@
             orders: [],
             savedVideos: [],
             
-            // QUAN TRỌNG: Các biến điều khiển scan
+            // QUAN TRỌNG: Các biến điều khiển scan - v7.13 FIX
             isRecording: false,
             isFirstScan: true,
             currentQR: null,
@@ -674,7 +722,7 @@
             recordingStartTime: null,
             scanTime: null,
             timerInterval: null,
-            countdownTimer: null,  // Timer đếm ngược
+            countdownTimer: null,
             
             // Settings
             quality: '1080p60',
@@ -715,8 +763,9 @@
             folderHandle: null,
             lastSavedFile: null,
             
-            // Debug
-            scanCycleCount: 0
+            // Debug - v7.13
+            scanCycleCount: 0,
+            totalScansToday: 0
         };
         
         function $(id) { return document.getElementById(id); }
@@ -752,6 +801,7 @@
             var codecs = [
                 { mimeType: 'video/webm;codecs=vp8,opus', ext: 'webm', name: 'VP8' },
                 { mimeType: 'video/webm;codecs=vp8', ext: 'webm', name: 'VP8' },
+                { mimeType: 'video/webm;codecs=vp9,opus', ext: 'webm', name: 'VP9' },
                 { mimeType: 'video/webm', ext: 'webm', name: 'WebM' }
             ];
             for (var i = 0; i < codecs.length; i++) {
@@ -764,38 +814,55 @@
             return state.currentCodec;
         }
         
+        function updateDebug(msg) {
+            var el = $('debugOverlay');
+            if (el) {
+                el.innerHTML = 'v7.13 | Đơn: ' + state.scanCycleCount + '<br>' + msg;
+            }
+        }
+        
+        // ========== CANVAS SETUP ==========
         function setupCanvas() {
             var preset = VIDEO_PRESETS[state.quality];
+            
             if (!state.recordingCanvas) {
                 state.recordingCanvas = document.createElement('canvas');
                 state.recordingCtx = state.recordingCanvas.getContext('2d', { alpha: false, desynchronized: true });
             }
             state.recordingCanvas.width = preset.width;
             state.recordingCanvas.height = preset.height;
+            
             if (!state.scanCanvas) {
                 state.scanCanvas = document.createElement('canvas');
                 state.scanCtx = state.scanCanvas.getContext('2d', { willReadFrequently: true });
             }
             state.scanCanvas.width = Math.round(preset.width * preset.scanScale);
             state.scanCanvas.height = Math.round(preset.height * preset.scanScale);
+            
             state.scanInterval = Math.round(1000 / preset.scanFPS);
             
+            // Reset FPS counter
             state.frameCount = 0;
             state.lastFpsTime = 0;
             state.currentFPS = 0;
-            state.actualScanCount = 0;
-            state.lastScanCountTime = 0;
-            state.actualScanRate = 0;
         }
         
-        // ========== RENDER LOOP ==========
+        // ========== RENDER LOOP - v7.13 FIX ==========
         function renderLoop(timestamp) {
-            if (!state.stream) return;
+            // Kiểm tra stream còn active không
+            if (!state.stream || !state.stream.active) {
+                console.log('[RenderLoop] Stream inactive, stopping');
+                state.rafId = null;
+                return;
+            }
             
-            var video = $('webcamVideo'), ctx = state.recordingCtx, canvas = state.recordingCanvas;
-            if (!video || !ctx || video.readyState < 2) { 
-                state.rafId = requestAnimationFrame(renderLoop); 
-                return; 
+            var video = $('webcamVideo');
+            var ctx = state.recordingCtx;
+            var canvas = state.recordingCanvas;
+            
+            if (!video || !ctx || video.readyState < 2) {
+                state.rafId = requestAnimationFrame(renderLoop);
+                return;
             }
             
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -809,12 +876,14 @@
             
             if (state.scanTime && state.audio) drawAudioIndicator(ctx);
             
-            // QR Scanning - throttled
+            // QR Scanning - throttled - v7.13: Chỉ scan khi KHÔNG bị block
             var now = performance.now();
             if (now - state.lastScanTime >= state.scanInterval) {
                 state.lastScanTime = now;
                 state.actualScanCount++;
-                if (state.device === 'camera' && !state.scanBlocked) {
+                
+                // v7.13 FIX: Kiểm tra điều kiện scan rõ ràng hơn
+                if (state.device === 'camera' && !state.scanBlocked && state.isRecording) {
                     scanQRCode();
                 }
             }
@@ -929,7 +998,7 @@
             ctx.fillText('🎤 REC', margin, y);
         }
         
-        // ========== QR SCANNING ==========
+        // ========== QR SCANNING - v7.13 FIX ==========
         function scanQRCode() {
             try {
                 var video = $('webcamVideo');
@@ -954,19 +1023,29 @@
                         $('productsCount').textContent = state.detectedProducts.length;
                     }
                     
-                    handleQRDetected(qrData);
+                    // v7.13 FIX: Double-check scanBlocked trước khi handle
+                    if (!state.scanBlocked) {
+                        handleQRDetected(qrData);
+                    }
                 }
             } catch (e) {
                 console.error('[Scan Error]', e);
             }
         }
         
-        // ========== HANDLE QR DETECTED ==========
+        // ========== HANDLE QR DETECTED - v7.13 CRITICAL FIX ==========
         function handleQRDetected(qrData) {
             if (!qrData) return;
             
+            // v7.13 FIX: Kiểm tra scanBlocked ngay đầu
+            if (state.scanBlocked) {
+                console.log('[QR] Blocked, ignoring:', qrData);
+                return;
+            }
+            
             beep();
-            console.log('[QR] Detected:', qrData, '| isFirstScan:', state.isFirstScan, '| scanBlocked:', state.scanBlocked, '| cycle:', state.scanCycleCount);
+            console.log('[QR] Detected:', qrData, '| isFirstScan:', state.isFirstScan, '| cycle:', state.scanCycleCount);
+            updateDebug('QR: ' + qrData.substring(0, 15));
             
             if (state.isFirstScan) {
                 // FIRST SCAN - Bắt đầu ghi đơn mới
@@ -974,7 +1053,7 @@
                 state.isFirstScan = false;
                 state.scanTime = Date.now();
                 state.detectedProducts = [qrData];
-                state.scanBlocked = true;  // Block ngay
+                state.scanBlocked = true;  // Block ngay lập tức
                 
                 var recordedMs = state.scanTime - state.recordingStartTime;
                 var effectivePreBuffer = Math.min(state.preBuf, recordedMs);
@@ -987,23 +1066,25 @@
                 startDisplayTimer(effectivePreBuffer);
                 toast('📹 Đang ghi (+' + Math.round(effectivePreBuffer/1000) + 's): ' + qrData, 'success');
                 
-                // Đếm ngược 10 giây
-                var countdown = 10;
-                
                 // Clear timer cũ nếu có
                 if (state.countdownTimer) {
                     clearInterval(state.countdownTimer);
+                    state.countdownTimer = null;
                 }
                 
+                // Đếm ngược 10 giây
+                var countdown = 10;
                 state.countdownTimer = setInterval(function() {
                     countdown--;
                     if (countdown > 0) {
                         toast('⏱️ Chờ ' + countdown + 's để quét lần 2...', 'warning');
+                        updateDebug('Chờ: ' + countdown + 's');
                     } else {
                         clearInterval(state.countdownTimer);
                         state.countdownTimer = null;
                         state.scanBlocked = false;  // Mở khóa scan
                         toast('✅ Quét lại mã để kết thúc!', 'success');
+                        updateDebug('Sẵn sàng quét lần 2');
                         console.log('[QR] Scan unblocked, ready for second scan');
                     }
                 }, 1000);
@@ -1017,16 +1098,19 @@
                 
                 console.log('[QR] Second scan matched, starting post-buffer');
                 state.scanBlocked = true;  // Block trong khi post-buffer
+                updateDebug('Post-buffer...');
                 startPostBuffer();
             }
         }
         
-        // ========== START RECORDING ==========
+        // ========== START RECORDING - v7.13 FIX ==========
         function startRecording() {
-            if (!state.stream) {
-                console.log('[Recording] No stream, cannot start');
+            if (!state.stream || !state.stream.active) {
+                console.log('[Recording] No active stream, cannot start');
                 return;
             }
+            
+            console.log('[Recording] Starting new recording session, cycle:', state.scanCycleCount);
             
             // Clear recorder cũ nếu có
             if (state.recorder) {
@@ -1041,10 +1125,15 @@
             setupCanvas();
             var preset = VIDEO_PRESETS[state.quality], bitrate = BITRATE_OPTIONS[state.bitrate].value;
             
+            // v7.13 FIX: Tạo canvasStream mới mỗi lần
+            if (state.canvasStream) {
+                state.canvasStream.getTracks().forEach(function(t) { t.stop(); });
+            }
+            
             state.canvasStream = state.recordingCanvas.captureStream(preset.fps);
             if (state.audio && state.stream.getAudioTracks().length > 0) {
                 state.stream.getAudioTracks().forEach(function(track) { 
-                    state.canvasStream.addTrack(track); 
+                    state.canvasStream.addTrack(track.clone()); 
                 });
             }
             
@@ -1073,18 +1162,20 @@
             state.isRecording = true;
             state.recordingStartTime = Date.now();
             
-            // Start render loop nếu chưa chạy
-            if (!state.rafId) {
-                state.rafId = requestAnimationFrame(renderLoop);
+            // v7.13 FIX: Luôn restart renderLoop để đảm bảo nó chạy với state mới
+            if (state.rafId) {
+                cancelAnimationFrame(state.rafId);
+                state.rafId = null;
             }
+            state.rafId = requestAnimationFrame(renderLoop);
             
             $('fpsDisplay').classList.remove('hidden');
             
-            console.log('[Recording] Started, cycle:', state.scanCycleCount);
+            console.log('[Recording] Started successfully');
+            updateDebug('Recording... ');
         }
         
         function stopRecordingOnly() {
-            // Chỉ dừng recorder, không reset state
             if (state.recorder && state.recorder.state === 'recording') {
                 console.log('[Recording] Stopping recorder...');
                 state.recorder.stop();
@@ -1116,7 +1207,7 @@
             }, 1000);
         }
         
-        // ========== SAVE RECORDING ==========
+        // ========== SAVE RECORDING - v7.13 FIX ==========
         async function saveRecording() {
             var qrCode = state.currentQR;
             
@@ -1166,11 +1257,13 @@
             
             updateUI();
             state.scanCycleCount++;
+            state.totalScansToday++;
             toast('✅ Đã lưu: ' + qrCode + ' (' + sizeMB + 'MB) - Đơn #' + state.scanCycleCount, 'success');
             
             console.log('[Save] Completed, cycle:', state.scanCycleCount);
+            updateDebug('Đã lưu đơn #' + state.scanCycleCount);
             
-            // Đợi ngắn rồi restart
+            // v7.13 FIX: Đợi ngắn rồi restart - đảm bảo state đã clear
             setTimeout(function() {
                 restartForNextOrder();
             }, SCAN_LOCK_SECOND);
@@ -1204,12 +1297,12 @@
             folderInfo.classList.remove('hidden');
         }
         
-        // ========== RESTART FOR NEXT ORDER - QUAN TRỌNG ==========
+        // ========== RESTART FOR NEXT ORDER - v7.13 CRITICAL FIX ==========
         function restartForNextOrder() {
             console.log('[Restart] ===== RESTARTING FOR NEXT ORDER =====');
-            console.log('[Restart] Cycle:', state.scanCycleCount);
+            console.log('[Restart] Previous cycle:', state.scanCycleCount);
             
-            // 1. Clear tất cả timers
+            // 1. Clear tất cả timers TRƯỚC
             if (state.timerInterval) {
                 clearInterval(state.timerInterval);
                 state.timerInterval = null;
@@ -1219,7 +1312,13 @@
                 state.countdownTimer = null;
             }
             
-            // 2. Reset TẤT CẢ state quan trọng
+            // 2. v7.13 FIX: Stop render loop TRƯỚC khi reset state
+            if (state.rafId) {
+                cancelAnimationFrame(state.rafId);
+                state.rafId = null;
+            }
+            
+            // 3. Reset TẤT CẢ state quan trọng
             state.isFirstScan = true;
             state.currentQR = null;
             state.scanTime = null;
@@ -1228,23 +1327,28 @@
             state.displayQR = null;
             state.displayTime = 0;
             
-            // 3. Clear chunks để giải phóng memory
+            // 4. Clear chunks để giải phóng memory
             state.chunks = [];
             
-            // 4. Clear recorder
+            // 5. Clear recorder reference (không stop vì đã stop rồi)
             state.recorder = null;
             state.isRecording = false;
             
-            // 5. Hide UI elements
+            // 6. Hide UI elements
             $('orderInfo').classList.remove('show');
             $('recIndicator').classList.add('hidden');
             
-            console.log('[Restart] State reset: isFirstScan=', state.isFirstScan, ', scanBlocked=', state.scanBlocked);
+            console.log('[Restart] State reset complete: isFirstScan=', state.isFirstScan, ', scanBlocked=', state.scanBlocked);
             
-            // 6. Bắt đầu recording mới
-            startRecording();
-            
-            toast('🔄 Sẵn sàng quét đơn #' + (state.scanCycleCount + 1), 'success');
+            // 7. v7.13 FIX: Kiểm tra stream còn active không trước khi start recording mới
+            if (state.stream && state.stream.active) {
+                startRecording();
+                toast('🔄 Sẵn sàng quét đơn #' + (state.scanCycleCount + 1), 'success');
+                updateDebug('Sẵn sàng đơn #' + (state.scanCycleCount + 1));
+            } else {
+                console.log('[Restart] Stream inactive, cannot restart recording');
+                toast('⚠️ Camera đã tắt, vui lòng bật lại', 'error');
+            }
         }
         
         function startDisplayTimer(preBufferMs) {
@@ -1298,7 +1402,7 @@
                 $('startBtn').classList.add('hidden');
                 $('stopBtn').classList.remove('hidden');
                 
-                // Reset state hoàn toàn khi start camera
+                // v7.13 FIX: Reset state hoàn toàn khi start camera
                 state.scanCycleCount = 0;
                 state.isFirstScan = true;
                 state.currentQR = null;
@@ -1310,6 +1414,7 @@
                 setTimeout(startRecording, 500);
                 toast('✅ Camera: ' + preset.label + ' - ' + BITRATE_OPTIONS[state.bitrate].label);
                 getCameras();
+                updateDebug('Camera ON');
             }).catch(function(e) {
                 toast('❌ Lỗi camera: ' + e.message, 'error');
             });
@@ -1339,6 +1444,12 @@
             state.recorder = null;
             state.isRecording = false;
             
+            // Stop canvasStream
+            if (state.canvasStream) {
+                state.canvasStream.getTracks().forEach(function(t) { t.stop(); });
+                state.canvasStream = null;
+            }
+            
             // Stop stream
             if (state.stream) {
                 state.stream.getTracks().forEach(function(t) { t.stop(); });
@@ -1359,6 +1470,7 @@
             state.chunks = [];
             
             toast('Camera đã tắt', 'warning');
+            updateDebug('Camera OFF');
         }
         
         async function openFolder() {
@@ -1497,7 +1609,7 @@
         
         // ========== INIT ==========
         function init() {
-            console.log('[QR Scanner] Blog v7.12 - Fix continuous scan + 10 items history');
+            console.log('[QR Scanner] Blog v7.13 - Unlimited continuous scan + 15 items history');
             
             try {
                 var saved = localStorage.getItem(STORAGE_KEY);
@@ -1608,7 +1720,8 @@
                     .catch(function() { getCameras(); });
             }, 500);
             
-            toast('✅ v7.12 - Sẵn sàng', 'success');
+            toast('✅ v7.13 - Quét không giới hạn', 'success');
+            updateDebug('Ready');
         }
         
         if (document.readyState === 'loading') {
