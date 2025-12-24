@@ -223,8 +223,8 @@
             position: relative;
             background: #000;
             width: 100%;
-            flex: 1;
-            min-height: 280px;
+            flex-shrink: 0;
+            height: 320px;
         }
         
         #webcamVideo {
@@ -298,20 +298,21 @@
             justify-content: center;
             align-items: center;
             gap: 12px;
+            flex-shrink: 0;
         }
         
         .stats-title { font-size: 13px; }
         .stats-count { font-size: 20px; font-weight: bold; }
         .stats-total { font-size: 12px; opacity: 0.9; }
         
-        /* ========== HISTORY - FIX SCROLL ========== */
+        /* ========== HISTORY - HIỂN THỊ 10 ĐƠN ========== */
         .history {
             padding: 8px 12px;
             background: #16213e;
             display: flex;
             flex-direction: column;
-            /* Giới hạn chiều cao để có scroll */
-            max-height: 300px;
+            flex: 1;
+            min-height: 350px;
         }
         
         .history-header {
@@ -334,7 +335,7 @@
             color: white;
         }
         
-        /* FIX: History list có scroll */
+        /* HISTORY LIST - Hiển thị 10 đơn (mỗi đơn ~32px) */
         .history-list {
             border: 1px solid #2a3f5f;
             border-radius: 5px;
@@ -342,8 +343,8 @@
             overflow-x: hidden;
             background: #1a1a2e;
             flex: 1;
-            min-height: 100px;
-            max-height: 220px;
+            min-height: 320px;
+            max-height: 400px;
         }
         
         /* Scrollbar style */
@@ -357,11 +358,11 @@
         
         .history-item {
             display: grid;
-            grid-template-columns: 30px 1fr 75px 55px 55px 50px 40px;
+            grid-template-columns: 30px 1fr 80px 60px 55px 55px 45px;
             gap: 4px;
-            padding: 6px 8px;
+            padding: 8px 8px;
             border-bottom: 1px solid #2a3f5f;
-            font-size: 11px;
+            font-size: 12px;
             align-items: center;
         }
         
@@ -391,6 +392,7 @@
             background: #0d1520;
             justify-content: center;
             flex-wrap: wrap;
+            flex-shrink: 0;
         }
         
         /* ========== DELETE MODAL ========== */
@@ -474,7 +476,7 @@
         <!-- Header -->
         <div class="header">
             <h1>📷 QR Scanner Video Recording</h1>
-            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.11</div>
+            <div class="subtitle">Quay video đóng gói • Tự xóa &gt; 60 ngày • v7.12</div>
         </div>
         
         <!-- Tabs -->
@@ -586,7 +588,7 @@
             <span class="stats-total">| Tổng: <span id="totalCount">0</span> / 100,000</span>
         </div>
         
-        <!-- History - FIX: max-height và overflow -->
+        <!-- History - Hiển thị 10 đơn -->
         <div class="history">
             <div class="history-header">
                 <h3>📜 Lịch sử (<span id="historyCount">0</span>)</h3>
@@ -640,8 +642,8 @@
         var STORAGE_KEY = 'qrScannerBlogV7';
         var MAX_ORDERS = 100000;
         var AUTO_DELETE_DAYS = 60;
-        var SCAN_LOCK_FIRST = 10000;
-        var SCAN_LOCK_SECOND = 5000;
+        var SCAN_LOCK_FIRST = 10000;   // 10 giây chờ quét lần 2
+        var SCAN_LOCK_SECOND = 3000;   // 3 giây sau khi lưu (giảm từ 5s)
         var PROGRESS_DISPLAY_TIME = 1500;
         
         var VIDEO_PRESETS = {
@@ -655,7 +657,7 @@
             '12': { value: 12000000, label: '12 Mbps' }
         };
         
-        // ========== STATE - FIX: Thêm biến để track trạng thái ==========
+        // ========== STATE ==========
         var state = {
             stream: null,
             recorder: null,
@@ -664,15 +666,15 @@
             orders: [],
             savedVideos: [],
             
-            // FIX: Biến quan trọng để kiểm soát scan
+            // QUAN TRỌNG: Các biến điều khiển scan
             isRecording: false,
             isFirstScan: true,
             currentQR: null,
             scanBlocked: false,
-            scanBlockedUntil: 0,
             recordingStartTime: null,
             scanTime: null,
             timerInterval: null,
+            countdownTimer: null,  // Timer đếm ngược
             
             // Settings
             quality: '1080p60',
@@ -713,7 +715,7 @@
             folderHandle: null,
             lastSavedFile: null,
             
-            // FIX: Debug counter
+            // Debug
             scanCycleCount: 0
         };
         
@@ -778,7 +780,6 @@
             state.scanCanvas.height = Math.round(preset.height * preset.scanScale);
             state.scanInterval = Math.round(1000 / preset.scanFPS);
             
-            // Reset counters
             state.frameCount = 0;
             state.lastFpsTime = 0;
             state.currentFPS = 0;
@@ -813,7 +814,9 @@
             if (now - state.lastScanTime >= state.scanInterval) {
                 state.lastScanTime = now;
                 state.actualScanCount++;
-                if (state.device === 'camera') scanQRCode();
+                if (state.device === 'camera' && !state.scanBlocked) {
+                    scanQRCode();
+                }
             }
             
             // Update scan rate display
@@ -928,11 +931,6 @@
         
         // ========== QR SCANNING ==========
         function scanQRCode() {
-            // FIX: Kiểm tra kỹ điều kiện trước khi scan
-            if (state.scanBlocked) {
-                return; // Đang bị block
-            }
-            
             try {
                 var video = $('webcamVideo');
                 if (!video || video.readyState < 2) return;
@@ -951,13 +949,11 @@
                     state.displayQR = qrData;
                     state.displayTime = Date.now();
                     
-                    // Track sản phẩm trong đơn hiện tại
                     if (state.scanTime && state.detectedProducts.indexOf(qrData) === -1) {
                         state.detectedProducts.push(qrData);
                         $('productsCount').textContent = state.detectedProducts.length;
                     }
                     
-                    // Xử lý QR detected
                     handleQRDetected(qrData);
                 }
             } catch (e) {
@@ -965,12 +961,12 @@
             }
         }
         
-        // ========== HANDLE QR DETECTED - FIX LOGIC ==========
+        // ========== HANDLE QR DETECTED ==========
         function handleQRDetected(qrData) {
-            if (!qrData || state.scanBlocked) return;
+            if (!qrData) return;
             
             beep();
-            console.log('[QR] Detected:', qrData, 'isFirstScan:', state.isFirstScan, 'cycle:', state.scanCycleCount);
+            console.log('[QR] Detected:', qrData, '| isFirstScan:', state.isFirstScan, '| scanBlocked:', state.scanBlocked, '| cycle:', state.scanCycleCount);
             
             if (state.isFirstScan) {
                 // FIRST SCAN - Bắt đầu ghi đơn mới
@@ -978,6 +974,7 @@
                 state.isFirstScan = false;
                 state.scanTime = Date.now();
                 state.detectedProducts = [qrData];
+                state.scanBlocked = true;  // Block ngay
                 
                 var recordedMs = state.scanTime - state.recordingStartTime;
                 var effectivePreBuffer = Math.min(state.preBuf, recordedMs);
@@ -990,19 +987,24 @@
                 startDisplayTimer(effectivePreBuffer);
                 toast('📹 Đang ghi (+' + Math.round(effectivePreBuffer/1000) + 's): ' + qrData, 'success');
                 
-                // Block scan 10 giây
-                state.scanBlocked = true;
-                state.scanBlockedUntil = Date.now() + SCAN_LOCK_FIRST;
-                
+                // Đếm ngược 10 giây
                 var countdown = 10;
-                var timer = setInterval(function() {
+                
+                // Clear timer cũ nếu có
+                if (state.countdownTimer) {
+                    clearInterval(state.countdownTimer);
+                }
+                
+                state.countdownTimer = setInterval(function() {
                     countdown--;
                     if (countdown > 0) {
                         toast('⏱️ Chờ ' + countdown + 's để quét lần 2...', 'warning');
                     } else {
-                        clearInterval(timer);
-                        state.scanBlocked = false;
+                        clearInterval(state.countdownTimer);
+                        state.countdownTimer = null;
+                        state.scanBlocked = false;  // Mở khóa scan
                         toast('✅ Quét lại mã để kết thúc!', 'success');
+                        console.log('[QR] Scan unblocked, ready for second scan');
                     }
                 }, 1000);
                 
@@ -1012,20 +1014,38 @@
                     toast('⚠️ Mã không khớp! Cần: ' + state.currentQR, 'error');
                     return;
                 }
+                
+                console.log('[QR] Second scan matched, starting post-buffer');
+                state.scanBlocked = true;  // Block trong khi post-buffer
                 startPostBuffer();
             }
         }
         
         // ========== START RECORDING ==========
         function startRecording() {
-            if (!state.stream || state.isRecording) return;
+            if (!state.stream) {
+                console.log('[Recording] No stream, cannot start');
+                return;
+            }
+            
+            // Clear recorder cũ nếu có
+            if (state.recorder) {
+                try {
+                    if (state.recorder.state !== 'inactive') {
+                        state.recorder.stop();
+                    }
+                } catch(e) {}
+                state.recorder = null;
+            }
             
             setupCanvas();
             var preset = VIDEO_PRESETS[state.quality], bitrate = BITRATE_OPTIONS[state.bitrate].value;
             
             state.canvasStream = state.recordingCanvas.captureStream(preset.fps);
             if (state.audio && state.stream.getAudioTracks().length > 0) {
-                state.stream.getAudioTracks().forEach(function(track) { state.canvasStream.addTrack(track); });
+                state.stream.getAudioTracks().forEach(function(track) { 
+                    state.canvasStream.addTrack(track); 
+                });
             }
             
             var codec = getCodec();
@@ -1037,74 +1057,80 @@
             
             state.chunks = [];
             state.recorder.ondataavailable = function(e) { 
-                if (e.data.size > 0) state.chunks.push(e.data); 
+                if (e.data && e.data.size > 0) {
+                    state.chunks.push(e.data);
+                }
             };
-            state.recorder.onstop = function() { 
+            state.recorder.onstop = function() {
+                console.log('[Recording] Stopped, chunks:', state.chunks.length);
                 saveRecording(); 
+            };
+            state.recorder.onerror = function(e) {
+                console.error('[Recording] Error:', e);
             };
             
             state.recorder.start(1000);
             state.isRecording = true;
             state.recordingStartTime = Date.now();
-            state.rafId = requestAnimationFrame(renderLoop);
+            
+            // Start render loop nếu chưa chạy
+            if (!state.rafId) {
+                state.rafId = requestAnimationFrame(renderLoop);
+            }
+            
             $('fpsDisplay').classList.remove('hidden');
             
             console.log('[Recording] Started, cycle:', state.scanCycleCount);
         }
         
-        function stopRecording() {
-            if (state.recorder && state.isRecording) {
+        function stopRecordingOnly() {
+            // Chỉ dừng recorder, không reset state
+            if (state.recorder && state.recorder.state === 'recording') {
+                console.log('[Recording] Stopping recorder...');
                 state.recorder.stop();
-                state.isRecording = false;
             }
-            if (state.rafId) {
-                cancelAnimationFrame(state.rafId);
-                state.rafId = null;
-            }
-            if (state.timerInterval) {
-                clearInterval(state.timerInterval);
-                state.timerInterval = null;
-            }
-            $('orderInfo').classList.remove('show');
-            $('recIndicator').classList.add('hidden');
         }
         
         // ========== POST BUFFER ==========
         function startPostBuffer() {
-            var postBufferSec = state.postBuf / 1000;
+            var postBufferSec = Math.round(state.postBuf / 1000);
             toast('📦 Ghi thêm ' + postBufferSec + 's...', 'success');
             $('recIndicator').classList.add('hidden');
             $('orderInfo').classList.remove('show');
             
-            state.scanBlocked = true;
+            // Clear countdown timer nếu còn
+            if (state.countdownTimer) {
+                clearInterval(state.countdownTimer);
+                state.countdownTimer = null;
+            }
             
             var countdown = postBufferSec;
-            var timer = setInterval(function() {
+            var postTimer = setInterval(function() {
                 countdown--;
                 if (countdown > 0) {
                     toast('📦 Post-buffer: ' + countdown + 's...', 'warning');
                 } else {
-                    clearInterval(timer);
-                    if (state.recorder && state.recorder.state === 'recording') {
-                        state.recorder.stop();
-                    }
+                    clearInterval(postTimer);
+                    stopRecordingOnly();  // Dừng để trigger save
                 }
             }, 1000);
         }
         
-        // ========== SAVE RECORDING - FIX: Clear memory ==========
+        // ========== SAVE RECORDING ==========
         async function saveRecording() {
             var qrCode = state.currentQR;
             
+            console.log('[Save] Starting, QR:', qrCode, ', chunks:', state.chunks.length);
+            
             if (!qrCode) {
                 console.log('[Save] No QR code, restarting...');
-                restartRecording();
+                restartForNextOrder();
                 return;
             }
             
             if (state.chunks.length === 0) {
                 toast('⚠️ Không có dữ liệu video', 'warning');
-                restartRecording();
+                restartForNextOrder();
                 return;
             }
             
@@ -1139,18 +1165,14 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
             
             updateUI();
-            toast('✅ Đã lưu: ' + qrCode + ' (' + sizeMB + 'MB, ' + state.detectedProducts.length + ' SP)', 'success');
-            
-            // FIX: Clear chunks để giải phóng memory
-            state.chunks = [];
-            
             state.scanCycleCount++;
+            toast('✅ Đã lưu: ' + qrCode + ' (' + sizeMB + 'MB) - Đơn #' + state.scanCycleCount, 'success');
+            
             console.log('[Save] Completed, cycle:', state.scanCycleCount);
             
-            // Đợi 5 giây rồi restart
-            state.scanBlockedUntil = Date.now() + SCAN_LOCK_SECOND;
+            // Đợi ngắn rồi restart
             setTimeout(function() {
-                restartRecording();
+                restartForNextOrder();
             }, SCAN_LOCK_SECOND);
         }
         
@@ -1182,30 +1204,47 @@
             folderInfo.classList.remove('hidden');
         }
         
-        // ========== RESTART RECORDING - FIX: Reset hoàn toàn ==========
-        function restartRecording() {
+        // ========== RESTART FOR NEXT ORDER - QUAN TRỌNG ==========
+        function restartForNextOrder() {
+            console.log('[Restart] ===== RESTARTING FOR NEXT ORDER =====');
             console.log('[Restart] Cycle:', state.scanCycleCount);
             
-            // FIX: Reset TẤT CẢ trạng thái quan trọng
-            state.scanBlocked = false;
-            state.isFirstScan = true;
-            state.currentQR = null;
-            state.scanTime = null;
-            state.detectedProducts = [];
-            state.chunks = [];  // Clear memory
-            state.displayQR = null;
-            state.displayTime = 0;
-            
-            // Clear timer nếu còn
+            // 1. Clear tất cả timers
             if (state.timerInterval) {
                 clearInterval(state.timerInterval);
                 state.timerInterval = null;
             }
+            if (state.countdownTimer) {
+                clearInterval(state.countdownTimer);
+                state.countdownTimer = null;
+            }
             
-            // Restart recording
+            // 2. Reset TẤT CẢ state quan trọng
+            state.isFirstScan = true;
+            state.currentQR = null;
+            state.scanTime = null;
+            state.scanBlocked = false;  // QUAN TRỌNG: Mở khóa scan
+            state.detectedProducts = [];
+            state.displayQR = null;
+            state.displayTime = 0;
+            
+            // 3. Clear chunks để giải phóng memory
+            state.chunks = [];
+            
+            // 4. Clear recorder
+            state.recorder = null;
+            state.isRecording = false;
+            
+            // 5. Hide UI elements
+            $('orderInfo').classList.remove('show');
+            $('recIndicator').classList.add('hidden');
+            
+            console.log('[Restart] State reset: isFirstScan=', state.isFirstScan, ', scanBlocked=', state.scanBlocked);
+            
+            // 6. Bắt đầu recording mới
             startRecording();
             
-            toast('🔄 Sẵn sàng quét đơn mới (đơn thứ ' + (state.scanCycleCount + 1) + ')', 'success');
+            toast('🔄 Sẵn sàng quét đơn #' + (state.scanCycleCount + 1), 'success');
         }
         
         function startDisplayTimer(preBufferMs) {
@@ -1259,7 +1298,7 @@
                 $('startBtn').classList.add('hidden');
                 $('stopBtn').classList.remove('hidden');
                 
-                // FIX: Reset state khi start camera
+                // Reset state hoàn toàn khi start camera
                 state.scanCycleCount = 0;
                 state.isFirstScan = true;
                 state.currentQR = null;
@@ -1277,15 +1316,41 @@
         }
         
         function stopCamera() {
-            stopRecording();
+            // Clear tất cả timers
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+                state.timerInterval = null;
+            }
+            if (state.countdownTimer) {
+                clearInterval(state.countdownTimer);
+                state.countdownTimer = null;
+            }
+            
+            // Stop render loop
+            if (state.rafId) {
+                cancelAnimationFrame(state.rafId);
+                state.rafId = null;
+            }
+            
+            // Stop recorder
+            if (state.recorder && state.recorder.state === 'recording') {
+                try { state.recorder.stop(); } catch(e) {}
+            }
+            state.recorder = null;
+            state.isRecording = false;
+            
+            // Stop stream
             if (state.stream) {
                 state.stream.getTracks().forEach(function(t) { t.stop(); });
                 state.stream = null;
             }
+            
             $('webcamVideo').srcObject = null;
             $('startBtn').classList.remove('hidden');
             $('stopBtn').classList.add('hidden');
             $('fpsDisplay').classList.add('hidden');
+            $('orderInfo').classList.remove('show');
+            $('recIndicator').classList.add('hidden');
             
             // Reset state
             state.scanBlocked = false;
@@ -1420,7 +1485,9 @@
             if (state.device !== 'scanner') return;
             if (barcodeTimer) clearTimeout(barcodeTimer);
             if (e.key === 'Enter') {
-                if (barcodeBuffer.length > 3) handleQRDetected(barcodeBuffer);
+                if (barcodeBuffer.length > 3 && !state.scanBlocked) {
+                    handleQRDetected(barcodeBuffer);
+                }
                 barcodeBuffer = '';
             } else if (e.key.length === 1) {
                 barcodeBuffer += e.key;
@@ -1430,7 +1497,7 @@
         
         // ========== INIT ==========
         function init() {
-            console.log('[QR Scanner] Blog v7.11 - Fix scan + scroll');
+            console.log('[QR Scanner] Blog v7.12 - Fix continuous scan + 10 items history');
             
             try {
                 var saved = localStorage.getItem(STORAGE_KEY);
@@ -1439,7 +1506,6 @@
             
             autoDelete();
             
-            // Load settings
             state.quality = localStorage.getItem('quality') || '1080p60';
             state.bitrate = localStorage.getItem('bitrate') || '12';
             state.audio = localStorage.getItem('audio') !== 'false';
@@ -1457,7 +1523,6 @@
             
             updateUI();
             
-            // Event listeners
             $('startBtn').onclick = startCamera;
             $('stopBtn').onclick = stopCamera;
             $('folderBtn').onclick = openFolder;
@@ -1534,7 +1599,6 @@
                 if (e.target === this) hideDeleteModal();
             };
             
-            // Init camera list
             setTimeout(function() {
                 navigator.mediaDevices.getUserMedia({ video: true, audio: true })
                     .then(function(s) {
@@ -1544,7 +1608,7 @@
                     .catch(function() { getCameras(); });
             }, 500);
             
-            toast('✅ v7.11 - Sẵn sàng', 'success');
+            toast('✅ v7.12 - Sẵn sàng', 'success');
         }
         
         if (document.readyState === 'loading') {
