@@ -1,0 +1,710 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+    <meta charset='UTF-8'/>
+    <meta content='width=device-width, initial-scale=1' name='viewport'/>
+    <title>Phần Mềm Quay Video Đóng Gói Hàng - Free &amp; Premium</title>
+    <meta content='Phần mềm quay video đóng gói hàng hóa. Tự động quét QR code và ghi video. Free 100 đơn/ngày.' name='description'/>
+    
+    <b:skin><![CDATA[
+    /* Blogger required */
+    ]]></b:skin>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { scrollbar-width: thin; scrollbar-color: #667eea #1a1a2e; background: #0d0d15; height: 100%; }
+        body { font-family: Segoe UI, Arial, sans-serif; min-height: 100vh; overflow-x: hidden; }
+        .page-wrapper { display: flex; min-height: 100vh; height: 100vh; }
+        .hidden { display: none !important; }
+        
+        .sidebar-left, .sidebar-right { width: 320px; background: #0d0d15; padding: 5px; display: flex !important; flex-direction: column; gap: 5px; flex-shrink: 0; }
+        .ad-box { background: #1a1a2e; border-radius: 6px; padding: 4px; text-align: center; min-height: 255px; position: relative; overflow: hidden; }
+        .ad-label { font-size: 9px; color: #444; text-transform: uppercase; margin-bottom: 2px; }
+        .ad-placeholder { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #555; font-size: 11px; }
+        .ad-loading { color: #667eea; animation: blink 1s infinite; }
+        .ad-content { min-height: 250px; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        
+        .center-area { flex: 1; display: flex; flex-direction: column; min-width: 0; background: #16213e; height: 100vh; }
+        
+        .premium-header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .premium-header .logo { font-size: 18px; font-weight: bold; }
+        .premium-header .btn-upgrade { background: #ffd700; color: #333; padding: 8px 20px; border: none; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; margin-left: 5px; }
+        .premium-header .btn-upgrade:hover { background: #ffed4a; }
+        .premium-header .premium-active { background: rgba(255,255,255,0.2); color: #fff; padding: 5px 15px; border-radius: 15px; font-size: 11px; }
+        
+        .banner-top, .banner-bottom { background: #1a1a2e; padding: 3px; text-align: center; flex-shrink: 0; min-height: 96px; max-height: 100px; }
+        .banner-ad-content { min-height: 90px; display: flex; justify-content: center; align-items: center; }
+        
+        /* APP FRAME - Default for FREE */
+        .app-frame { width: 100%; height: 1200px; border: none; display: block; }
+        
+        .site-footer { background: #0d0d15; color: #666; padding: 8px; text-align: center; font-size: 10px; flex-shrink: 0; }
+        .site-footer a { color: #667eea; text-decoration: none; }
+        
+        .debug-info { position: fixed; bottom: 5px; right: 5px; background: rgba(0,0,0,0.85); color: #0f0; padding: 5px 8px; font-size: 9px; font-family: monospace; border-radius: 4px; z-index: 9999; max-width: 250px; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); display: flex; align-items: center; justify-content: center; z-index: 99999; }
+        .modal-box { background: #1a1a2e; border: 2px solid #667eea; border-radius: 16px; padding: 25px; max-width: 450px; width: 90%; text-align: center; color: white; }
+        .modal-icon { font-size: 50px; margin-bottom: 10px; }
+        .modal-box h2 { color: #667eea; font-size: 20px; margin-bottom: 15px; }
+        
+        .premium-features { background: #0d1520; border-radius: 10px; padding: 15px; margin: 15px 0; text-align: left; }
+        .premium-features .feature { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #2a3f5f; font-size: 13px; }
+        .premium-features .feature:last-child { border-bottom: none; }
+        .premium-features .feature .icon { font-size: 18px; }
+        .premium-features .feature .text { flex: 1; }
+        .premium-features .feature .check { color: #28a745; font-weight: bold; }
+        
+        .price-box { background: linear-gradient(135deg, #28a745, #20c997); border-radius: 10px; padding: 15px; margin: 15px 0; }
+        .price-box .price { font-size: 28px; font-weight: bold; color: #fff; }
+        .price-box .period { font-size: 14px; color: rgba(255,255,255,0.8); }
+        
+        .btn-pay { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-pay:hover { transform: scale(1.05); }
+        .btn-pay:disabled { opacity: 0.5; cursor: wait; }
+        
+        .contact-info { margin-top: 15px; font-size: 12px; color: #888; }
+        .contact-info a { color: #667eea; }
+        
+        .license-box { background: #0d1520; border: 2px solid #28a745; border-radius: 10px; padding: 20px; margin: 15px 0; }
+        .license-key { font-family: monospace; font-size: 16px; color: #ffd700; background: #1a1a2e; padding: 15px; border-radius: 8px; word-break: break-all; margin: 10px 0; }
+        .btn-copy { background: #667eea; color: white; border: none; padding: 10px 25px; border-radius: 20px; font-size: 13px; cursor: pointer; margin: 5px; }
+        .btn-copy:hover { background: #764ba2; }
+        .countdown { font-size: 12px; color: #f39c12; margin-top: 10px; }
+        
+        body.locked .center-area { pointer-events: none; opacity: 0.25; filter: blur(4px); }
+        body.locked .sidebar-left, body.locked .sidebar-right { pointer-events: none; opacity: 0.15; }
+        
+        /* PREMIUM MODE - Full screen video */
+        body.premium-active .sidebar-left, 
+        body.premium-active .sidebar-right, 
+        body.premium-active .banner-top, 
+        body.premium-active .banner-bottom,
+        body.premium-active .site-footer { display: none !important; }
+        
+        body.premium-active .page-wrapper { height: 100vh; }
+        body.premium-active .center-area { height: 100vh; }
+        body.premium-active .app-frame { height: calc(100vh - 50px) !important; flex: 1; }
+        body.premium-active .premium-header { flex-shrink: 0; }
+        
+        @media (max-width: 1400px) { .sidebar-left, .sidebar-right { width: 310px; } }
+        @media (max-width: 1200px) { .sidebar-left { display: none !important; } }
+        @media (max-width: 900px) { .sidebar-right { display: none !important; } }
+        @media (max-width: 600px) { .banner-top, .banner-bottom { display: none; } }
+    </style>
+</head>
+
+<body>
+    <div class='page-wrapper'>
+        <div class='sidebar-left' id='sidebarLeft'>
+            <div class='ad-box' id='ad1'><div class='ad-label'>Ad 1</div><div class='ad-placeholder ad-loading'>Loading...</div><div class='ad-content'></div></div>
+            <div class='ad-box' id='ad2'><div class='ad-label'>Ad 2</div><div class='ad-placeholder ad-loading'>Loading...</div><div class='ad-content'></div></div>
+            <div class='ad-box' id='ad3'><div class='ad-label'>Ad 3</div><div class='ad-placeholder ad-loading'>Loading...</div><div class='ad-content'></div></div>
+            <div class='ad-box' id='ad4'><div class='ad-label'>Ad 4</div><div class='ad-placeholder ad-loading'>Loading...</div><div class='ad-content'></div></div>
+            <div class='ad-box' id='ad5'><div class='ad-label'>Ad 5</div><div class='ad-placeholder ad-loading'>Loading...</div><div class='ad-content'></div></div>
+        </div>
+        
+        <div class='center-area'>
+            <div class='premium-header'>
+                <div class='logo'>📦 Quay Video Đóng Hàng</div>
+                <div class='status' id='headerStatus'>
+                    <button class='btn-upgrade' onclick='showPremiumPopup()'>👑 Nâng cấp Premium</button>
+                </div>
+            </div>
+            
+            <div class='banner-top' id='bannerTop'>
+                <div class='ad-label'>Banner Top</div>
+                <div id='ad11' class='banner-ad-content'></div>
+            </div>
+            
+            <iframe class='app-frame' id='appFrame' src='https://thluc138-creator.github.io/qr-scanner-Blog-phan-mem-quay-video-dong-goi-hang/embed-v717-full.html' allowfullscreen='allowfullscreen' allow='camera *; microphone *; display-capture *; clipboard-write *;'></iframe>
+            
+            <div class='banner-bottom' id='bannerBottom'>
+                <div class='ad-label'>Banner Bottom</div>
+                <div id='ad12' class='banner-ad-content'></div>
+            </div>
+            
+            <div class='site-footer'>© 2025 QR Scanner v7.17 Premium</div>
+        </div>
+        
+        <div class='sidebar-right' id='sidebarRight'>
+            <div class='ad-box' id='ad6'><div class='ad-label'>Ad 6</div><div class='ad-placeholder ad-loading'>Loading...</div><div class='ad-content'></div></div>
+            <div class='ad-box' id='ad7'><div class='ad-label'>Ad 7</div><div class='ad-placeholder ad-loading'>Loading...</div><div class='ad-content'></div></div>
+            <div class='ad-box' id='ad8'><div class='ad-label'>Ad 8</div><div class='ad-placeholder ad-loading'>Loading...</div><div class='ad-content'></div></div>
+            <div class='ad-box' id='ad9'><div class='ad-label'>Ad 9</div><div class='ad-placeholder ad-loading'>Loading...</div><div class='ad-content'></div></div>
+            <div class='ad-box' id='ad10'><div class='ad-label'>Ad 10</div><div class='ad-placeholder ad-loading'>Loading...</div><div class='ad-content'></div></div>
+        </div>
+    </div>
+    
+    <div class='modal-overlay hidden' id='premiumPopup'>
+        <div class='modal-box'>
+            <div class='modal-icon'>👑</div>
+            <h2>NÂNG CẤP PREMIUM</h2>
+            <div class='premium-features'>
+                <div class='feature'><span class='icon'>🚫</span><span class='text'>Không quảng cáo</span><span class='check'>✓</span></div>
+                <div class='feature'><span class='icon'>♾️</span><span class='text'>Không giới hạn đơn hàng - 100,000 đơn</span><span class='check'>✓</span></div>
+                <div class='feature'><span class='icon'>💾</span><span class='text'>Lịch sử không bị xóa khi reset</span><span class='check'>✓</span></div>
+                <div class='feature'><span class='icon'>⭐</span><span class='text'>Hỗ trợ ưu tiên qua Zalo</span><span class='check'>✓</span></div>
+            </div>
+            <div class='price-box'>
+                <div class='price'>365.000₫</div>
+                <div class='period'>/ 1 Năm (365 ngày)</div>
+            </div>
+            <button class='btn-pay' id='btnPay' onclick='startPayment()'>💳 Thanh Toán Ngay</button>
+            <div class='contact-info'>📞 Zalo hỗ trợ: <a href='https://zalo.me/0906518413' target='_blank'>0906 518 413</a></div>
+            <button style='background:transparent;border:none;color:#888;margin-top:15px;cursor:pointer;font-size:12px;' onclick='hidePremiumPopup()'>✕ Đóng</button>
+        </div>
+    </div>
+    
+    <div class='modal-overlay hidden' id='licensePopup'>
+        <div class='modal-box'>
+            <div class='modal-icon'>🎉</div>
+            <h2>THANH TOÁN THÀNH CÔNG!</h2>
+            <div class='license-box'>
+                <p style='font-size:13px;color:#28a745;margin-bottom:10px;'>Đây là License Key của bạn:</p>
+                <div class='license-key' id='licenseKeyDisplay'>QRVD-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX</div>
+                <button class='btn-copy' onclick='copyLicenseKey()'>📋 Copy</button>
+                <button class='btn-copy' onclick='downloadLicenseKey()'>💾 Tải về</button>
+                <div class='countdown' id='autoDownloadCountdown'>Tự động tải về sau 10 giây...</div>
+            </div>
+            <p style='font-size:12px;color:#888;'>License đã được kích hoạt tự động.</p>
+            <button class='btn-pay' onclick='closeLicensePopup()' style='background:linear-gradient(135deg,#28a745,#20c997);'>✅ Bắt đầu sử dụng</button>
+        </div>
+    </div>
+    
+    <div class='modal-overlay hidden' id='activatePopup'>
+        <div class='modal-box'>
+            <div class='modal-icon'>🔑</div>
+            <h2>KÍCH HOẠT LICENSE</h2>
+            <p style='font-size:13px;color:#ccc;margin-bottom:15px;'>Nhập License Key để kích hoạt Premium:</p>
+            <input type='text' id='licenseInput' placeholder='QRVD-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX' style='width:100%;padding:12px;border:2px solid #3a4f6f;border-radius:8px;background:#0d1520;color:#ffd700;font-family:monospace;font-size:14px;text-align:center;text-transform:uppercase;'/>
+            <button class='btn-pay' onclick='activateLicense()' style='margin-top:15px;'>🔓 Kích hoạt</button>
+            <button style='background:transparent;border:none;color:#888;margin-top:15px;cursor:pointer;font-size:12px;display:block;width:100%;' onclick='hideActivatePopup()'>✕ Đóng</button>
+        </div>
+    </div>
+    
+    <div class='debug-info' id='debugInfo'>v7.17 | 0/12</div>
+    
+    <script>
+    //<![CDATA[
+    (function() {
+        'use strict';
+        
+        var API_URL = 'https://qr-scanner-blog-backend.onrender.com';
+        var LICENSE_KEY = 'qrScannerLicense';
+        var BLOG_URL = window.location.origin + window.location.pathname;
+        
+        var state = {
+            isPremium: false,
+            licenseKey: null,
+            daysRemaining: 0,
+            currentOrderCode: null,
+            paymentPolling: null
+        };
+        
+        // ==================== AD SYSTEM v7.17 ====================
+        var AD_CONFIG = {
+            'ad1':  { key: '2f98ac94f9d984db67519e8c4a9d713e', w: 300, h: 250 },
+            'ad2':  { key: '2f98ac94f9d984db67519e8c4a9d713e', w: 300, h: 250 },
+            'ad3':  { key: '2f98ac94f9d984db67519e8c4a9d713e', w: 300, h: 250 },
+            'ad4':  { key: '2f98ac94f9d984db67519e8c4a9d713e', w: 300, h: 250 },
+            'ad5':  { key: '2f98ac94f9d984db67519e8c4a9d713e', w: 300, h: 250 },
+            'ad6':  { key: '2f98ac94f9d984db67519e8c4a9d713e', w: 300, h: 250 },
+            'ad7':  { key: '2f98ac94f9d984db67519e8c4a9d713e', w: 300, h: 250 },
+            'ad8':  { key: '2f98ac94f9d984db67519e8c4a9d713e', w: 300, h: 250 },
+            'ad9':  { key: '2f98ac94f9d984db67519e8c4a9d713e', w: 300, h: 250 },
+            'ad10': { key: '2f98ac94f9d984db67519e8c4a9d713e', w: 300, h: 250 },
+            'ad11': { key: 'bd7a09d7e9670570b00120dfe00e67d1', w: 728, h: 90 },
+            'ad12': { key: 'bd7a09d7e9670570b00120dfe00e67d1', w: 728, h: 90 }
+        };
+        
+        var adTimers = {};
+        var adNextRefresh = {};
+        var adLoadCount = {};
+        var tParameter = {};
+        var BLACKOUT_TIME = 1000;
+        
+        function calculateRefreshTime(slotId) {
+            if (!tParameter[slotId]) {
+                var slotNum = parseInt(slotId.replace('ad', '')) || 1;
+                tParameter[slotId] = slotNum * 0.5 + Math.random() * Math.PI;
+            }
+            tParameter[slotId] += 0.7 + Math.random() * 0.6;
+            var x = 100 + 10 * Math.sin(tParameter[slotId]);
+            return x * 1000;
+        }
+        
+        function loadAd(slotId) {
+            if (state.isPremium) return false;
+            
+            var slot = document.getElementById(slotId);
+            if (!slot) return false;
+            var config = AD_CONFIG[slotId];
+            if (!config) return false;
+            
+            var content = slot.querySelector('.ad-content');
+            var placeholder = slot.querySelector('.ad-placeholder');
+            
+            if (slot.classList.contains('banner-ad-content')) {
+                content = slot;
+                placeholder = null;
+            }
+            
+            if (content) content.innerHTML = '';
+            if (placeholder) {
+                placeholder.style.display = 'block';
+                placeholder.textContent = 'Loading...';
+                placeholder.className = 'ad-placeholder ad-loading';
+            }
+            
+            adLoadCount[slotId] = (adLoadCount[slotId] || 0) + 1;
+            
+            var script1 = document.createElement('script');
+            script1.type = 'text/javascript';
+            script1.textContent = "atOptions = { 'key': '" + config.key + "', 'format': 'iframe', 'height': " + config.h + ", 'width': " + config.w + ", 'params': {} };";
+            
+            var script2 = document.createElement('script');
+            script2.type = 'text/javascript';
+            script2.src = 'https://www.highperformanceformat.com/' + config.key + '/invoke.js';
+            script2.async = true;
+            
+            script2.onload = function() {
+                if (placeholder) placeholder.style.display = 'none';
+                console.log('[Ad] Loaded: ' + slotId);
+                updateDebugInfo();
+            };
+            
+            script2.onerror = function() {
+                if (placeholder) {
+                    placeholder.textContent = 'Ad Error';
+                    placeholder.className = 'ad-placeholder';
+                }
+            };
+            
+            if (content) {
+                content.appendChild(script1);
+                content.appendChild(script2);
+            }
+            
+            return true;
+        }
+        
+        function startAdCycle(slotId) {
+            if (state.isPremium) return;
+            if (adTimers[slotId]) clearTimeout(adTimers[slotId]);
+            
+            var refreshTime = calculateRefreshTime(slotId);
+            adNextRefresh[slotId] = Date.now() + refreshTime;
+            
+            adTimers[slotId] = setTimeout(function() {
+                blackoutAd(slotId);
+            }, refreshTime);
+            
+            updateDebugInfo();
+        }
+        
+        function blackoutAd(slotId) {
+            if (state.isPremium) return;
+            
+            var slot = document.getElementById(slotId);
+            if (!slot) return;
+            
+            var content = slot.querySelector('.ad-content');
+            var placeholder = slot.querySelector('.ad-placeholder');
+            
+            if (slot.classList.contains('banner-ad-content')) {
+                content = slot;
+            }
+            
+            if (content) content.innerHTML = '';
+            if (placeholder) {
+                placeholder.style.display = 'block';
+                placeholder.textContent = '🔄';
+                placeholder.className = 'ad-placeholder';
+            }
+            
+            setTimeout(function() {
+                loadAd(slotId);
+                startAdCycle(slotId);
+            }, BLACKOUT_TIME);
+        }
+        
+        function loadAllAds() {
+            if (state.isPremium) return;
+            
+            console.log('[Ad] Loading all 12 banners...');
+            var slots = Object.keys(AD_CONFIG);
+            
+            slots.forEach(function(slotId, index) {
+                setTimeout(function() {
+                    loadAd(slotId);
+                }, index * 300);
+            });
+            
+            setTimeout(function() {
+                slots.forEach(function(slotId) {
+                    startAdCycle(slotId);
+                });
+            }, 5000);
+        }
+        
+        function updateDebugInfo() {
+            var debugEl = document.getElementById('debugInfo');
+            if (!debugEl) return;
+            
+            if (state.isPremium) {
+                debugEl.textContent = 'Premium (' + state.daysRemaining + ' ngày)';
+                return;
+            }
+            
+            var loadedCount = 0;
+            Object.keys(AD_CONFIG).forEach(function(slotId) {
+                var slot = document.getElementById(slotId);
+                if (slot) {
+                    var iframe = slot.querySelector('iframe');
+                    if (iframe && iframe.offsetHeight > 0) loadedCount++;
+                }
+            });
+            
+            var nextTimes = [];
+            var now = Date.now();
+            Object.keys(adNextRefresh).forEach(function(slotId) {
+                var remaining = Math.max(0, adNextRefresh[slotId] - now);
+                if (remaining > 0) {
+                    nextTimes.push(slotId.replace('ad', '') + ':' + Math.round(remaining/1000) + 's');
+                }
+            });
+            
+            var html = 'v7.17 | ' + loadedCount + '/12';
+            if (nextTimes.length > 0) {
+                html += ' | ' + nextTimes.slice(0, 4).join(' ');
+            }
+            debugEl.textContent = html;
+        }
+        
+        function periodicCheck() {
+            if (state.isPremium) return;
+            
+            Object.keys(AD_CONFIG).forEach(function(slotId) {
+                var slot = document.getElementById(slotId);
+                if (!slot) return;
+                
+                var iframe = slot.querySelector('iframe');
+                var hasIframe = iframe && iframe.offsetHeight > 0;
+                
+                if (!hasIframe && !adTimers[slotId]) {
+                    loadAd(slotId);
+                    startAdCycle(slotId);
+                }
+            });
+            
+            updateDebugInfo();
+        }
+        
+        // ==================== PREMIUM FUNCTIONS ====================
+        window.showPremiumPopup = function() {
+            document.getElementById('premiumPopup').classList.remove('hidden');
+        };
+        
+        window.hidePremiumPopup = function() {
+            document.getElementById('premiumPopup').classList.add('hidden');
+        };
+        
+        window.showActivatePopup = function() {
+            document.getElementById('activatePopup').classList.remove('hidden');
+        };
+        
+        window.hideActivatePopup = function() {
+            document.getElementById('activatePopup').classList.add('hidden');
+        };
+        
+        window.startPayment = function() {
+            var btnPay = document.getElementById('btnPay');
+            btnPay.disabled = true;
+            btnPay.textContent = 'Đang tạo thanh toán...';
+            
+            var visitorId = getVisitorId();
+            var returnUrl = API_URL + '/api/payment-callback';
+            var cancelUrl = BLOG_URL + '?payment=cancel';
+            
+            fetch(API_URL + '/api/create-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    visitorId: visitorId,
+                    returnUrl: returnUrl,
+                    cancelUrl: cancelUrl
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success && data.data.checkoutUrl) {
+                    state.currentOrderCode = data.data.orderCode;
+                    startPaymentPolling(data.data.orderCode);
+                    window.open(data.data.checkoutUrl, '_blank');
+                    btnPay.textContent = 'Chờ thanh toán...';
+                    alert('Cửa sổ thanh toán đã mở!\n\n1. Quét mã QR VietQR\n2. Chuyển khoản 365.000đ\n3. Trang sẽ tự động cập nhật sau khi thanh toán thành công');
+                } else {
+                    throw new Error(data.error || 'Không thể tạo thanh toán');
+                }
+            })
+            .catch(function(error) {
+                alert('Lỗi: ' + error.message + '\n\nVui lòng thử lại hoặc liên hệ Zalo: 0906 518 413');
+                btnPay.disabled = false;
+                btnPay.textContent = '💳 Thanh Toán Ngay';
+            });
+        };
+        
+        function startPaymentPolling(orderCode) {
+            if (state.paymentPolling) clearInterval(state.paymentPolling);
+            
+            var pollCount = 0;
+            state.paymentPolling = setInterval(function() {
+                pollCount++;
+                if (pollCount > 120) {
+                    clearInterval(state.paymentPolling);
+                    document.getElementById('btnPay').disabled = false;
+                    document.getElementById('btnPay').textContent = '💳 Thanh Toán Ngay';
+                    return;
+                }
+                
+                fetch(API_URL + '/api/check-payment/' + orderCode)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success && data.status === 'PAID') {
+                        clearInterval(state.paymentPolling);
+                        var licenseData = {
+                            licenseKey: data.data.licenseKey,
+                            expiresAt: data.data.expiresAt,
+                            activatedAt: new Date().toISOString()
+                        };
+                        localStorage.setItem(LICENSE_KEY, JSON.stringify(licenseData));
+                        activateLicenseOnServer(data.data.licenseKey);
+                        showLicenseSuccess(data.data.licenseKey, data.data.daysRemaining);
+                        checkPremiumStatus();
+                        updateHeaderStatus();
+                        hidePremiumPopup();
+                    }
+                })
+                .catch(function(e) { });
+            }, 5000);
+        }
+        
+        function showLicenseSuccess(licenseKey, daysRemaining) {
+            document.getElementById('licenseKeyDisplay').textContent = licenseKey;
+            document.getElementById('licensePopup').classList.remove('hidden');
+            
+            var iframe = document.getElementById('appFrame');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({
+                    action: 'premiumActivated',
+                    license: {
+                        licenseKey: licenseKey,
+                        expiresAt: new Date(Date.now() + daysRemaining * 86400000).toISOString(),
+                        daysRemaining: daysRemaining
+                    }
+                }, '*');
+            }
+            
+            var countdown = 10;
+            var countdownEl = document.getElementById('autoDownloadCountdown');
+            var countdownInterval = setInterval(function() {
+                countdown--;
+                countdownEl.textContent = 'Tự động tải về sau ' + countdown + ' giây...';
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    downloadLicenseKey();
+                }
+            }, 1000);
+        }
+        
+        window.copyLicenseKey = function() {
+            var licenseKey = document.getElementById('licenseKeyDisplay').textContent;
+            navigator.clipboard.writeText(licenseKey).then(function() {
+                alert('Đã copy License Key!');
+            });
+        };
+        
+        window.downloadLicenseKey = function() {
+            var licenseKey = document.getElementById('licenseKeyDisplay').textContent;
+            var content = 'QR Scanner Premium - License Key\n================================\n\n';
+            content += 'License Key: ' + licenseKey + '\n\n';
+            content += 'Ngày kích hoạt: ' + new Date().toLocaleString('vi-VN') + '\n';
+            content += 'Hạn sử dụng: 365 ngày\n\n';
+            content += 'Zalo hỗ trợ: 0906 518 413\n';
+            
+            var blob = new Blob([content], { type: 'text/plain' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'QRScanner_License_' + licenseKey.substring(0, 12) + '.txt';
+            a.click();
+        };
+        
+        window.closeLicensePopup = function() {
+            document.getElementById('licensePopup').classList.add('hidden');
+            location.reload();
+        };
+        
+        window.activateLicense = function() {
+            var licenseInput = document.getElementById('licenseInput');
+            var licenseKey = licenseInput.value.trim().toUpperCase();
+            
+            if (!licenseKey || licenseKey.length < 30) {
+                alert('Vui lòng nhập License Key hợp lệ!');
+                return;
+            }
+            
+            fetch(API_URL + '/api/activate-license', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    licenseKey: licenseKey,
+                    visitorId: getVisitorId()
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    localStorage.setItem(LICENSE_KEY, JSON.stringify({
+                        licenseKey: data.data.licenseKey,
+                        expiresAt: data.data.expiresAt,
+                        activatedAt: new Date().toISOString()
+                    }));
+                    alert('Kích hoạt thành công!\nCòn ' + data.data.daysRemaining + ' ngày sử dụng.');
+                    hideActivatePopup();
+                    location.reload();
+                } else {
+                    alert(data.error || 'License không hợp lệ');
+                }
+            })
+            .catch(function(error) {
+                alert('Lỗi: ' + error.message);
+            });
+        };
+        
+        function activateLicenseOnServer(licenseKey) {
+            fetch(API_URL + '/api/activate-license', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    licenseKey: licenseKey,
+                    visitorId: getVisitorId()
+                })
+            }).catch(function(e) { });
+        }
+        
+        function getVisitorId() {
+            var visitorId = localStorage.getItem('visitorId');
+            if (!visitorId) {
+                visitorId = 'v_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('visitorId', visitorId);
+            }
+            return visitorId;
+        }
+        
+        function checkPremiumStatus() {
+            try {
+                var licenseData = localStorage.getItem(LICENSE_KEY);
+                if (licenseData) {
+                    var license = JSON.parse(licenseData);
+                    var now = new Date();
+                    var expires = new Date(license.expiresAt);
+                    if (now < expires) {
+                        state.isPremium = true;
+                        state.licenseKey = license.licenseKey;
+                        state.daysRemaining = Math.ceil((expires - now) / (1000 * 60 * 60 * 24));
+                        return true;
+                    }
+                }
+            } catch (e) { }
+            state.isPremium = false;
+            return false;
+        }
+        
+        function updateHeaderStatus() {
+            var headerStatus = document.getElementById('headerStatus');
+            if (state.isPremium) {
+                headerStatus.innerHTML = '<div class="premium-active">⭐ Premium | ' + state.daysRemaining + ' ngày còn lại</div>';
+                document.body.classList.add('premium-active');
+                
+                // Stop all ad timers
+                Object.keys(adTimers).forEach(function(slotId) {
+                    if (adTimers[slotId]) clearTimeout(adTimers[slotId]);
+                });
+                
+                var iframe = document.getElementById('appFrame');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({
+                        action: 'premiumActivated',
+                        license: {
+                            licenseKey: state.licenseKey,
+                            expiresAt: new Date(Date.now() + state.daysRemaining * 86400000).toISOString(),
+                            daysRemaining: state.daysRemaining
+                        }
+                    }, '*');
+                }
+            } else {
+                headerStatus.innerHTML = '<button class="btn-upgrade" onclick="showPremiumPopup()">👑 Nâng cấp Premium</button><button class="btn-upgrade" onclick="showActivatePopup()" style="background:#667eea;">🔑 Nhập License</button>';
+                document.body.classList.remove('premium-active');
+            }
+            updateDebugInfo();
+        }
+        
+        function handleUrlParams() {
+            var params = new URLSearchParams(window.location.search);
+            var payment = params.get('payment');
+            var license = params.get('license');
+            if (payment === 'success' && license) {
+                var licenseData = {
+                    licenseKey: license,
+                    expiresAt: new Date(Date.now() + 365 * 86400000).toISOString(),
+                    activatedAt: new Date().toISOString()
+                };
+                localStorage.setItem(LICENSE_KEY, JSON.stringify(licenseData));
+                window.history.replaceState({}, document.title, window.location.pathname);
+                setTimeout(function() {
+                    showLicenseSuccess(license, 365);
+                }, 1000);
+            } else if (payment === 'cancel') {
+                alert('Thanh toán đã bị hủy. Vui lòng thử lại!');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+        
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.action === 'openPremiumPopup') {
+                showPremiumPopup();
+            }
+        });
+        
+        function init() {
+            console.log('═══════════════════════════════════════');
+            console.log('[Blog] v7.17 Premium - PayOS Integration');
+            console.log('═══════════════════════════════════════');
+            
+            handleUrlParams();
+            checkPremiumStatus();
+            updateHeaderStatus();
+            
+            if (!state.isPremium) {
+                loadAllAds();
+                setInterval(periodicCheck, 15000);
+            }
+            
+            setInterval(updateDebugInfo, 1000);
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+    //]]>
+    </script>
+    
+    <b:section class='hidden' id='hidden'/>
+</body>
+</html>
