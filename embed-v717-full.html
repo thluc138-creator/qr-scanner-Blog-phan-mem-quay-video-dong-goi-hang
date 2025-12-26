@@ -64,7 +64,7 @@
         .folder-info .title { font-weight: 600; color: #4dabf7; }
         .folder-info .path { background: #0d1520; padding: 3px 8px; border-radius: 4px; font-family: monospace; color: #7bed9f; font-size: 10px; }
         
-        /* VIDEO SECTION - 16:9 aspect ratio, contain để không bị crop */
+        /* VIDEO SECTION - 16:9 aspect ratio */
         .video-section { 
             position: relative; 
             background: #000; 
@@ -98,7 +98,7 @@
         .stats-total { font-size: 13px; opacity: 0.9; }
         .stats-limit { font-size: 12px; color: #ffd700; }
         
-        /* HISTORY - Phần dư để hiển thị lịch sử đơn hàng */
+        /* HISTORY */
         .history { padding: 10px 12px; background: #16213e; flex: 1; }
         .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .history-header h3 { font-size: 15px; color: #fff; }
@@ -120,6 +120,56 @@
         
         /* HISTORY ACTIONS */
         .history-actions { display: flex; gap: 8px; padding: 10px 12px; background: #0d1520; justify-content: center; }
+        
+        /* ============================================
+           PREMIUM MODE - Video full màn hình giữ tỷ lệ
+           ============================================ */
+        body.premium-mode .header,
+        body.premium-mode .limit-banner,
+        body.premium-mode .tabs,
+        body.premium-mode .controls,
+        body.premium-mode .buttons,
+        body.premium-mode .folder-info,
+        body.premium-mode .stats,
+        body.premium-mode .history,
+        body.premium-mode .history-actions {
+            display: none !important;
+        }
+        
+        body.premium-mode .premium-info {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 8px 15px;
+        }
+        
+        body.premium-mode .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        body.premium-mode .video-section {
+            flex: 1;
+            padding-top: 0;
+            height: calc(100vh - 40px); /* Trừ premium-info bar */
+            margin-top: 40px; /* Cho premium-info bar */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+        
+        body.premium-mode #webcamVideo {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* QUAN TRỌNG: Giữ tỷ lệ, không crop */
+        }
         
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
@@ -277,7 +327,7 @@ function resetDailyData(today){state.todayUsed=0;state.todayDate=today;if(!state
 function incrementDailyUsage(){state.todayUsed++;localStorage.setItem(DAILY_KEY,JSON.stringify({date:state.todayDate,used:state.todayUsed}));updateLimitDisplay();}
 function canScanMore(){if(state.isPremium)return true;return state.todayUsed<FREE_DAILY_LIMIT;}
 function getRemainingScans(){if(state.isPremium)return'Không giới hạn';return Math.max(0,FREE_DAILY_LIMIT-state.todayUsed);}
-function updateLimitDisplay(){var limitBanner=$('limitBanner'),premiumInfo=$('premiumInfo'),userBadge=$('userBadge'),statsLimit=$('statsLimit'),remainingToday=$('remainingToday'),usedToday=$('usedToday'),daysRemaining=$('daysRemaining');if(state.isPremium){limitBanner.classList.add('hidden');premiumInfo.classList.remove('hidden');userBadge.textContent='PREMIUM';userBadge.className='premium-badge';statsLimit.classList.add('hidden');daysRemaining.textContent=state.daysRemaining;}else{limitBanner.classList.remove('hidden');premiumInfo.classList.add('hidden');userBadge.textContent='FREE';userBadge.className='free-badge';statsLimit.classList.remove('hidden');usedToday.textContent=state.todayUsed;remainingToday.textContent=getRemainingScans();}}
+function updateLimitDisplay(){var limitBanner=$('limitBanner'),premiumInfo=$('premiumInfo'),userBadge=$('userBadge'),statsLimit=$('statsLimit'),remainingToday=$('remainingToday'),usedToday=$('usedToday'),daysRemaining=$('daysRemaining');if(state.isPremium){if(limitBanner)limitBanner.classList.add('hidden');if(premiumInfo)premiumInfo.classList.remove('hidden');if(userBadge){userBadge.textContent='PREMIUM';userBadge.className='premium-badge';}if(statsLimit)statsLimit.classList.add('hidden');if(daysRemaining)daysRemaining.textContent=state.daysRemaining;document.body.classList.add('premium-mode');}else{if(limitBanner)limitBanner.classList.remove('hidden');if(premiumInfo)premiumInfo.classList.add('hidden');if(userBadge){userBadge.textContent='FREE';userBadge.className='free-badge';}if(statsLimit)statsLimit.classList.remove('hidden');if(usedToday)usedToday.textContent=state.todayUsed;if(remainingToday)remainingToday.textContent=getRemainingScans();document.body.classList.remove('premium-mode');}}
 function showLimitModal(){$('limitModal').classList.remove('hidden');}
 function hideLimitModal(){$('limitModal').classList.add('hidden');}
 window.addEventListener('message',function(event){if(event.data&&event.data.action==='premiumActivated'){var licenseData=event.data.license;if(licenseData){localStorage.setItem(LICENSE_KEY,JSON.stringify(licenseData));checkPremiumStatus();updateLimitDisplay();updateUI();toast('🎉 Premium đã kích hoạt! Còn '+state.daysRemaining+' ngày','success');}}});
