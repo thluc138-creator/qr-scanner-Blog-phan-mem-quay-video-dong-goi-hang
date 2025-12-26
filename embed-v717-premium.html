@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Scanner v7.17 Premium</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; height: 100%; overflow: hidden; }
+        .app-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        .hidden { display: none !important; }
+        /* HEADER */
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 8px 15px; text-align: center; flex-shrink: 0; }
+        .header h1 { font-size: 24px; }
+        .header .subtitle { font-size: 12px; opacity: 0.9; }
+        .header .premium-badge { background: #ffd700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-left: 8px; }
+        .header .free-badge { background: #6c757d; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 8px; }
+        /* LIMIT BANNER */
+        .limit-banner { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; padding: 6px 12px; text-align: center; font-size: 12px; flex-shrink: 0; cursor: pointer; }
+        .limit-banner:hover { background: linear-gradient(135deg, #e67e22, #d35400); }
+        .limit-banner .upgrade-link { color: #fff; text-decoration: underline; font-weight: bold; }
+        /* PREMIUM INFO */
+        .premium-info { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 6px 12px; text-align: center; font-size: 12px; flex-shrink: 0; }
+        .days-remaining { font-weight: bold; color: #ffd700; }
+        /* TABS */
+        .tabs { display: flex; background: #16213e; border-bottom: 2px solid #667eea; flex-shrink: 0; }
+        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; background: transparent; border: none; font-size: 16px; color: #888; font-weight: 500; }
+        .tab.active { background: #1a1a2e; color: #667eea; font-weight: 600; border-bottom: 3px solid #667eea; margin-bottom: -2px; }
+        /* CONTROLS */
+        .controls { padding: 8px 12px; background: #16213e; border-bottom: 1px solid #2a3f5f; flex-shrink: 0; }
+        .control-row { display: flex; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+        .control-group { flex: 1; min-width: 130px; }
+        .control-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 3px; font-weight: 500; }
+        select { width: 100%; padding: 6px 8px; border: 1px solid #3a4f6f; border-radius: 4px; font-size: 12px; background: #1a1a2e; color: white; }
+        /* TOGGLE */
+        .toggle-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+        .toggle { position: relative; width: 36px; height: 18px; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #444; border-radius: 18px; transition: 0.3s; }
+        .toggle-slider:before { content: ""; position: absolute; height: 14px; width: 14px; left: 2px; bottom: 2px; background: white; border-radius: 50%; transition: 0.3s; }
+        .toggle input:checked + .toggle-slider { background: #667eea; }
+        .toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
+        .toggle-label { font-size: 12px; color: #ccc; font-weight: 500; }
+        /* BUTTONS */
+        .buttons { display: flex; gap: 8px; padding: 8px 12px; background: #16213e; justify-content: center; flex-shrink: 0; }
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-secondary { background: #f39c12; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-small { padding: 5px 12px; font-size: 11px; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* FOLDER INFO */
+        .folder-info { background: #1f3a5f; border: 1px solid #3a5f8f; border-radius: 5px; padding: 6px 10px; margin: 0 12px 5px; font-size: 11px; flex-shrink: 0; }
+        .folder-info .title { font-weight: 600; color: #4dabf7; font-size: 12px; }
+        .folder-info .path { background: #0d1520; padding: 4px 8px; border-radius: 4px; font-family: monospace; color: #7bed9f; font-size: 10px; }
+        /* VIDEO SECTION */
+        .video-section { position: relative; background: #000; width: 100%; flex: 1; min-height: 0; overflow: hidden; }
+        #webcamVideo { width: 100%; height: 100%; object-fit: cover; background: #000; }
+        .video-overlay { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; border-left: 3px solid #28a745; opacity: 0; transform: translateY(10px); transition: all 0.3s; }
+        .video-overlay.show { opacity: 1; transform: translateY(0); }
+        .video-overlay h4 { font-size: 13px; margin-bottom: 3px; }
+        .video-overlay strong { color: #ffd700; }
+        .rec-indicator { position: absolute; top: 10px; left: 10px; background: rgba(255,0,0,0.9); color: white; padding: 5px 12px; border-radius: 5px; font-size: 12px; font-weight: bold; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .fps-display { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; display: flex; gap: 12px; }
+        .fps-value { color: #00ff00; }
+        .fps-value.low { color: #ff0000; }
+        .fps-value.medium { color: #ffff00; }
+        .scan-rate { color: #00bfff; }
+        /* STATS */
+        .stats { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 8px 12px; text-align: center; display: flex; justify-content: center; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+        .stats-title { font-size: 13px; }
+        .stats-count { font-size: 18px; font-weight: bold; }
+        .stats-total { font-size: 12px; opacity: 0.9; }
+        .stats-limit { font-size: 11px; color: #ffd700; }
+        /* HISTORY */
+        .history { padding: 8px 12px; background: #16213e; flex-shrink: 0; max-height: 150px; display: flex; flex-direction: column; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .history-header h3 { font-size: 13px; color: #fff; }
+        .search-input { padding: 5px 10px; border: 1px solid #3a4f6f; border-radius: 10px; font-size: 11px; width: 90px; background: #1a1a2e; color: white; }
+        .history-list { border: 1px solid #2a3f5f; border-radius: 5px; overflow-y: auto; background: #1a1a2e; flex: 1; max-height: 100px; }
+        .history-list::-webkit-scrollbar { width: 6px; }
+        .history-list::-webkit-scrollbar-track { background: #2a3f5f; }
+        .history-list::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
+        .history-item { display: grid; grid-template-columns: 25px 1fr 65px 45px 45px 45px 30px; gap: 4px; padding: 5px 8px; border-bottom: 1px solid #2a3f5f; font-size: 11px; align-items: center; }
+        .history-item:hover { background: #1f2b47; }
+        .h-num { color: #666; }
+        .h-qr { font-weight: 600; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .h-date { color: #888; font-size: 9px; }
+        .h-time { color: #667eea; }
+        .h-duration { color: #28a745; }
+        .h-size { color: #f39c12; }
+        .h-products { color: #e74c3c; font-weight: 600; }
+        .empty-msg { text-align: center; padding: 15px; color: #666; font-size: 12px; }
+        /* HISTORY ACTIONS */
+        .history-actions { display: flex; gap: 6px; padding: 6px 12px; background: #0d1520; justify-content: center; flex-shrink: 0; }
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-box { background: #1a1a2e; border: 1px solid #3a4f6f; border-radius: 10px; padding: 15px; width: 90%; max-width: 280px; text-align: center; }
+        .modal-box h3 { margin-bottom: 12px; color: #fff; font-size: 14px; }
+        .modal-box .date-inputs { display: flex; gap: 8px; margin-bottom: 12px; flex-direction: column; }
+        .modal-box .date-inputs label { font-size: 11px; color: #aaa; text-align: left; }
+        .modal-box .date-inputs input { padding: 8px; border: 1px solid #3a4f6f; border-radius: 5px; background: #0d1520; color: white; font-size: 12px; }
+        .modal-box .modal-buttons { display: flex; gap: 8px; justify-content: center; }
+        /* LIMIT REACHED MODAL */
+        .limit-modal { background: #1a1a2e; border: 2px solid #f39c12; border-radius: 15px; padding: 20px; width: 90%; max-width: 350px; text-align: center; }
+        .limit-modal h2 { color: #f39c12; font-size: 18px; margin-bottom: 10px; }
+        .limit-modal p { color: #ccc; font-size: 13px; margin-bottom: 15px; }
+        .limit-modal .btn-upgrade { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; padding: 12px 30px; font-size: 14px; border-radius: 25px; border: none; cursor: pointer; font-weight: bold; }
+        /* TOAST */
+        .toast { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: white; padding: 10px 20px; border-radius: 20px; font-size: 12px; opacity: 0; transition: all 0.3s; z-index: 2000; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { background: linear-gradient(135deg, #28a745, #20c997); }
+        .toast.warning { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .toast.error { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>📦 Quay Video Đóng Hàng <span id="userBadge" class="free-badge">FREE</span></h1>
+            <div class="subtitle">v7.17 Premium - Full Screen</div>
+        </div>
+        
+        <!-- FREE LIMIT BANNER -->
+        <div class="limit-banner" id="limitBanner" onclick="window.parent.postMessage({action:'openPremiumPopup'},'*')">
+            ⚠️ Bản Free: <strong><span id="usedToday">0</span>/100</strong> đơn hôm nay | Reset lúc 00:00 | <span class="upgrade-link">👑 Nâng cấp Premium</span>
+        </div>
+        
+        <!-- PREMIUM INFO -->
+        <div class="premium-info hidden" id="premiumInfo">
+            ⭐ Premium Active | Còn lại: <span class="days-remaining" id="daysRemaining">365</span> ngày | Không giới hạn đơn hàng
+        </div>
+        
+        <div class="tabs"><button class="tab active" id="tabCamera">📷 Camera</button><button class="tab" id="tabScanner">⌨️ Scanner</button></div>
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group"><label>📹 Camera</label><select id="cameraSelect"><option>Đang tải...</option></select></div>
+                <div class="control-group"><label>📐 Chất lượng</label><select id="qualitySelect"><option value="1080p30">1080p 30fps</option><option value="1080p60" selected>1080p 60fps</option></select></div>
+                <div class="control-group"><label>💾 Bitrate</label><select id="bitrateSelect"><option value="8">8 Mbps</option><option value="10">10 Mbps</option><option value="12" selected>12 Mbps</option></select></div>
+            </div>
+            <div class="control-row">
+                <div class="control-group"><label>📍 Timestamp</label><select id="timestampPosition"><option value="top-left">Trên trái</option><option value="top-right" selected>Trên phải</option><option value="bottom-left">Dưới trái</option><option value="bottom-right">Dưới phải</option></select></div>
+                <div class="control-group"><label>⏪ Ghi hình trước</label><select id="preBufferSelect"><option value="3000">3 giây</option><option value="5000" selected>5 giây</option><option value="7000">7 giây</option><option value="10000">10 giây</option></select></div>
+                <div class="control-group"><label>⏩ Ghi hình sau</label><select id="postBufferSelect"><option value="2000">2 giây</option><option value="3000" selected>3 giây</option><option value="5000">5 giây</option></select></div>
+            </div>
+            <div class="toggle-row">
+                <label class="toggle"><input type="checkbox" id="audioToggle" checked><span class="toggle-slider"></span></label>
+                <span class="toggle-label">🎤 Ghi âm</span>
+            </div>
+        </div>
+        <div class="buttons"><button id="startBtn" class="btn btn-primary">🎬 Bắt đầu</button><button id="stopBtn" class="btn btn-danger hidden">⏹️ Dừng</button><button id="folderBtn" class="btn btn-secondary">📁 Thư mục</button></div>
+        <div class="folder-info hidden" id="folderInfo"><div class="title">📁 Lưu tại:</div><div class="path" id="folderPath">Downloads/</div></div>
+        <div class="video-section">
+            <video id="webcamVideo" autoplay playsinline muted></video>
+            <div class="video-overlay" id="orderInfo"><h4>📦 Đang ghi</h4><div>Mã: <strong id="currentQRDisplay">-</strong></div><div>Time: <span id="currentTime">00:00:00</span> | SP: <span id="productsCount">0</span></div></div>
+            <div class="rec-indicator hidden" id="recIndicator">⏺ REC <span id="recTime">00:00</span></div>
+            <div class="fps-display hidden" id="fpsDisplay"><span>FPS: <span id="fpsValue" class="fps-value">0</span></span><span>Scan: <span id="scanRate" class="scan-rate">0</span>/s</span></div>
+        </div>
+        <div class="stats">
+            <span class="stats-title">📊 Hôm nay:</span>
+            <span class="stats-count"><span id="todayCount">0</span> đơn</span>
+            <span class="stats-total">| Tổng: <span id="totalCount">0</span>/<span id="maxOrders">100000</span></span>
+            <span class="stats-limit" id="statsLimit">| Còn: <span id="remainingToday">100</span> đơn</span>
+        </div>
+        <div class="history"><div class="history-header"><h3>📜 Lịch sử (<span id="historyCount">0</span>)</h3><input type="text" class="search-input" id="searchInput" placeholder="🔍 Tìm..."></div><div class="history-list" id="historyList"><div class="empty-msg">Chưa có lịch sử</div></div></div>
+        <div class="history-actions"><button id="exportBtn" class="btn btn-success btn-small">📊 Excel</button><button id="deleteByDateBtn" class="btn btn-info btn-small">📅 Xóa theo ngày</button><button id="deleteAllBtn" class="btn btn-danger btn-small">🗑️ Xóa tất cả</button></div>
+    </div>
+    
+    <div class="modal-overlay hidden" id="deleteModal"><div class="modal-box"><h3>📅 Xóa đơn theo ngày</h3><div class="date-inputs"><div><label>Từ ngày:</label><input type="date" id="deleteFromDate"></div><div><label>Đến ngày:</label><input type="date" id="deleteToDate"></div></div><div class="modal-buttons"><button class="btn btn-secondary btn-small" id="cancelDeleteBtn">Hủy</button><button class="btn btn-danger btn-small" id="confirmDeleteBtn">🗑️ Xóa</button></div></div></div>
+    
+    <!-- LIMIT REACHED MODAL -->
+    <div class="modal-overlay hidden" id="limitModal">
+        <div class="limit-modal">
+            <h2>⚠️ ĐÃ HẾT LƯỢT QUÉT!</h2>
+            <p>Bạn đã sử dụng hết <strong>100 đơn/ngày</strong> của bản Free.</p>
+            <p>Nâng cấp Premium để quét không giới hạn!</p>
+            <button class="btn-upgrade" onclick="window.parent.postMessage({action:'openPremiumPopup'},'*')">👑 Nâng cấp ngay - 365.000đ/năm</button>
+            <p style="margin-top:15px;font-size:11px;color:#888;">Hoặc chờ reset lúc 00:00</p>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script>
+(function(){
+// ==================== CONFIG ====================
+var STORAGE_KEY = 'qrScannerBlogV7';
+var LICENSE_KEY = 'qrScannerLicense';
+var DAILY_KEY = 'qrScannerDaily';
+var MAX_ORDERS = 100000;
+var FREE_DAILY_LIMIT = 100;
+var AUTO_DELETE_DAYS = 60;
+var SCAN_LOCK_FIRST = 10000;
+var SCAN_LOCK_SECOND = 2000;
+var PROGRESS_DISPLAY_TIME = 1500;
+
+var VIDEO_PRESETS = {
+    '1080p30': { width: 1920, height: 1080, fps: 30, scanFPS: 3, scanScale: 0.5 },
+    '1080p60': { width: 1920, height: 1080, fps: 60, scanFPS: 3, scanScale: 0.5 }
+};
+var BITRATE_OPTIONS = { '8': { value: 8000000 }, '10': { value: 10000000 }, '12': { value: 12000000 } };
+
+// ==================== STATE ====================
+var state = {
+    stream: null, recorder: null, chunks: [], canvasStream: null, orders: [],
+    isRecording: false, isFirstScan: true, currentQR: null, scanBlocked: false,
+    recordingStartTime: null, scanTime: null, timerInterval: null, countdownTimer: null,
+    quality: '1080p60', bitrate: '12', audio: true, preBuf: 5000, postBuf: 3000,
+    cameraId: null, device: 'camera', timestampPos: 'top-right',
+    recordingCanvas: null, recordingCtx: null, scanCanvas: null, scanCtx: null,
+    rafId: null, frameCount: 0, lastFpsTime: 0, currentFPS: 0,
+    lastScanTime: 0, scanInterval: 333, actualScanCount: 0, lastScanCountTime: 0, actualScanRate: 0,
+    displayQR: null, displayTime: 0, detectedProducts: [], currentCodec: null,
+    folderHandle: null, lastSavedFile: null, scanCycleCount: 0,
+    // Premium state
+    isPremium: false,
+    licenseKey: null,
+    licenseExpires: null,
+    daysRemaining: 0,
+    todayUsed: 0,
+    todayDate: null
+};
+
+// ==================== UTILITY FUNCTIONS ====================
+function $(id) { return document.getElementById(id); }
+function toast(msg, type) { var t = $('toast'); t.textContent = msg; t.className = 'toast show ' + (type || ''); setTimeout(function() { t.classList.remove('show'); }, 2500); }
+function beep() { try { var ctx = new (window.AudioContext || window.webkitAudioContext)(); var o = ctx.createOscillator(), g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = 800; o.type = 'square'; g.gain.setValueAtTime(0.3, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1); o.start(); o.stop(ctx.currentTime + 0.1); } catch (e) { } }
+function pad(n) { return String(n).padStart(2, '0'); }
+function formatTime(sec) { return pad(Math.floor(sec / 3600)) + ':' + pad(Math.floor((sec % 3600) / 60)) + ':' + pad(sec % 60); }
+function dateStr() { var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function dateStrVN() { var d = new Date(); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear(); }
+function timeStr() { var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
+function fileTimeStr() { var d = new Date(); return pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds()); }
+function vnDateToISO(vnDate) { var p = vnDate.split('/'); return p.length === 3 ? p[2] + '-' + p[1] + '-' + p[0] : vnDate; }
+
+// ==================== PREMIUM FUNCTIONS ====================
+function checkPremiumStatus() {
+    try {
+        var licenseData = localStorage.getItem(LICENSE_KEY);
+        if (licenseData) {
+            var license = JSON.parse(licenseData);
+            var now = new Date();
+            var expires = new Date(license.expiresAt);
+            
+            if (now < expires) {
+                state.isPremium = true;
+                state.licenseKey = license.licenseKey;
+                state.licenseExpires = license.expiresAt;
+                state.daysRemaining = Math.ceil((expires - now) / (1000 * 60 * 60 * 24));
+                return true;
+            } else {
+                // License expired
+                localStorage.removeItem(LICENSE_KEY);
+            }
+        }
+    } catch (e) { }
+    
+    state.isPremium = false;
+    state.licenseKey = null;
+    state.daysRemaining = 0;
+    return false;
+}
+
+function checkDailyLimit() {
+    var today = dateStr();
+    try {
+        var dailyData = localStorage.getItem(DAILY_KEY);
+        if (dailyData) {
+            var daily = JSON.parse(dailyData);
+            if (daily.date === today) {
+                state.todayUsed = daily.used || 0;
+                state.todayDate = today;
+            } else {
+                // New day - reset
+                resetDailyData(today);
+            }
+        } else {
+            resetDailyData(today);
+        }
+    } catch (e) {
+        resetDailyData(today);
+    }
+}
+
+function resetDailyData(today) {
+    state.todayUsed = 0;
+    state.todayDate = today;
+    
+    // Nếu Free user, xóa lịch sử
+    if (!state.isPremium) {
+        state.orders = [];
+        localStorage.setItem(STORAGE_KEY, '[]');
+    }
+    
+    localStorage.setItem(DAILY_KEY, JSON.stringify({
+        date: today,
+        used: 0
+    }));
+}
+
+function incrementDailyUsage() {
+    state.todayUsed++;
+    localStorage.setItem(DAILY_KEY, JSON.stringify({
+        date: state.todayDate,
+        used: state.todayUsed
+    }));
+    updateLimitDisplay();
+}
+
+function canScanMore() {
+    if (state.isPremium) return true;
+    return state.todayUsed < FREE_DAILY_LIMIT;
+}
+
+function getRemainingScans() {
+    if (state.isPremium) return 'Không giới hạn';
+    return Math.max(0, FREE_DAILY_LIMIT - state.todayUsed);
+}
+
+function updateLimitDisplay() {
+    var limitBanner = $('limitBanner');
+    var premiumInfo = $('premiumInfo');
+    var userBadge = $('userBadge');
+    var statsLimit = $('statsLimit');
+    var remainingToday = $('remainingToday');
+    var usedToday = $('usedToday');
+    var daysRemaining = $('daysRemaining');
+    
+    if (state.isPremium) {
+        limitBanner.classList.add('hidden');
+        premiumInfo.classList.remove('hidden');
+        userBadge.textContent = 'PREMIUM';
+        userBadge.className = 'premium-badge';
+        statsLimit.classList.add('hidden');
+        daysRemaining.textContent = state.daysRemaining;
+    } else {
+        limitBanner.classList.remove('hidden');
+        premiumInfo.classList.add('hidden');
+        userBadge.textContent = 'FREE';
+        userBadge.className = 'free-badge';
+        statsLimit.classList.remove('hidden');
+        usedToday.textContent = state.todayUsed;
+        remainingToday.textContent = getRemainingScans();
+    }
+}
+
+function showLimitModal() {
+    $('limitModal').classList.remove('hidden');
+}
+
+function hideLimitModal() {
+    $('limitModal').classList.add('hidden');
+}
+
+// Listen for premium activation from parent
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.action === 'premiumActivated') {
+        var licenseData = event.data.license;
+        if (licenseData) {
+            localStorage.setItem(LICENSE_KEY, JSON.stringify(licenseData));
+            checkPremiumStatus();
+            updateLimitDisplay();
+            updateUI();
+            toast('🎉 Premium đã kích hoạt! Còn ' + state.daysRemaining + ' ngày', 'success');
+        }
+    }
+});
+
+// ==================== CODEC & CANVAS ====================
+function getCodec() { var codecs = [{ mimeType: 'video/webm;codecs=vp8,opus', ext: 'webm', name: 'VP8' }, { mimeType: 'video/webm;codecs=vp8', ext: 'webm', name: 'VP8' }, { mimeType: 'video/webm', ext: 'webm', name: 'WebM' }]; for (var i = 0; i < codecs.length; i++) { if (MediaRecorder.isTypeSupported(codecs[i].mimeType)) { state.currentCodec = codecs[i]; return codecs[i]; } } state.currentCodec = { mimeType: 'video/webm', ext: 'webm', name: 'WebM' }; return state.currentCodec; }
+function setupCanvas() { var preset = VIDEO_PRESETS[state.quality]; if (!state.recordingCanvas) { state.recordingCanvas = document.createElement('canvas'); state.recordingCtx = state.recordingCanvas.getContext('2d', { alpha: false }); } state.recordingCanvas.width = preset.width; state.recordingCanvas.height = preset.height; if (!state.scanCanvas) { state.scanCanvas = document.createElement('canvas'); state.scanCtx = state.scanCanvas.getContext('2d', { willReadFrequently: true }); } state.scanCanvas.width = Math.round(preset.width * preset.scanScale); state.scanCanvas.height = Math.round(preset.height * preset.scanScale); state.scanInterval = Math.round(1000 / preset.scanFPS); state.frameCount = 0; state.lastFpsTime = 0; state.currentFPS = 0; }
+// ==================== RENDER LOOP ====================
+function renderLoop(timestamp) { if (!state.stream || !state.stream.active) { state.rafId = null; return; } var video = $('webcamVideo'); var ctx = state.recordingCtx; var canvas = state.recordingCanvas; if (!video || !ctx || video.readyState < 2) { state.rafId = requestAnimationFrame(renderLoop); return; } ctx.drawImage(video, 0, 0, canvas.width, canvas.height); drawTimestamp(ctx); if (state.displayQR && (Date.now() - state.displayTime < PROGRESS_DISPLAY_TIME)) { drawProgressBar(ctx, state.displayQR); } drawFPSCounter(ctx, timestamp); if (state.scanTime && state.audio) drawAudioIndicator(ctx); var now = performance.now(); if (now - state.lastScanTime >= state.scanInterval) { state.lastScanTime = now; state.actualScanCount++; if (state.device === 'camera' && !state.scanBlocked && state.isRecording) { scanQRCode(); } } if (now - state.lastScanCountTime >= 1000) { state.actualScanRate = state.actualScanCount; state.actualScanCount = 0; state.lastScanCountTime = now; var scanEl = $('scanRate'); if (scanEl) scanEl.textContent = state.actualScanRate; } state.rafId = requestAnimationFrame(renderLoop); }
+
+function drawTimestamp(ctx) { var now = new Date(); var text = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN'); var position = state.timestampPos, canvas = state.recordingCanvas, margin = 113; ctx.font = 'bold 22px Arial'; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 3; var x = position.includes('left') ? margin : canvas.width - 260 - margin; var y = position.includes('top') ? margin + 22 : canvas.height - margin; ctx.strokeText(text, x, y); ctx.fillText(text, x, y); if (state.scanTime) { var blink = Math.floor(Date.now() / 500) % 2; var recY = position.includes('top') ? margin + 57 : canvas.height - margin - 35; if (blink) { ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(margin + 15, recY, 12, 0, 2 * Math.PI); ctx.fill(); } ctx.fillStyle = 'white'; ctx.font = 'bold 18px Arial'; ctx.fillText('REC', margin + 35, recY + 6); } }
+
+function drawProgressBar(ctx, qrCode) { var position = state.timestampPos, canvas = state.recordingCanvas, margin = 113; var panelWidth = 500, panelHeight = 180; var panelX = position.includes('left') ? margin : canvas.width - panelWidth - margin; var panelY = position.includes('top') ? margin + 80 : canvas.height - margin - panelHeight - 80; var centerX = panelX + panelWidth / 2; ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(panelX, panelY, panelWidth, panelHeight); ctx.strokeStyle = '#00FF00'; ctx.lineWidth = 3; ctx.strokeRect(panelX, panelY, panelWidth, panelHeight); ctx.fillStyle = '#00FF00'; ctx.font = 'bold 24px Arial'; ctx.textAlign = 'center'; ctx.fillText('✅ QR CODE DETECTED', centerX, panelY + 30); ctx.fillStyle = '#FFD700'; ctx.font = 'bold 28px Arial'; ctx.fillText(qrCode.length > 20 ? qrCode.substring(0, 20) + '...' : qrCode, centerX, panelY + 65); var barX = panelX + 20, barY = panelY + 120, barWidth = panelWidth - 40, barHeight = 35; ctx.fillStyle = 'rgba(50,50,50,0.9)'; ctx.fillRect(barX, barY, barWidth, barHeight); ctx.fillStyle = '#00FF00'; ctx.fillRect(barX, barY, barWidth, barHeight); ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 20px Arial'; ctx.fillText('100%', centerX, barY + barHeight / 2 + 7); if (state.detectedProducts.length > 0) { ctx.fillStyle = '#00BFFF'; ctx.font = 'bold 14px Arial'; ctx.fillText('📦 ' + state.detectedProducts.length + ' SP', centerX, panelY + panelHeight - 15); } ctx.textAlign = 'left'; }
+
+function drawFPSCounter(ctx, timestamp) { state.frameCount++; if (state.lastFpsTime === 0) state.lastFpsTime = timestamp; var elapsed = timestamp - state.lastFpsTime; if (elapsed >= 1000) { state.currentFPS = Math.round(state.frameCount * 1000 / elapsed); state.frameCount = 0; state.lastFpsTime = timestamp; var fpsEl = $('fpsValue'); if (fpsEl) { fpsEl.textContent = state.currentFPS; fpsEl.className = 'fps-value ' + (state.currentFPS < 30 ? 'low' : state.currentFPS < 50 ? 'medium' : ''); } } var margin = 113, position = state.timestampPos; var y = position.includes('bottom') ? margin + 20 : state.recordingCanvas.height - margin; ctx.fillStyle = state.currentFPS < 30 ? '#FF0000' : state.currentFPS < 50 ? '#FFFF00' : '#00FF00'; ctx.font = 'bold 14px Arial'; ctx.fillText('FPS: ' + state.currentFPS, margin, y); ctx.fillStyle = '#00BFFF'; ctx.fillText('Scan: ' + state.actualScanRate + '/s', margin + 80, y); }
+
+function drawAudioIndicator(ctx) { var margin = 113, position = state.timestampPos; var y = position.includes('bottom') ? margin + 45 : state.recordingCanvas.height - margin - 25; ctx.fillStyle = '#FF0000'; ctx.font = 'bold 14px Arial'; ctx.fillText('🎤 REC', margin, y); }
+// ==================== QR SCANNING ====================
+function scanQRCode() { try { var video = $('webcamVideo'); if (!video || video.readyState < 2) return; var ctx = state.scanCtx, canvas = state.scanCanvas; if (!ctx || !canvas) return; ctx.drawImage(video, 0, 0, canvas.width, canvas.height); var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height); if (!imageData || typeof jsQR === 'undefined') return; var code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' }); if (code && code.data && code.data.trim()) { var qrData = code.data.trim(); state.displayQR = qrData; state.displayTime = Date.now(); if (state.scanTime && state.detectedProducts.indexOf(qrData) === -1) { state.detectedProducts.push(qrData); $('productsCount').textContent = state.detectedProducts.length; } if (!state.scanBlocked) { handleQRDetected(qrData); } } } catch (e) { } }
+
+function handleQRDetected(qrData) {
+    if (!qrData || state.scanBlocked) return;
+    
+    // Check daily limit for FREE users
+    if (!canScanMore()) {
+        showLimitModal();
+        toast('⚠️ Đã hết lượt quét hôm nay!', 'warning');
+        return;
+    }
+    
+    beep();
+    
+    if (state.isFirstScan) {
+        state.currentQR = qrData;
+        state.isFirstScan = false;
+        state.scanTime = Date.now();
+        state.detectedProducts = [qrData];
+        state.scanBlocked = true;
+        var recordedMs = state.scanTime - state.recordingStartTime;
+        var effectivePreBuffer = Math.min(state.preBuf, recordedMs);
+        $('currentQRDisplay').textContent = qrData;
+        $('productsCount').textContent = '1';
+        $('orderInfo').classList.add('show');
+        $('recIndicator').classList.remove('hidden');
+        startDisplayTimer(effectivePreBuffer);
+        toast('📹 Ghi (+' + Math.round(effectivePreBuffer / 1000) + 's): ' + qrData, 'success');
+        
+        if (state.countdownTimer) { clearInterval(state.countdownTimer); state.countdownTimer = null; }
+        var countdown = 10;
+        state.countdownTimer = setInterval(function() {
+            countdown--;
+            if (countdown > 0) {
+                toast('⏱️ Chờ ' + countdown + 's...', 'warning');
+            } else {
+                clearInterval(state.countdownTimer);
+                state.countdownTimer = null;
+                state.scanBlocked = false;
+                toast('✅ Quét lại để kết thúc!', 'success');
+            }
+        }, 1000);
+    } else {
+        if (qrData !== state.currentQR) {
+            toast('⚠️ Mã không khớp!', 'error');
+            return;
+        }
+        state.scanBlocked = true;
+        startPostBuffer();
+    }
+}
+
+function startRecording() { if (!state.stream || !state.stream.active) return; if (state.recorder) { try { if (state.recorder.state !== 'inactive') state.recorder.stop(); } catch (e) { } state.recorder = null; } setupCanvas(); var preset = VIDEO_PRESETS[state.quality], bitrate = BITRATE_OPTIONS[state.bitrate].value; if (state.canvasStream) { state.canvasStream.getTracks().forEach(function(t) { t.stop(); }); } state.canvasStream = state.recordingCanvas.captureStream(preset.fps); if (state.audio && state.stream.getAudioTracks().length > 0) { state.stream.getAudioTracks().forEach(function(track) { state.canvasStream.addTrack(track.clone()); }); } var codec = getCodec(); try { state.recorder = new MediaRecorder(state.canvasStream, { mimeType: codec.mimeType, videoBitsPerSecond: bitrate }); } catch (e) { state.recorder = new MediaRecorder(state.canvasStream); } state.chunks = []; state.recorder.ondataavailable = function(e) { if (e.data && e.data.size > 0) state.chunks.push(e.data); }; state.recorder.onstop = function() { saveRecording(); }; state.recorder.start(1000); state.isRecording = true; state.recordingStartTime = Date.now(); if (state.rafId) { cancelAnimationFrame(state.rafId); state.rafId = null; } state.rafId = requestAnimationFrame(renderLoop); $('fpsDisplay').classList.remove('hidden'); }
+
+function stopRecordingOnly() { if (state.recorder && state.recorder.state === 'recording') { state.recorder.stop(); } }
+
+function startPostBuffer() { var postBufferSec = Math.round(state.postBuf / 1000); toast('📦 +' + postBufferSec + 's...', 'success'); $('recIndicator').classList.add('hidden'); $('orderInfo').classList.remove('show'); if (state.countdownTimer) { clearInterval(state.countdownTimer); state.countdownTimer = null; } var countdown = postBufferSec; var postTimer = setInterval(function() { countdown--; if (countdown <= 0) { clearInterval(postTimer); stopRecordingOnly(); } }, 1000); }
+// ==================== SAVE RECORDING ====================
+async function saveRecording() {
+    var qrCode = state.currentQR;
+    if (!qrCode || state.chunks.length === 0) { restartForNextOrder(); return; }
+    
+    var ext = state.currentCodec ? state.currentCodec.ext : 'webm';
+    var mimeType = state.currentCodec ? state.currentCodec.mimeType : 'video/webm';
+    var filename = qrCode + '_' + dateStr() + '_' + fileTimeStr() + '.' + ext;
+    var blob = new Blob(state.chunks, { type: mimeType });
+    var sizeMB = (blob.size / 1048576).toFixed(2);
+    var duration = state.chunks.length;
+    
+    await saveVideo(blob, filename);
+    state.lastSavedFile = filename;
+    updateFolderInfo(filename);
+    
+    var order = {
+        qr: qrCode,
+        date: dateStrVN(),
+        time: timeStr(),
+        duration: formatTime(duration),
+        filename: filename,
+        size: sizeMB + 'MB',
+        productsDetected: state.detectedProducts.length,
+        timestamp: Date.now()
+    };
+    
+    state.orders.unshift(order);
+    if (state.orders.length > MAX_ORDERS) state.orders.pop();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+    
+    // Increment daily usage for FREE users
+    if (!state.isPremium) {
+        incrementDailyUsage();
+    }
+    
+    updateUI();
+    state.scanCycleCount++;
+    toast('✅ Lưu: ' + qrCode + ' (' + sizeMB + 'MB) #' + state.scanCycleCount, 'success');
+    setTimeout(restartForNextOrder, SCAN_LOCK_SECOND);
+}
+
+async function saveVideo(blob, filename) { if (state.folderHandle) { try { var fileHandle = await state.folderHandle.getFileHandle(filename, { create: true }); var writable = await fileHandle.createWritable(); await writable.write(blob); await writable.close(); return; } catch (e) { } } var url = URL.createObjectURL(blob); var a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function() { URL.revokeObjectURL(url); }, 1000); }
+
+function updateFolderInfo(filename) { $('folderPath').textContent = (state.folderHandle ? state.folderHandle.name + '/' : 'Downloads/') + filename; $('folderInfo').classList.remove('hidden'); }
+
+function restartForNextOrder() { if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; } if (state.countdownTimer) { clearInterval(state.countdownTimer); state.countdownTimer = null; } if (state.rafId) { cancelAnimationFrame(state.rafId); state.rafId = null; } state.isFirstScan = true; state.currentQR = null; state.scanTime = null; state.scanBlocked = false; state.detectedProducts = []; state.displayQR = null; state.displayTime = 0; state.chunks = []; state.recorder = null; state.isRecording = false; $('orderInfo').classList.remove('show'); $('recIndicator').classList.add('hidden'); if (state.stream && state.stream.active) { startRecording(); toast('🔄 Sẵn sàng #' + (state.scanCycleCount + 1), 'success'); } }
+
+function startDisplayTimer(preBufferMs) { var displayTime = Math.floor(preBufferMs / 1000); if (state.timerInterval) clearInterval(state.timerInterval); state.timerInterval = setInterval(function() { displayTime++; var timeString = formatTime(displayTime); var recTime = $('recTime'); if (recTime) recTime.textContent = timeString.substring(3); var curTimer = $('currentTime'); if (curTimer) curTimer.textContent = timeString; }, 1000); }
+// ==================== CAMERA FUNCTIONS ====================
+function getCameras() { navigator.mediaDevices.enumerateDevices().then(function(devs) { var cams = devs.filter(function(d) { return d.kind === 'videoinput'; }); var sel = $('cameraSelect'); sel.innerHTML = ''; cams.forEach(function(c, i) { var opt = document.createElement('option'); opt.value = c.deviceId; opt.textContent = c.label || 'Camera ' + (i + 1); sel.appendChild(opt); }); if (cams.length && !state.cameraId) state.cameraId = cams[0].deviceId; var saved = localStorage.getItem('camera'); if (saved && cams.find(function(c) { return c.deviceId === saved; })) { state.cameraId = saved; sel.value = saved; } }); }
+
+function startCamera() { var preset = VIDEO_PRESETS[state.quality]; navigator.mediaDevices.getUserMedia({ video: { deviceId: state.cameraId ? { exact: state.cameraId } : undefined, width: { ideal: preset.width }, height: { ideal: preset.height }, frameRate: { ideal: preset.fps, min: 30 } }, audio: state.audio }).then(function(stream) { state.stream = stream; $('webcamVideo').srcObject = stream; $('startBtn').classList.add('hidden'); $('stopBtn').classList.remove('hidden'); state.scanCycleCount = 0; state.isFirstScan = true; state.currentQR = null; state.scanBlocked = false; state.scanTime = null; state.detectedProducts = []; state.chunks = []; setTimeout(startRecording, 500); toast('✅ Camera ON'); getCameras(); }).catch(function(e) { toast('❌ Lỗi: ' + e.message, 'error'); }); }
+
+function stopCamera() { if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; } if (state.countdownTimer) { clearInterval(state.countdownTimer); state.countdownTimer = null; } if (state.rafId) { cancelAnimationFrame(state.rafId); state.rafId = null; } if (state.recorder && state.recorder.state === 'recording') { try { state.recorder.stop(); } catch (e) { } } state.recorder = null; state.isRecording = false; if (state.canvasStream) { state.canvasStream.getTracks().forEach(function(t) { t.stop(); }); state.canvasStream = null; } if (state.stream) { state.stream.getTracks().forEach(function(t) { t.stop(); }); state.stream = null; } $('webcamVideo').srcObject = null; $('startBtn').classList.remove('hidden'); $('stopBtn').classList.add('hidden'); $('fpsDisplay').classList.add('hidden'); $('orderInfo').classList.remove('show'); $('recIndicator').classList.add('hidden'); state.scanBlocked = false; state.isFirstScan = true; state.currentQR = null; state.chunks = []; toast('Camera OFF', 'warning'); }
+
+async function openFolder() { var folderInfo = $('folderInfo'), folderPath = $('folderPath'); if (!folderInfo.classList.contains('hidden')) { folderInfo.classList.add('hidden'); return; } folderPath.textContent = state.lastSavedFile ? 'Downloads/' + state.lastSavedFile : 'Downloads/'; folderInfo.classList.remove('hidden'); if ('showDirectoryPicker' in window) { try { state.folderHandle = await window.showDirectoryPicker({ mode: 'readwrite', startIn: 'downloads' }); folderPath.textContent = state.folderHandle.name + '/'; toast('✅ Chọn: ' + state.folderHandle.name, 'success'); } catch (e) { } } }
+// ==================== UI FUNCTIONS ====================
+function updateUI() {
+    var today = dateStr();
+    var todayOrders = state.orders.filter(function(o) { return vnDateToISO(o.date) === today; });
+    $('todayCount').textContent = todayOrders.length;
+    $('totalCount').textContent = state.orders.length.toLocaleString();
+    $('maxOrders').textContent = MAX_ORDERS.toLocaleString();
+    $('historyCount').textContent = state.orders.length.toLocaleString();
+    updateLimitDisplay();
+    renderHistory();
+}
+
+function renderHistory(search) { var list = $('historyList'); var filtered = search ? state.orders.filter(function(o) { return o.qr.toLowerCase().indexOf(search.toLowerCase()) !== -1; }) : state.orders; if (!filtered.length) { list.innerHTML = '<div class="empty-msg">Chưa có lịch sử</div>'; return; } var html = ''; filtered.forEach(function(o, i) { html += '<div class="history-item"><span class="h-num">#' + (i + 1) + '</span><span class="h-qr">' + o.qr + '</span><span class="h-date">' + o.date + '</span><span class="h-time">' + o.time + '</span><span class="h-duration">' + o.duration + '</span><span class="h-size">' + (o.size || '-') + '</span><span class="h-products">' + (o.productsDetected || 0) + '</span></div>'; }); list.innerHTML = html; }
+
+function exportExcel() {
+    // Export luôn hoạt động cho cả Free và Premium
+    if (!state.orders.length) { toast('Chưa có dữ liệu', 'warning'); return; }
+    var csv = '\uFEFF' + ['STT', 'Mã QR', 'Ngày', 'Giờ', 'Thời lượng', 'Dung lượng', 'Số SP', 'File'].join(',') + '\n';
+    state.orders.forEach(function(o, i) { csv += [i + 1, '"' + o.qr + '"', o.date, o.time, o.duration, o.size || '-', o.productsDetected || 0, o.filename].join(',') + '\n'; });
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'QRScanner_' + dateStr() + '.csv';
+    a.click();
+    toast('✅ Xuất: ' + state.orders.length + ' đơn', 'success');
+}
+
+function showDeleteModal() { var today = new Date(), lastWeek = new Date(today.getTime() - 7 * 86400000); $('deleteFromDate').value = lastWeek.toISOString().split('T')[0]; $('deleteToDate').value = today.toISOString().split('T')[0]; $('deleteModal').classList.remove('hidden'); }
+function hideDeleteModal() { $('deleteModal').classList.add('hidden'); }
+function deleteByDate() { var fromDate = $('deleteFromDate').value, toDate = $('deleteToDate').value; if (!fromDate || !toDate) { toast('Chọn ngày', 'warning'); return; } var beforeCount = state.orders.length; state.orders = state.orders.filter(function(o) { var isoDate = vnDateToISO(o.date); return isoDate < fromDate || isoDate > toDate; }); var deletedCount = beforeCount - state.orders.length; if (deletedCount > 0) { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders)); updateUI(); toast('✅ Xóa ' + deletedCount + ' đơn', 'success'); } else { toast('Không có đơn', 'warning'); } hideDeleteModal(); }
+function deleteAll() { if (confirm('Xóa tất cả ' + state.orders.length + ' đơn?')) { state.orders = []; localStorage.setItem(STORAGE_KEY, '[]'); updateUI(); toast('✅ Đã xóa', 'success'); } }
+
+function autoDelete() {
+    // Chỉ auto delete cho Premium users
+    if (!state.isPremium) return;
+    
+    var cutoff = Date.now() - AUTO_DELETE_DAYS * 86400000;
+    var before = state.orders.length;
+    state.orders = state.orders.filter(function(o) { return o.timestamp && o.timestamp > cutoff; });
+    if (state.orders.length < before) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+        console.log('[AutoDelete] Đã xóa ' + (before - state.orders.length) + ' đơn cũ hơn ' + AUTO_DELETE_DAYS + ' ngày');
+    }
+}
+
+var barcodeBuffer = '', barcodeTimer = null;
+function handleKeydown(e) { if (state.device !== 'scanner') return; if (barcodeTimer) clearTimeout(barcodeTimer); if (e.key === 'Enter') { if (barcodeBuffer.length > 3 && !state.scanBlocked) handleQRDetected(barcodeBuffer); barcodeBuffer = ''; } else if (e.key.length === 1) { barcodeBuffer += e.key; } barcodeTimer = setTimeout(function() { barcodeBuffer = ''; }, 100); }
+// ==================== INIT ====================
+function init() {
+    // Check Premium status first
+    checkPremiumStatus();
+    checkDailyLimit();
+    
+    // Load orders
+    try {
+        var saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) state.orders = JSON.parse(saved);
+    } catch (e) { }
+    
+    // Auto delete old orders (Premium only)
+    autoDelete();
+    
+    // Load settings
+    state.quality = localStorage.getItem('quality') || '1080p60';
+    state.bitrate = localStorage.getItem('bitrate') || '12';
+    state.audio = localStorage.getItem('audio') !== 'false';
+    state.preBuf = parseInt(localStorage.getItem('preBuf')) || 5000;
+    state.postBuf = parseInt(localStorage.getItem('postBuf')) || 3000;
+    state.timestampPos = localStorage.getItem('timestampPos') || 'top-right';
+    
+    $('qualitySelect').value = state.quality;
+    $('bitrateSelect').value = state.bitrate;
+    $('audioToggle').checked = state.audio;
+    $('preBufferSelect').value = state.preBuf;
+    $('postBufferSelect').value = state.postBuf;
+    $('timestampPosition').value = state.timestampPos;
+    $('scanRate').textContent = VIDEO_PRESETS[state.quality].scanFPS;
+    
+    updateUI();
+    
+    // Event listeners
+    $('startBtn').onclick = startCamera;
+    $('stopBtn').onclick = stopCamera;
+    $('folderBtn').onclick = openFolder;
+    $('exportBtn').onclick = exportExcel;
+    $('deleteByDateBtn').onclick = showDeleteModal;
+    $('deleteAllBtn').onclick = deleteAll;
+    $('cancelDeleteBtn').onclick = hideDeleteModal;
+    $('confirmDeleteBtn').onclick = deleteByDate;
+    
+    $('tabCamera').onclick = function() { state.device = 'camera'; $('tabCamera').classList.add('active'); $('tabScanner').classList.remove('active'); };
+    $('tabScanner').onclick = function() { state.device = 'scanner'; $('tabScanner').classList.add('active'); $('tabCamera').classList.remove('active'); };
+    $('searchInput').oninput = function(e) { renderHistory(e.target.value); };
+    
+    $('cameraSelect').onchange = function() { state.cameraId = this.value; localStorage.setItem('camera', this.value); if (state.stream) { stopCamera(); setTimeout(startCamera, 300); } };
+    $('qualitySelect').onchange = function() { state.quality = this.value; localStorage.setItem('quality', this.value); $('scanRate').textContent = VIDEO_PRESETS[this.value].scanFPS; if (state.stream) { stopCamera(); setTimeout(startCamera, 300); } };
+    $('bitrateSelect').onchange = function() { state.bitrate = this.value; localStorage.setItem('bitrate', this.value); };
+    $('timestampPosition').onchange = function() { state.timestampPos = this.value; localStorage.setItem('timestampPos', this.value); };
+    $('preBufferSelect').onchange = function() { state.preBuf = parseInt(this.value); localStorage.setItem('preBuf', this.value); };
+    $('postBufferSelect').onchange = function() { state.postBuf = parseInt(this.value); localStorage.setItem('postBuf', this.value); };
+    $('audioToggle').onchange = function() { state.audio = this.checked; localStorage.setItem('audio', this.checked); if (state.stream) { stopCamera(); setTimeout(startCamera, 300); } };
+    
+    document.addEventListener('keydown', handleKeydown);
+    $('deleteModal').onclick = function(e) { if (e.target === this) hideDeleteModal(); };
+    $('limitModal').onclick = function(e) { if (e.target === this) hideLimitModal(); };
+    
+    // Check midnight reset
+    setInterval(function() {
+        var today = dateStr();
+        if (state.todayDate !== today) {
+            checkDailyLimit();
+            updateUI();
+            if (!state.isPremium) {
+                toast('🔄 Đã reset lượt quét mới!', 'success');
+            }
+        }
+    }, 60000); // Check every minute
+    
+    setTimeout(function() {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(function(s) { s.getTracks().forEach(function(t) { t.stop(); }); getCameras(); }).catch(function() { getCameras(); });
+    }, 500);
+    
+    var statusText = state.isPremium ? 'Premium (' + state.daysRemaining + ' ngày)' : 'Free (' + getRemainingScans() + '/' + FREE_DAILY_LIMIT + ')';
+    toast('✅ v7.17 ' + statusText, 'success');
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+})();
+    </script>
+</body>
+</html>
