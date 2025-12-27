@@ -69,7 +69,7 @@
             position: relative; 
             background: #000; 
             width: 100%; 
-            padding-top: 56.25%; /* 16:9 aspect ratio */
+            padding-top: 56.25%;
         }
         #webcamVideo { 
             position: absolute;
@@ -77,7 +77,7 @@
             left: 0;
             width: 100%; 
             height: 100%; 
-            object-fit: contain; /* QUAN TRỌNG: Không bị crop */
+            object-fit: contain;
             background: #000; 
         }
         .video-overlay { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.85); color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; border-left: 4px solid #28a745; opacity: 0; transform: translateY(10px); transition: all 0.3s; z-index: 10; }
@@ -102,8 +102,10 @@
         .history { padding: 10px 12px; background: #16213e; flex: 1; }
         .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .history-header h3 { font-size: 15px; color: #fff; }
-        .search-input { padding: 6px 12px; border: 1px solid #3a4f6f; border-radius: 10px; font-size: 12px; width: 120px; background: #1a1a2e; color: white; }
-        .history-list { border: 1px solid #2a3f5f; border-radius: 6px; overflow-y: auto; background: #1a1a2e; min-height: 300px; max-height: 500px; }
+        /* Ô tìm kiếm tăng gấp đôi: 120px -> 240px */
+        .search-input { padding: 6px 12px; border: 1px solid #3a4f6f; border-radius: 10px; font-size: 12px; width: 240px; background: #1a1a2e; color: white; }
+        /* Phần lịch sử tăng gấp đôi: 300px -> 600px */
+        .history-list { border: 1px solid #2a3f5f; border-radius: 6px; overflow-y: auto; background: #1a1a2e; min-height: 600px; max-height: 1000px; }
         .history-list::-webkit-scrollbar { width: 8px; }
         .history-list::-webkit-scrollbar-track { background: #2a3f5f; }
         .history-list::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
@@ -215,7 +217,7 @@
         <div class="history">
             <div class="history-header">
                 <h3>📜 Lịch sử đơn hàng (<span id="historyCount">0</span>)</h3>
-                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Tìm kiếm...">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Tìm kiếm mã đơn...">
             </div>
             <div class="history-list" id="historyList">
                 <div class="empty-msg">Chưa có lịch sử đơn hàng<br><br>Quét mã QR để bắt đầu ghi video</div>
@@ -271,7 +273,70 @@ function dateStrVN(){var d=new Date();return pad(d.getDate())+'/'+pad(d.getMonth
 function timeStr(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());}
 function fileTimeStr(){var d=new Date();return pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds());}
 function vnDateToISO(vnDate){var p=vnDate.split('/');return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:vnDate;}
-function checkPremiumStatus(){try{var licenseData=localStorage.getItem(LICENSE_KEY);if(licenseData){var license=JSON.parse(licenseData);var now=new Date();var expires=new Date(license.expiresAt);if(now<expires){state.isPremium=true;state.licenseKey=license.licenseKey;state.licenseExpires=license.expiresAt;state.daysRemaining=Math.ceil((expires-now)/(1000*60*60*24));return true;}else{localStorage.removeItem(LICENSE_KEY);}}}catch(e){}state.isPremium=false;state.licenseKey=null;state.daysRemaining=0;return false;}
+
+// ============================================
+// IMPROVED LICENSE FUNCTIONS - Lưu cả localStorage và sessionStorage
+// ============================================
+function saveLicenseData(licenseData){
+    try{
+        var dataStr=JSON.stringify(licenseData);
+        localStorage.setItem(LICENSE_KEY,dataStr);
+        sessionStorage.setItem(LICENSE_KEY,dataStr);
+        console.log('[License] Saved:',licenseData.licenseKey);
+        return true;
+    }catch(e){
+        console.error('[License] Save error:',e);
+        return false;
+    }
+}
+
+function loadLicenseData(){
+    try{
+        // Thử localStorage trước
+        var data=localStorage.getItem(LICENSE_KEY);
+        if(data){
+            console.log('[License] Loaded from localStorage');
+            return JSON.parse(data);
+        }
+        // Fallback to sessionStorage
+        data=sessionStorage.getItem(LICENSE_KEY);
+        if(data){
+            console.log('[License] Loaded from sessionStorage');
+            var parsed=JSON.parse(data);
+            // Sync back to localStorage
+            localStorage.setItem(LICENSE_KEY,data);
+            return parsed;
+        }
+    }catch(e){
+        console.error('[License] Load error:',e);
+    }
+    return null;
+}
+
+function checkPremiumStatus(){
+    var licenseData=loadLicenseData();
+    if(licenseData&&licenseData.expiresAt){
+        var now=new Date();
+        var expires=new Date(licenseData.expiresAt);
+        if(now<expires){
+            state.isPremium=true;
+            state.licenseKey=licenseData.licenseKey;
+            state.licenseExpires=licenseData.expiresAt;
+            state.daysRemaining=Math.ceil((expires-now)/(1000*60*60*24));
+            console.log('[License] Premium active, days:',state.daysRemaining);
+            return true;
+        }else{
+            console.log('[License] Expired');
+            localStorage.removeItem(LICENSE_KEY);
+            sessionStorage.removeItem(LICENSE_KEY);
+        }
+    }
+    state.isPremium=false;
+    state.licenseKey=null;
+    state.daysRemaining=0;
+    return false;
+}
+
 function checkDailyLimit(){var today=dateStr();try{var dailyData=localStorage.getItem(DAILY_KEY);if(dailyData){var daily=JSON.parse(dailyData);if(daily.date===today){state.todayUsed=daily.used||0;state.todayDate=today;}else{resetDailyData(today);}}else{resetDailyData(today);}}catch(e){resetDailyData(today);}}
 function resetDailyData(today){state.todayUsed=0;state.todayDate=today;if(!state.isPremium){state.orders=[];localStorage.setItem(STORAGE_KEY,'[]');}localStorage.setItem(DAILY_KEY,JSON.stringify({date:today,used:0}));}
 function incrementDailyUsage(){state.todayUsed++;localStorage.setItem(DAILY_KEY,JSON.stringify({date:state.todayDate,used:state.todayUsed}));updateLimitDisplay();}
@@ -280,7 +345,21 @@ function getRemainingScans(){if(state.isPremium)return'Không giới hạn';retu
 function updateLimitDisplay(){var limitBanner=$('limitBanner'),premiumInfo=$('premiumInfo'),userBadge=$('userBadge'),statsLimit=$('statsLimit'),remainingToday=$('remainingToday'),usedToday=$('usedToday'),daysRemaining=$('daysRemaining');if(state.isPremium){if(limitBanner)limitBanner.classList.add('hidden');if(premiumInfo)premiumInfo.classList.remove('hidden');if(userBadge){userBadge.textContent='PREMIUM';userBadge.className='premium-badge';}if(statsLimit)statsLimit.classList.add('hidden');if(daysRemaining)daysRemaining.textContent=state.daysRemaining;}else{if(limitBanner)limitBanner.classList.remove('hidden');if(premiumInfo)premiumInfo.classList.add('hidden');if(userBadge){userBadge.textContent='FREE';userBadge.className='free-badge';}if(statsLimit)statsLimit.classList.remove('hidden');if(usedToday)usedToday.textContent=state.todayUsed;if(remainingToday)remainingToday.textContent=getRemainingScans();}}
 function showLimitModal(){$('limitModal').classList.remove('hidden');}
 function hideLimitModal(){$('limitModal').classList.add('hidden');}
-window.addEventListener('message',function(event){if(event.data&&event.data.action==='premiumActivated'){var licenseData=event.data.license;if(licenseData){localStorage.setItem(LICENSE_KEY,JSON.stringify(licenseData));checkPremiumStatus();updateLimitDisplay();updateUI();toast('🎉 Premium đã kích hoạt! Còn '+state.daysRemaining+' ngày','success');}}});
+
+// Nhận message từ parent (Blogger)
+window.addEventListener('message',function(event){
+    if(event.data&&event.data.action==='premiumActivated'){
+        var licenseData=event.data.license;
+        if(licenseData){
+            saveLicenseData(licenseData);
+            checkPremiumStatus();
+            updateLimitDisplay();
+            updateUI();
+            toast('🎉 Premium đã kích hoạt! Còn '+state.daysRemaining+' ngày','success');
+        }
+    }
+});
+
 function getCodec(){var codecs=[{mimeType:'video/webm;codecs=vp8,opus',ext:'webm',name:'VP8'},{mimeType:'video/webm;codecs=vp8',ext:'webm',name:'VP8'},{mimeType:'video/webm',ext:'webm',name:'WebM'}];for(var i=0;i<codecs.length;i++){if(MediaRecorder.isTypeSupported(codecs[i].mimeType)){state.currentCodec=codecs[i];return codecs[i];}}state.currentCodec={mimeType:'video/webm',ext:'webm',name:'WebM'};return state.currentCodec;}
 function setupCanvas(){var preset=VIDEO_PRESETS[state.quality];if(!state.recordingCanvas){state.recordingCanvas=document.createElement('canvas');state.recordingCtx=state.recordingCanvas.getContext('2d',{alpha:false});}state.recordingCanvas.width=preset.width;state.recordingCanvas.height=preset.height;if(!state.scanCanvas){state.scanCanvas=document.createElement('canvas');state.scanCtx=state.scanCanvas.getContext('2d',{willReadFrequently:true});}state.scanCanvas.width=Math.round(preset.width*preset.scanScale);state.scanCanvas.height=Math.round(preset.height*preset.scanScale);state.scanInterval=Math.round(1000/preset.scanFPS);state.frameCount=0;state.lastFpsTime=0;state.currentFPS=0;}
 function renderLoop(timestamp){if(!state.stream||!state.stream.active){state.rafId=null;return;}var video=$('webcamVideo');var ctx=state.recordingCtx;var canvas=state.recordingCanvas;if(!video||!ctx||video.readyState<2){state.rafId=requestAnimationFrame(renderLoop);return;}ctx.drawImage(video,0,0,canvas.width,canvas.height);drawTimestamp(ctx);if(state.displayQR&&(Date.now()-state.displayTime<PROGRESS_DISPLAY_TIME)){drawProgressBar(ctx,state.displayQR);}drawFPSCounter(ctx,timestamp);if(state.scanTime&&state.audio)drawAudioIndicator(ctx);var now=performance.now();if(now-state.lastScanTime>=state.scanInterval){state.lastScanTime=now;state.actualScanCount++;if(state.device==='camera'&&!state.scanBlocked&&state.isRecording){scanQRCode();}}if(now-state.lastScanCountTime>=1000){state.actualScanRate=state.actualScanCount;state.actualScanCount=0;state.lastScanCountTime=now;var scanEl=$('scanRate');if(scanEl)scanEl.textContent=state.actualScanRate;}state.rafId=requestAnimationFrame(renderLoop);}
