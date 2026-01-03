@@ -41,6 +41,7 @@
         
         /* TOGGLE */
         .toggle-row { display: flex; align-items: center; gap: 8px; }
+        .recommend-text { margin-left: auto; font-size: 11px; color: #ccc; }
         .toggle { position: relative; width: 36px; height: 18px; }
         .toggle input { opacity: 0; width: 0; height: 0; }
         .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #444; border-radius: 18px; transition: 0.3s; }
@@ -165,6 +166,7 @@
             <div class="toggle-row">
                 <label class="toggle"><input type="checkbox" id="audioToggle" checked><span class="toggle-slider"></span></label>
                 <span class="toggle-label">🎤 Ghi âm</span>
+                <span class="recommend-text">Khuyến nghị: Ổn định 1080p 30fps - 8Mbps</span>
             </div>
         </div>
         
@@ -288,6 +290,8 @@ function drawAudioIndicator(ctx){var margin=113,position=state.timestampPos;var 
 // SCAN QR CODE - Xử lý khác nhau cho 2 mode
 // ============================================
 function scanQRCode(){try{var video=$('webcamVideo');if(!video||video.readyState<2)return;var ctx=state.scanCtx,canvas=state.scanCanvas;if(!ctx||!canvas)return;ctx.drawImage(video,0,0,canvas.width,canvas.height);var imageData=ctx.getImageData(0,0,canvas.width,canvas.height);if(!imageData||typeof jsQR==='undefined')return;var code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'dontInvert'});if(code&&code.data&&code.data.trim()){var qrData=code.data.trim();
+// Scanner mode: Beep khi camera phát hiện QR (chỉ beep khi QR mới hoặc hết thời gian hiển thị)
+if(state.device==='scanner'){if(state.displayQR!==qrData||(Date.now()-state.displayTime>=PROGRESS_DISPLAY_TIME)){beep();}}
 // Hiển thị progress bar + visual block cho CẢ 2 MODE
 state.displayQR=qrData;state.displayTime=Date.now();
 // Đếm sản phẩm nếu đang ghi và mã khác mã đơn chính
