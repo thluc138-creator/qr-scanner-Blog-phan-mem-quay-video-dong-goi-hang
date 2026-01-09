@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Scanner v7.25 Premium - Full Screen</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>📦 Quay Video Đóng Hàng <span id="userBadge" class="free-badge">FREE</span></h1>
+            <div class="subtitle">v7.25 Premium - Full Screen</div>
+        </div>
+        
+        <!-- LIMIT BANNER (Free users) -->
+        <div class="limit-banner" id="limitBanner" onclick="window.parent.postMessage({action:'openPremiumPopup'},'*')">
+            ⚠️ Bản Free: <strong><span id="usedToday">0</span>/100</strong> đơn hôm nay | Reset lúc 00:00 | <span class="upgrade-link">👑 Nâng cấp Premium</span>
+        </div>
+        
+        <!-- PREMIUM INFO (Premium users) -->
+        <div class="premium-info hidden" id="premiumInfo">
+            ⭐ Premium Active | Còn lại: <span class="days-remaining" id="daysRemaining">365</span> ngày | Không giới hạn đơn hàng
+        </div>
+        
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab active" data-tab="tabCamera">📷 Camera - Webcam</button>
+            <button class="tab" data-tab="tabScanner">⌨️ Máy quét cầm tay</button>
+        </div>
+        
+        <!-- CONTROLS -->
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group">
+                    <label>📹 Camera</label>
+                    <select id="cameraSelect"><option>Đang tải...</option></select>
+                </div>
+                <div class="control-group">
+                    <label>📐 Chất lượng</label>
+                    <select id="qualitySelect">
+                        <option value="1080p30">1080p 30fps</option>
+                        <option value="1080p60" selected>1080p 60fps</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>💾 Bitrate</label>
+                    <select id="bitrateSelect">
+                        <option value="8">8 Mbps</option>
+                        <option value="10">10 Mbps</option>
+                        <option value="12" selected>12 Mbps</option>
+                    </select>
+                </div>
+            </div>
+            <div class="control-row">
+                <div class="control-group">
+                    <label>📍 Timestamp</label>
+                    <select id="timestampSelect">
+                        <option value="top-left">Trên trái</option>
+                        <option value="top-right" selected>Trên phải</option>
+                        <option value="bottom-left">Dưới trái</option>
+                        <option value="bottom-right">Dưới phải</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>🔊 Âm lượng Beep</label>
+                    <div class="volume-group">
+                        <input type="range" class="volume-slider" id="beepVolume" min="0" max="100" value="80">
+                        <span class="volume-value" id="volumeValue">80%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>⏩ Ghi hình sau quét</label>
+                    <select id="postBufferSelect">
+                        <option value="2000">2 giây</option>
+                        <option value="3000" selected>3 giây</option>
+                        <option value="5000">5 giây</option>
+                    </select>
+                </div>
+            </div>
+            <div class="toggle-row">
+                <label class="toggle">
+                    <input type="checkbox" id="audioToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">🎤 Ghi âm</span>
+                <span class="recommend-text">Khuyến nghị: Ổn định 1080p 30fps - 8Mbps</span>
+            </div>
+        </div>
+        
+        <!-- BUTTONS -->
+        <div class="buttons">
+            <button id="btnCamera" class="btn btn-primary">📷 Bật Camera</button>
+            <button id="btnFolder" class="btn btn-secondary">📁 Thư mục</button>
+        </div>
+        
+        <!-- FOLDER INFO -->
+        <div class="folder-info hidden" id="folderInfo">
+            <span class="title">📁 Lưu vào:</span> 
+            <span class="path" id="folderPath">-</span>
+        </div>
+        
+        <!-- VIDEO SECTION -->
+        <div class="video-section">
+            <video id="webcamVideo" autoplay muted playsinline></video>
+            
+            <!-- Recording Indicator -->
+            <div class="rec-indicator hidden" id="recIndicator">
+                🔴 REC <span id="timerDisplay">00:00:00</span>
+            </div>
+            
+            <!-- FPS Display -->
+            <div class="fps-display">
+                <span>FPS: <span class="fps-value" id="fpsValue">0</span></span>
+                <span>Scan: <span id="scanRateValue">0</span>/s</span>
+            </div>
+            
+            <!-- Scan Lock Overlay -->
+            <div class="scan-lock-overlay hidden" id="scanLockOverlay">
+                <div class="scan-lock-time" id="scanLockTime">10</div>
+                <div class="scan-lock-text">Đang ghi hình...</div>
+            </div>
+            
+            <!-- QR Detected Overlay -->
+            <div class="video-overlay" id="videoOverlay">
+                <h4>📦 Đã quét:</h4>
+                <strong id="detectedQR">-</strong>
+                <div>Sản phẩm: <span id="productCount">0</span></div>
+            </div>
+        </div>
+        
+        <!-- STATS -->
+        <div class="stats">
+            <span class="stats-title">📊 Hôm nay:</span>
+            <span class="stats-count" id="todayCount">0</span>
+            <span class="stats-total">| Tổng: <span id="totalCount">0</span></span>
+            <span class="stats-limit" id="statsLimit">| Còn: <span id="remainingToday">100</span></span>
+        </div>
+        
+        <!-- HISTORY -->
+        <div class="history">
+            <div class="history-header">
+                <h3>📋 Lịch sử quét</h3>
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Tìm kiếm...">
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="empty-msg">Chưa có đơn hàng nào</div>
+            </div>
+        </div>
+        
+        <!-- HISTORY ACTIONS -->
+        <div class="history-actions">
+            <button id="btnExport" class="btn btn-success btn-small">📥 Xuất Excel</button>
+            <button id="btnDateFilter" class="btn btn-info btn-small">📅 Lọc ngày</button>
+            <button id="btnClearHistory" class="btn btn-danger btn-small">🗑️ Xóa tất cả</button>
+        </div>
+    </div>
+    
+    <!-- ==================== MODALS ==================== -->
+    
+    <!-- Limit Modal -->
+    <div class="modal-overlay hidden" id="limitModal">
+        <div class="limit-modal">
+            <h2>⚠️ Hết lượt quét hôm nay!</h2>
+            <p>Bạn đã sử dụng hết 100 lượt quét miễn phí.</p>
+            <p>Nâng cấp Premium để quét không giới hạn!</p>
+            <button class="btn-upgrade" id="btnUpgradeFromLimit">👑 Nâng cấp Premium</button>
+            <br><br>
+            <button class="btn btn-small" id="btnCloseLimitModal">Đóng</button>
+        </div>
+    </div>
+    
+    <!-- Date Filter Modal -->
+    <div class="modal-overlay hidden" id="dateModal">
+        <div class="modal-box">
+            <h3>📅 Lọc theo ngày</h3>
+            <div class="date-inputs">
+                <label>Từ ngày</label>
+                <input type="date" id="startDate">
+                <label>Đến ngày</label>
+                <input type="date" id="endDate">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary btn-small" id="btnApplyDateFilter">Áp dụng</button>
+                <button class="btn btn-small" id="btnCancelDateFilter">Hủy</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Renewal Warning Modal -->
+    <div class="renewal-modal hidden" id="renewalModal">
+        <div class="renewal-box">
+            <h2>⚠️ Sắp hết hạn Premium!</h2>
+            <div>
+                <div class="days-big" id="renewDays">5</div>
+                <p id="renewText">ngày còn lại</p>
+            </div>
+            <div class="warning-text">
+                Gia hạn ngay để tiếp tục sử dụng Premium và giữ toàn bộ dữ liệu!
+            </div>
+            <button class="btn-renew" id="btnRenewNow">🔄 Gia hạn ngay</button>
+            <button class="btn-later" id="btnRenewLater">Để sau</button>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    
+    <!-- ==================== SCRIPTS ==================== -->
+    <!-- jsQR Library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    
+    <!-- App Modules (load in order) -->
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/license.js"></script>
+    <script src="js/scanner.js"></script>
+    <script src="js/recorder.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
