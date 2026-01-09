@@ -64,14 +64,15 @@ var QRApp = (function() {
         console.log('✅ QR Scanner v7.25 Ready!');
         UI.toast('✅ v7.25 Ready', 'success');
         
-        // AUTO REQUEST PERMISSION sau 2 giây
+        // AUTO REQUEST PERMISSION sau 500ms (như v7.23)
         setTimeout(function() {
             autoRequestPermission();
-        }, 2000);
+        }, 500);
     }
     
     /**
      * Auto request camera permission and load camera list
+     * Như v7.23: getUserMedia -> getCameras
      */
     async function autoRequestPermission() {
         try {
@@ -83,7 +84,14 @@ var QRApp = (function() {
             // Stop stream immediately (just to get permission)
             stream.getTracks().forEach(function(t) { t.stop(); });
             
-            // Now get camera list with labels
+            console.log('✅ Permission granted');
+            
+        } catch (e) {
+            console.log('⚠️ Permission denied or error:', e.message);
+        }
+        
+        // Always try to get cameras (even without permission, will show "Camera 1, 2...")
+        try {
             var cameras = await RECORDER.getCameras();
             
             // Update camera select dropdown
@@ -97,12 +105,15 @@ var QRApp = (function() {
                     select.appendChild(option);
                 });
                 console.log('✅ Found ' + cameras.length + ' camera(s)');
+            } else if (select) {
+                select.innerHTML = '<option value="">Không tìm thấy camera</option>';
             }
-            
         } catch (e) {
-            console.log('⚠️ Camera permission request failed:', e.message);
-            // Retry after 3 seconds
-            setTimeout(autoRequestPermission, 3000);
+            console.log('⚠️ getCameras error:', e.message);
+            var select = UI.$('cameraSelect');
+            if (select) {
+                select.innerHTML = '<option value="">Lỗi camera</option>';
+            }
         }
     }
     
