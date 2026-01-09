@@ -14,7 +14,7 @@ var QRConfig = (function() {
     
     // ==================== API URLs ====================
     var API = {
-        BASE_URL: 'https://qr-scanner-v725.onrender.com',
+        BASE_URL: 'https://qr-scanner-backend-v725.onrender.com',
         BLOG_URL: 'https://phanmemquayvideodonggoihang.blogspot.com',
         EMBED_URL: 'https://thluc138-creator.github.io/qr-scanner-Blog-phan-mem-quay-video-dong-goi-hang/embed'
     };
