@@ -63,6 +63,47 @@ var QRApp = (function() {
         
         console.log('✅ QR Scanner v7.25 Ready!');
         UI.toast('✅ v7.25 Ready', 'success');
+        
+        // AUTO REQUEST PERMISSION sau 2 giây
+        setTimeout(function() {
+            autoRequestPermission();
+        }, 2000);
+    }
+    
+    /**
+     * Auto request camera permission and load camera list
+     */
+    async function autoRequestPermission() {
+        try {
+            console.log('📷 Auto requesting camera permission...');
+            
+            // Request permission
+            var stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            
+            // Stop stream immediately (just to get permission)
+            stream.getTracks().forEach(function(t) { t.stop(); });
+            
+            // Now get camera list with labels
+            var cameras = await RECORDER.getCameras();
+            
+            // Update camera select dropdown
+            var select = UI.$('cameraSelect');
+            if (select && cameras.length > 0) {
+                select.innerHTML = '';
+                cameras.forEach(function(cam, i) {
+                    var option = document.createElement('option');
+                    option.value = cam.deviceId;
+                    option.textContent = cam.label || 'Camera ' + (i + 1);
+                    select.appendChild(option);
+                });
+                console.log('✅ Found ' + cameras.length + ' camera(s)');
+            }
+            
+        } catch (e) {
+            console.log('⚠️ Camera permission request failed:', e.message);
+            // Retry after 3 seconds
+            setTimeout(autoRequestPermission, 3000);
+        }
     }
     
     // ==================== Callbacks Setup ====================
@@ -102,13 +143,32 @@ var QRApp = (function() {
         });
         
         // Recorder callbacks
-        RECORDER.on('onCameraStart', function(stream) {
+        RECORDER.on('onCameraStart', function(data) {
             var video = UI.$('webcamVideo');
-            if (video) {
-                video.srcObject = stream;
+            if (video && data.stream) {
+                video.srcObject = data.stream;
+                RECORDER.setVideoElement(video);
             }
+            
+            // Update camera select with names
+            if (data.cameras && data.cameras.length > 0) {
+                var select = UI.$('cameraSelect');
+                if (select) {
+                    select.innerHTML = '';
+                    data.cameras.forEach(function(cam, i) {
+                        var option = document.createElement('option');
+                        option.value = cam.deviceId;
+                        option.textContent = cam.label || 'Camera ' + (i + 1);
+                        if (cam.deviceId === data.deviceId) {
+                            option.selected = true;
+                        }
+                        select.appendChild(option);
+                    });
+                }
+            }
+            
             UI.updateCameraButton(true);
-            startScanLoop();
+            UI.showFPSDisplay(true);
         });
         
         RECORDER.on('onCameraStop', function() {

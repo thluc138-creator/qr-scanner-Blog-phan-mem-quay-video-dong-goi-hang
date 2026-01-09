@@ -227,6 +227,21 @@ var QRUI = (function() {
         }
     }
     
+    /**
+     * Show/hide FPS display
+     * @param {boolean} show
+     */
+    function showFPSDisplay(show) {
+        var fpsDisplay = $('fpsDisplay');
+        if (fpsDisplay) {
+            if (show) {
+                fpsDisplay.classList.remove('hidden');
+            } else {
+                fpsDisplay.classList.add('hidden');
+            }
+        }
+    }
+    
     // ==================== Scan Lock Overlay ====================
     
     /**
@@ -457,6 +472,7 @@ var QRUI = (function() {
         updateStats: updateStats,
         updateRecordingStatus: updateRecordingStatus,
         updateFPS: updateFPS,
+        showFPSDisplay: showFPSDisplay,
         updateScanLock: updateScanLock,
         showQRDetected: showQRDetected,
         updateFolderInfo: updateFolderInfo,
