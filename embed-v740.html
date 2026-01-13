@@ -48,12 +48,14 @@
         
         /* RENEWAL WARNING MODAL */
         .renewal-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 10000; }
-        .renewal-box { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 3px solid #f39c12; border-radius: 16px; padding: 25px; max-width: 420px; width: 90%; text-align: center; color: white; }
+        .renewal-box { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 3px solid #f39c12; border-radius: 16px; padding: 25px; max-width: 420px; width: 90%; text-align: center; color: white; position: relative; }
         .renewal-box h2 { color: #f39c12; font-size: 22px; margin-bottom: 15px; }
         .renewal-box .days-big { font-size: 48px; color: #e74c3c; font-weight: bold; }
-        .renewal-box .warning-text { color: #e74c3c; font-size: 14px; margin: 15px 0; padding: 10px; background: rgba(231,76,60,0.2); border-radius: 8px; }
+        .renewal-box .warning-text { color: #f39c12; font-size: 14px; margin: 15px 0; padding: 10px; background: rgba(243,156,18,0.15); border-radius: 8px; line-height: 1.5; }
         .renewal-box .btn-renew { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; margin: 10px 5px; }
         .renewal-box .btn-later { background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-size: 13px; cursor: pointer; margin: 10px 5px; }
+        .btn-close-modal { position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #888; font-size: 20px; cursor: pointer; padding: 5px 10px; }
+        .btn-close-modal:hover { color: #fff; }
         
         /* TOGGLE */
         .toggle-row { display: flex; align-items: center; gap: 8px; }
@@ -274,15 +276,12 @@
     <!-- Renewal Warning Modal -->
     <div class="renewal-modal hidden" id="renewalModal">
         <div class="renewal-box">
+            <button class="btn-close-modal" onclick="hideRenewalModal()" title="Đóng">✕</button>
             <h2>⚠️ Premium sắp hết hạn!</h2>
-            <div class="days-big" id="renewDays">5</div>
-            <p>ngày còn lại</p>
-            <div class="warning-text">
-                ⚠️ <strong>CẢNH BÁO:</strong> Nếu không gia hạn, toàn bộ <strong>dữ liệu đơn hàng</strong> sẽ bị XÓA sau 24h kể từ khi hết hạn!
+            <div class="warning-text" id="renewalWarningText">
+                Sau <strong><span id="renewDays">5</span> ngày</strong> nếu không gia hạn, thông tin đơn hàng sẽ bị che. Vui lòng gia hạn để tiếp tục sử dụng đầy đủ tính năng!
             </div>
             <button class="btn-renew" onclick="window.parent.postMessage({action:'openPremiumPopup'},'*');hideRenewalModal();">👑 Gia hạn ngay</button>
-            <br>
-            <button class="btn-later" onclick="hideRenewalModal()">Để sau</button>
         </div>
     </div>
     
@@ -413,57 +412,27 @@ function checkPremiumStatus(){
 }
 
 function handlePremiumExpired(expiredAt){
-    var graceData = localStorage.getItem(GRACE_PERIOD_KEY);
-    var now = new Date();
-    
-    if(!graceData){
-        // Bắt đầu grace period 24h
-        var graceEnd = new Date(expiredAt);
-        graceEnd.setHours(graceEnd.getHours() + 24);
-        localStorage.setItem(GRACE_PERIOD_KEY, JSON.stringify({
-            expiredAt: expiredAt,
-            graceEndAt: graceEnd.toISOString()
-        }));
-        localStorage.removeItem(LICENSE_KEY);
-        toast('⚠️ Premium hết hạn! Còn 24h để gia hạn trước khi mất dữ liệu','warning');
-        showRenewalWarning(0); // 0 ngày = đã hết hạn
-    } else {
-        var grace = JSON.parse(graceData);
-        var graceEnd = new Date(grace.graceEndAt);
-        
-        if(now >= graceEnd){
-            // Hết grace period - XÓA TOÀN BỘ DATA
-            state.orders = [];
-            localStorage.setItem(STORAGE_KEY, '[]');
-            localStorage.removeItem(GRACE_PERIOD_KEY);
-            localStorage.removeItem(LICENSE_KEY);
-            toast('⚠️ Premium hết hạn - Dữ liệu đã bị xóa!','error');
-        } else {
-            // Còn trong grace period
-            var hoursLeft = Math.ceil((graceEnd - now) / (1000*60*60));
-            toast('⚠️ Còn '+hoursLeft+'h để gia hạn Premium!','warning');
-            showRenewalWarning(-1); // -1 = trong grace period
-        }
-    }
+    // Premium hết hạn - chuyển về FREE mode, KHÔNG xóa data
+    localStorage.removeItem(LICENSE_KEY);
+    localStorage.removeItem(GRACE_PERIOD_KEY);
+    toast('⚠️ Premium đã hết hạn - Đã chuyển về Free mode','warning');
 }
 
 function showRenewalWarning(days){
     var modal = $('renewalModal');
     var daysEl = $('renewDays');
-    if(!modal || !daysEl) return;
+    if(!modal || !daysEl || days <= 0) return;
     
-    if(days > 0){
-        daysEl.textContent = days;
-        daysEl.parentElement.querySelector('p').textContent = 'ngày còn lại';
-    } else if(days === 0){
-        daysEl.textContent = '0';
-        daysEl.parentElement.querySelector('p').textContent = 'ĐÃ HẾT HẠN';
-        daysEl.style.color = '#e74c3c';
-    } else {
-        daysEl.textContent = '24h';
-        daysEl.parentElement.querySelector('p').textContent = 'GRACE PERIOD';
-        daysEl.style.color = '#f39c12';
-    }
+    // Kiểm tra đã hiện popup hôm nay chưa (chỉ hiện 1 lần/ngày)
+    var today = dateStr();
+    var lastShown = localStorage.getItem('renewalWarningShown');
+    if(lastShown === today) return;
+    
+    // Cập nhật text theo số ngày còn lại
+    daysEl.textContent = days;
+    
+    // Lưu ngày đã hiện popup
+    localStorage.setItem('renewalWarningShown', today);
     modal.classList.remove('hidden');
 }
 
@@ -1201,7 +1170,7 @@ function deleteAll(){
 }
 
 function autoDelete(){
-    if(!state.isPremium)return;
+    // Xóa orders > 60 ngày cho cả FREE và Premium
     var cutoff=Date.now()-AUTO_DELETE_DAYS*86400000;
     var before=state.orders.length;
     state.orders=state.orders.filter(function(o){return o.timestamp&&o.timestamp>cutoff;});
