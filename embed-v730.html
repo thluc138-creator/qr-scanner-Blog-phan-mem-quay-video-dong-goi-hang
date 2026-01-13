@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Scanner v7.30 Premium - Full Screen</title>
+    <title>QR Scanner v7.40 Premium - Full Screen</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; }
@@ -157,11 +157,11 @@
     <div class="app-container">
         <div class="header">
             <h1>📦 Quay Video Đóng Hàng <span id="userBadge" class="free-badge">FREE</span></h1>
-            <div class="subtitle">v7.30 Premium - Full Screen</div>
+            <div class="subtitle">v7.40 Premium - Full Screen</div>
         </div>
         
         <div class="limit-banner" id="limitBanner" onclick="window.parent.postMessage({action:'openPremiumPopup'},'*')">
-            ⚠️ Bản Free: <strong><span id="usedToday">0</span>/100</strong> đơn hôm nay | Reset lúc 00:00 | <span class="upgrade-link">👑 Nâng cấp Premium</span>
+            👑 Nâng cấp Premium để hiển thị thông tin đơn hàng
         </div>
         
         <div class="premium-info hidden" id="premiumInfo">
@@ -325,7 +325,8 @@ var state={
     currentCodec:null,folderHandle:null,lastSavedFile:null,scanCycleCount:0,
     isPremium:false,licenseKey:null,licenseExpires:null,daysRemaining:0,todayUsed:0,todayDate:null,
     lastBeepTime:0,
-    beepVolume:80
+    beepVolume:80,
+    freeVideoCounter:0
 };
 
 // UTILITIES
@@ -470,10 +471,10 @@ function hideRenewalModal(){
     $('renewalModal').classList.add('hidden');
 }
 function checkDailyLimit(){var today=dateStr();try{var dailyData=localStorage.getItem(DAILY_KEY);if(dailyData){var daily=JSON.parse(dailyData);if(daily.date===today){state.todayUsed=daily.used||0;state.todayDate=today;}else{resetDailyData(today);}}else{resetDailyData(today);}}catch(e){resetDailyData(today);}}
-function resetDailyData(today){state.todayUsed=0;state.todayDate=today;if(!state.isPremium){state.orders=[];localStorage.setItem(STORAGE_KEY,'[]');}localStorage.setItem(DAILY_KEY,JSON.stringify({date:today,used:0}));}
+function resetDailyData(today){state.todayUsed=0;state.todayDate=today;localStorage.setItem(DAILY_KEY,JSON.stringify({date:today,used:0}));}
 function incrementDailyUsage(){state.todayUsed++;localStorage.setItem(DAILY_KEY,JSON.stringify({date:state.todayDate,used:state.todayUsed}));updateLimitDisplay();}
-function canScanMore(){if(state.isPremium)return true;return state.todayUsed<FREE_DAILY_LIMIT;}
-function getRemainingScans(){if(state.isPremium)return'Không giới hạn';return Math.max(0,FREE_DAILY_LIMIT-state.todayUsed);}
+function canScanMore(){return true;}
+function getRemainingScans(){return'Không giới hạn';}
 function updateLimitDisplay(){var limitBanner=$('limitBanner'),premiumInfo=$('premiumInfo'),userBadge=$('userBadge'),statsLimit=$('statsLimit'),remainingToday=$('remainingToday'),usedToday=$('usedToday'),daysRemaining=$('daysRemaining');if(state.isPremium){if(limitBanner)limitBanner.classList.add('hidden');if(premiumInfo)premiumInfo.classList.remove('hidden');if(userBadge){userBadge.textContent='PREMIUM';userBadge.className='premium-badge';}if(statsLimit)statsLimit.classList.add('hidden');if(daysRemaining)daysRemaining.textContent=state.daysRemaining;}else{if(limitBanner)limitBanner.classList.remove('hidden');if(premiumInfo)premiumInfo.classList.add('hidden');if(userBadge){userBadge.textContent='FREE';userBadge.className='free-badge';}if(statsLimit)statsLimit.classList.remove('hidden');if(usedToday)usedToday.textContent=state.todayUsed;if(remainingToday)remainingToday.textContent=getRemainingScans();}}
 function showLimitModal(){$('limitModal').classList.remove('hidden');}
 function hideLimitModal(){$('limitModal').classList.add('hidden');}
@@ -919,7 +920,18 @@ async function saveRecording(){
     
     var ext=state.currentCodec?state.currentCodec.ext:'webm';
     var mimeType=state.currentCodec?state.currentCodec.mimeType:'video/webm';
-    var filename=qrCode+'_'+dateStr()+'_'+fileTimeStr()+'.'+ext;
+    
+    // Tên file: Premium = QR_date_time, Free = nang_cap_premium_XXX
+    var filename;
+    if(state.isPremium){
+        filename=qrCode+'_'+dateStr()+'_'+fileTimeStr()+'.'+ext;
+    }else{
+        state.freeVideoCounter++;
+        localStorage.setItem('freeVideoCounter',state.freeVideoCounter);
+        var counterStr=String(state.freeVideoCounter).padStart(3,'0');
+        filename='nang_cap_premium_'+counterStr+'.'+ext;
+    }
+    
     var blob=new Blob(state.chunks,{type:mimeType});
     var sizeMB=(blob.size/1048576).toFixed(2);
     var duration=state.chunks.length;
@@ -1121,7 +1133,12 @@ function renderHistory(search){
     if(!filtered.length){list.innerHTML='<div class="empty-msg">Chưa có lịch sử đơn hàng<br><br>Quét mã QR để bắt đầu ghi video</div>';return;}
     var html='';
     filtered.forEach(function(o,i){
-        html+='<div class="history-item"><span class="h-num">#'+(i+1)+'</span><span class="h-qr">'+o.qr+'</span><span class="h-date">'+o.date+'</span><span class="h-time">'+o.time+'</span><span class="h-duration">'+o.duration+'</span><span class="h-size">'+(o.size||'-')+'</span><span class="h-products">'+(o.productsDetected||0)+'</span></div>';
+        // Che thông tin nếu không phải Premium
+        var showDate = state.isPremium ? o.date : '*****';
+        var showTime = state.isPremium ? o.time : '*****';
+        var showDuration = state.isPremium ? o.duration : '*****';
+        var showSize = state.isPremium ? (o.size||'-') : '*****';
+        html+='<div class="history-item"><span class="h-num">#'+(i+1)+'</span><span class="h-qr">'+o.qr+'</span><span class="h-date">'+showDate+'</span><span class="h-time">'+showTime+'</span><span class="h-duration">'+showDuration+'</span><span class="h-size">'+showSize+'</span><span class="h-products">'+(o.productsDetected||0)+'</span></div>';
     });
     list.innerHTML=html;
 }
@@ -1130,7 +1147,13 @@ function exportExcel(){
     if(!state.orders.length){toast('Chưa có dữ liệu','warning');return;}
     var csv='\uFEFF'+['STT','Mã QR','Ngày','Giờ','Thời lượng','Dung lượng','Số SP','File'].join(',')+'\n';
     state.orders.forEach(function(o,i){
-        csv+=[i+1,'"'+o.qr+'"',o.date,o.time,o.duration,o.size||'-',o.productsDetected||0,o.filename].join(',')+'\n';
+        // Che thông tin nếu không phải Premium
+        var showDate = state.isPremium ? o.date : '*****';
+        var showTime = state.isPremium ? o.time : '*****';
+        var showDuration = state.isPremium ? o.duration : '*****';
+        var showSize = state.isPremium ? (o.size||'-') : '*****';
+        var showFilename = state.isPremium ? o.filename : '*****';
+        csv+=[i+1,'"'+o.qr+'"',showDate,showTime,showDuration,showSize,o.productsDetected||0,showFilename].join(',')+'\n';
     });
     var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
     var a=document.createElement('a');
@@ -1210,6 +1233,7 @@ function init(){
     state.postBuf=parseInt(localStorage.getItem('postBuf'))||3000;
     state.timestampPos=localStorage.getItem('timestampPos')||'top-right';
     state.beepVolume=parseInt(localStorage.getItem('beepVolume'))||80;
+    state.freeVideoCounter=parseInt(localStorage.getItem('freeVideoCounter'))||0;
     
     $('qualitySelect').value=state.quality;
     $('bitrateSelect').value=state.bitrate;
@@ -1315,8 +1339,8 @@ function init(){
         }).catch(function(){getCameras();});
     },500);
     
-    var statusText=state.isPremium?'Premium ('+state.daysRemaining+' ngày)':'Free ('+getRemainingScans()+'/'+FREE_DAILY_LIMIT+')';
-    toast('✅ v7.30 '+statusText,'success');
+    var statusText=state.isPremium?'Premium ('+state.daysRemaining+' ngày)':'Free';
+    toast('✅ v7.40 '+statusText,'success');
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
