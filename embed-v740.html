@@ -298,6 +298,7 @@
 // CONFIG
 var STORAGE_KEY='qrScannerBlogV7',LICENSE_KEY='qrScannerLicense',DAILY_KEY='qrScannerDaily';
 var LICENSE_COOKIE='qrLicenseBackupEmbed';
+var ORDERS_COOKIE='qrOrdersBackupEmbed';
 var MAX_ORDERS=100000,FREE_DAILY_LIMIT=100,AUTO_DELETE_DAYS=60;
 var SCAN_LOCK_SECOND=10000,PROGRESS_DISPLAY_TIME=1500;
 var VIDEO_PRESETS={'1080p30':{width:1920,height:1080,fps:30,scanFPS:3,scanScale:0.5},'1080p60':{width:1920,height:1080,fps:60,scanFPS:3,scanScale:0.5}};
@@ -308,6 +309,44 @@ function setCookie(name,value,days){var expires='';if(days){var d=new Date();d.s
 function getCookie(name){var nameEQ=name+'=';var ca=document.cookie.split(';');for(var i=0;i<ca.length;i++){var c=ca[i].trim();if(c.indexOf(nameEQ)===0)return decodeURIComponent(c.substring(nameEQ.length));}return null;}
 function saveLicenseEmbed(licenseData){var jsonStr=JSON.stringify(licenseData);try{localStorage.setItem(LICENSE_KEY,jsonStr);}catch(e){}setCookie(LICENSE_COOKIE,jsonStr,400);console.log('✅ Embed: License saved + cookie backup');}
 function loadLicenseEmbed(){var licenseStr=null;try{licenseStr=localStorage.getItem(LICENSE_KEY);if(licenseStr){console.log('📂 Embed: License from localStorage');return JSON.parse(licenseStr);}}catch(e){}licenseStr=getCookie(LICENSE_COOKIE);if(licenseStr){console.log('🍪 Embed: License restored from cookie!');try{var license=JSON.parse(licenseStr);localStorage.setItem(LICENSE_KEY,licenseStr);return license;}catch(e){}}return null;}
+
+// ORDERS BACKUP FUNCTIONS - Backup orders sang parent và cookie
+function saveOrdersEmbed(orders){
+    var jsonStr=JSON.stringify(orders);
+    try{localStorage.setItem(STORAGE_KEY,jsonStr);}catch(e){}
+    // Cookie backup (giới hạn 4KB nên chỉ lưu 50 orders gần nhất)
+    var recentOrders=orders.slice(0,50);
+    try{setCookie(ORDERS_COOKIE,JSON.stringify(recentOrders),400);}catch(e){}
+    // Sync lên parent để backup
+    if(window.parent && window.parent !== window){
+        window.parent.postMessage({action:'syncOrders',orders:orders},'*');
+    }
+    console.log('✅ Embed: Orders saved + backup ('+orders.length+' orders)');
+}
+function loadOrdersEmbed(){
+    var orders=[];
+    // Thử load từ localStorage trước
+    try{
+        var saved=localStorage.getItem(STORAGE_KEY);
+        if(saved){
+            orders=JSON.parse(saved);
+            console.log('📂 Embed: Orders from localStorage ('+orders.length+')');
+            return orders;
+        }
+    }catch(e){}
+    // Thử load từ cookie backup
+    try{
+        var cookieOrders=getCookie(ORDERS_COOKIE);
+        if(cookieOrders){
+            orders=JSON.parse(cookieOrders);
+            console.log('🍪 Embed: Orders restored from cookie ('+orders.length+')');
+            localStorage.setItem(STORAGE_KEY,JSON.stringify(orders));
+            return orders;
+        }
+    }catch(e){}
+    console.log('📭 Embed: No orders found');
+    return [];
+}
 
 // STATE
 var state={
@@ -507,6 +546,27 @@ window.addEventListener('message',function(event){
             
             // Không hiện toast khi sync (để tránh spam)
             console.log('✅ License synced! Premium: '+state.daysRemaining+' days');
+        }
+    }
+    
+    // Nhận sync orders từ parent (backup từ blogspot.com)
+    if(event.data&&event.data.action==='syncOrders'){
+        var orders=event.data.orders;
+        if(orders && Array.isArray(orders)){
+            console.log('📥 Received orders from parent: '+orders.length+' orders');
+            
+            // Nếu local không có orders hoặc ít hơn parent → dùng của parent
+            if(!state.orders || state.orders.length < orders.length){
+                state.orders = orders;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+                // Cập nhật cookie backup
+                var recentOrders = orders.slice(0,50);
+                try{setCookie(ORDERS_COOKIE,JSON.stringify(recentOrders),400);}catch(e){}
+                updateUI();
+                console.log('✅ Orders synced from parent! Total: '+orders.length);
+            } else {
+                console.log('📝 Local orders newer/equal, keeping local');
+            }
         }
     }
 });
@@ -912,7 +972,7 @@ async function saveRecording(){
     var order={qr:qrCode,date:dateStrVN(),time:timeStr(),duration:formatTime(duration),filename:filename,size:sizeMB+'MB',productsDetected:state.detectedProducts.length,timestamp:Date.now()};
     state.orders.unshift(order);
     if(state.orders.length>MAX_ORDERS)state.orders.pop();
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(state.orders));
+    saveOrdersEmbed(state.orders);
     
     if(!state.isPremium){incrementDailyUsage();}
     updateUI();
@@ -1151,7 +1211,7 @@ function deleteByDate(){
     });
     var deletedCount=beforeCount-state.orders.length;
     if(deletedCount>0){
-        localStorage.setItem(STORAGE_KEY,JSON.stringify(state.orders));
+        saveOrdersEmbed(state.orders);
         updateUI();
         toast('✅ Xóa '+deletedCount+' đơn','success');
     }else{
@@ -1163,7 +1223,7 @@ function deleteByDate(){
 function deleteAll(){
     if(confirm('Xóa tất cả '+state.orders.length+' đơn?')){
         state.orders=[];
-        localStorage.setItem(STORAGE_KEY,'[]');
+        saveOrdersEmbed(state.orders);
         updateUI();
         toast('✅ Đã xóa','success');
     }
@@ -1175,7 +1235,7 @@ function autoDelete(){
     var before=state.orders.length;
     state.orders=state.orders.filter(function(o){return o.timestamp&&o.timestamp>cutoff;});
     if(state.orders.length<before){
-        localStorage.setItem(STORAGE_KEY,JSON.stringify(state.orders));
+        saveOrdersEmbed(state.orders);
     }
 }
 
@@ -1183,17 +1243,19 @@ function autoDelete(){
 // INIT
 // ============================================
 function init(){
-    // Request license từ parent (giải quyết cross-domain localStorage)
-    // Parent sẽ gửi license nếu có
+    // Request license và orders từ parent (giải quyết cross-domain localStorage)
+    // Parent sẽ gửi license và orders nếu có
     if(window.parent && window.parent !== window){
         window.parent.postMessage({action: 'requestLicense'}, '*');
-        console.log('📤 Requesting license from parent...');
+        window.parent.postMessage({action: 'requestOrders'}, '*');
+        console.log('📤 Requesting license and orders from parent...');
     }
     
     checkPremiumStatus();
     checkDailyLimit();
     
-    try{var saved=localStorage.getItem(STORAGE_KEY);if(saved)state.orders=JSON.parse(saved);}catch(e){}
+    // Load orders với backup (localStorage + cookie)
+    state.orders=loadOrdersEmbed();
     autoDelete();
     
     state.quality=localStorage.getItem('quality')||'1080p60';
