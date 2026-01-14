@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Scanner v7.41 Premium - Full Screen</title>
+    <title>QR Scanner v7.42 Premium - Full Screen</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; }
@@ -159,7 +159,7 @@
     <div class="app-container">
         <div class="header">
             <h1>📦 Quay Video Đóng Hàng <span id="userBadge" class="free-badge">FREE</span></h1>
-            <div class="subtitle">v7.41 Premium - Full Screen</div>
+            <div class="subtitle">v7.42 Premium - Full Screen</div>
         </div>
         
         <div class="limit-banner" id="limitBanner" onclick="window.parent.postMessage({action:'openPremiumPopup'},'*')">
@@ -309,7 +309,7 @@ function getCookie(name){var nameEQ=name+'=';var ca=document.cookie.split(';');f
 function saveLicenseEmbed(licenseData){var jsonStr=JSON.stringify(licenseData);try{localStorage.setItem(LICENSE_KEY,jsonStr);}catch(e){}setCookie(LICENSE_COOKIE,jsonStr,400);console.log('✅ Embed: License saved + cookie backup');}
 function loadLicenseEmbed(){var licenseStr=null;try{licenseStr=localStorage.getItem(LICENSE_KEY);if(licenseStr){console.log('📂 Embed: License from localStorage');return JSON.parse(licenseStr);}}catch(e){}licenseStr=getCookie(LICENSE_COOKIE);if(licenseStr){console.log('🍪 Embed: License restored from cookie!');try{var license=JSON.parse(licenseStr);localStorage.setItem(LICENSE_KEY,licenseStr);return license;}catch(e){}}return null;}
 
-// V7.41: ORDERS SYNC - Giải quyết vấn đề Third-Party Storage bị xóa
+// V7.42: ORDERS SYNC - Giải quyết vấn đề Third-Party Storage bị xóa
 // Sync orders lên parent page (Blogger) để lưu localStorage bền vững
 var ordersLoadedFromParent = false;
 
@@ -538,25 +538,53 @@ window.addEventListener('message',function(event){
         }
     }
     
-    // V7.41: Nhận orders từ parent (giải quyết Third-Party Storage bị xóa)
+    // V7.42: Nhận orders từ parent (giải quyết Third-Party Storage bị xóa)
     if(event.data&&event.data.action==='syncOrdersFromParent'){
         var parentOrders=event.data.orders;
         if(parentOrders && Array.isArray(parentOrders)){
-            console.log('📥 Received '+parentOrders.length+' orders from parent');
+            console.log('📥 Received '+parentOrders.length+' orders from parent, local has '+state.orders.length);
+            ordersLoadedFromParent = true;
             
-            // Merge orders: ưu tiên parent nếu nhiều hơn, hoặc merge unique
-            if(parentOrders.length > state.orders.length || !ordersLoadedFromParent){
+            // Logic merge thông minh:
+            // 1. Nếu parent có nhiều hơn → dùng parent
+            // 2. Nếu local có nhiều hơn → sync local lên parent  
+            // 3. Nếu cả 2 có data → merge unique theo timestamp
+            
+            if(parentOrders.length > 0 && state.orders.length === 0){
+                // Parent có, local không có → dùng parent
                 state.orders = parentOrders;
-                ordersLoadedFromParent = true;
                 try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state.orders));}catch(e){}
                 updateUI();
-                if(parentOrders.length > 0){
-                    console.log('✅ Orders restored from parent: '+parentOrders.length+' đơn');
+                console.log('✅ Orders restored from parent: '+parentOrders.length+' đơn');
+            } else if(parentOrders.length === 0 && state.orders.length > 0){
+                // Parent không có, local có → sync local lên parent
+                console.log('📤 Local has data, syncing to parent: '+state.orders.length+' đơn');
+                syncOrdersToParent();
+            } else if(parentOrders.length > 0 && state.orders.length > 0){
+                // Cả 2 đều có → merge unique theo timestamp
+                var merged = mergeOrders(parentOrders, state.orders);
+                if(merged.length !== state.orders.length){
+                    state.orders = merged;
+                    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state.orders));}catch(e){}
+                    syncOrdersToParent(); // Sync merged data back
+                    updateUI();
+                    console.log('✅ Merged orders: '+merged.length+' đơn');
                 }
             }
+            // Nếu cả 2 đều empty → không làm gì
         }
     }
 });
+
+// Helper function để merge orders unique theo timestamp
+function mergeOrders(arr1, arr2){
+    var map = {};
+    arr1.forEach(function(o){ if(o.timestamp) map[o.timestamp] = o; });
+    arr2.forEach(function(o){ if(o.timestamp) map[o.timestamp] = o; });
+    var merged = Object.values(map);
+    merged.sort(function(a,b){ return (b.timestamp||0) - (a.timestamp||0); });
+    return merged;
+}
 
 // CODEC & CANVAS
 function getCodec(){var codecs=[{mimeType:'video/webm;codecs=vp8,opus',ext:'webm',name:'VP8'},{mimeType:'video/webm;codecs=vp8',ext:'webm',name:'VP8'},{mimeType:'video/webm',ext:'webm',name:'WebM'}];for(var i=0;i<codecs.length;i++){if(MediaRecorder.isTypeSupported(codecs[i].mimeType)){state.currentCodec=codecs[i];return codecs[i];}}state.currentCodec={mimeType:'video/webm',ext:'webm',name:'WebM'};return state.currentCodec;}
@@ -959,7 +987,7 @@ async function saveRecording(){
     var order={qr:qrCode,date:dateStrVN(),time:timeStr(),duration:formatTime(duration),filename:filename,size:sizeMB+'MB',productsDetected:state.detectedProducts.length,timestamp:Date.now()};
     state.orders.unshift(order);
     if(state.orders.length>MAX_ORDERS)state.orders.pop();
-    saveOrdersWithSync(); // V7.41: Sync to parent for persistent storage
+    saveOrdersWithSync(); // V7.42: Sync to parent for persistent storage
     
     if(!state.isPremium){incrementDailyUsage();}
     updateUI();
@@ -1198,7 +1226,7 @@ function deleteByDate(){
     });
     var deletedCount=beforeCount-state.orders.length;
     if(deletedCount>0){
-        saveOrdersWithSync(); // V7.41: Sync to parent
+        saveOrdersWithSync(); // V7.42: Sync to parent
         updateUI();
         toast('✅ Xóa '+deletedCount+' đơn','success');
     }else{
@@ -1210,7 +1238,7 @@ function deleteByDate(){
 function deleteAll(){
     if(confirm('Xóa tất cả '+state.orders.length+' đơn?')){
         state.orders=[];
-        saveOrdersWithSync(); // V7.41: Sync to parent
+        saveOrdersWithSync(); // V7.42: Sync to parent
         updateUI();
         toast('✅ Đã xóa','success');
     }
@@ -1222,7 +1250,7 @@ function autoDelete(){
     var before=state.orders.length;
     state.orders=state.orders.filter(function(o){return o.timestamp&&o.timestamp>cutoff;});
     if(state.orders.length<before){
-        saveOrdersWithSync(); // V7.41: Sync to parent
+        saveOrdersWithSync(); // V7.42: Sync to parent
     }
 }
 
@@ -1234,7 +1262,7 @@ function init(){
     // Parent sẽ gửi license và orders nếu có
     if(window.parent && window.parent !== window){
         window.parent.postMessage({action: 'requestLicense'}, '*');
-        window.parent.postMessage({action: 'requestOrders'}, '*'); // V7.41: Request orders
+        window.parent.postMessage({action: 'requestOrders'}, '*'); // V7.42: Request orders
         console.log('📤 Requesting license + orders from parent...');
     }
     
@@ -1358,7 +1386,7 @@ function init(){
     },500);
     
     var statusText=state.isPremium?'Premium ('+state.daysRemaining+' ngày)':'Free';
-    toast('✅ v7.41 '+statusText,'success');
+    toast('✅ v7.42 '+statusText,'success');
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
