@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Scanner v7.42 Premium - Full Screen</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; }
+        body { overflow-y: auto; }
+        .app-container { display: flex; flex-direction: column; }
+        .hidden { display: none !important; }
+        
+        /* HEADER */
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 8px 15px; text-align: center; }
+        .header h1 { font-size: 20px; display: inline; }
+        .header .subtitle { font-size: 11px; opacity: 0.9; }
+        .header .premium-badge { background: #ffd700; color: #333; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-left: 10px; }
+        .header .free-badge { background: #6c757d; color: white; padding: 2px 10px; border-radius: 12px; font-size: 11px; margin-left: 10px; }
+        
+        /* LIMIT BANNER */
+        .limit-banner { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; padding: 6px 12px; text-align: center; font-size: 12px; cursor: pointer; }
+        .limit-banner:hover { background: linear-gradient(135deg, #e67e22, #d35400); }
+        .limit-banner .upgrade-link { color: #fff; text-decoration: underline; font-weight: bold; }
+        
+        /* PREMIUM INFO */
+        .premium-info { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 6px 12px; text-align: center; font-size: 12px; }
+        .days-remaining { font-weight: bold; color: #ffd700; }
+        
+        /* TABS */
+        .tabs { display: flex; background: #16213e; border-bottom: 2px solid #667eea; }
+        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; background: transparent; border: none; font-size: 15px; color: #888; font-weight: 500; }
+        .tab.active { background: #1a1a2e; color: #667eea; font-weight: 600; border-bottom: 3px solid #667eea; margin-bottom: -2px; }
+        
+        /* CONTROLS */
+        .controls { padding: 8px 12px; background: #16213e; border-bottom: 1px solid #2a3f5f; }
+        .control-row { display: flex; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+        .control-group { flex: 1; min-width: 120px; }
+        .control-group label { display: block; font-size: 11px; color: #aaa; margin-bottom: 3px; }
+        select { width: 100%; padding: 6px 8px; border: 1px solid #3a4f6f; border-radius: 5px; font-size: 12px; background: #1a1a2e; color: white; }
+        
+        /* VOLUME SLIDER */
+        .volume-group { display: flex; align-items: center; gap: 8px; }
+        .volume-slider { flex: 1; -webkit-appearance: none; appearance: none; height: 6px; background: #3a4f6f; border-radius: 3px; outline: none; }
+        .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: #667eea; border-radius: 50%; cursor: pointer; }
+        .volume-slider::-moz-range-thumb { width: 16px; height: 16px; background: #667eea; border-radius: 50%; cursor: pointer; border: none; }
+        .volume-value { font-size: 11px; color: #ffd700; min-width: 35px; text-align: right; }
+        
+        /* RENEWAL WARNING MODAL */
+        .renewal-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 10000; }
+        .renewal-box { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 3px solid #f39c12; border-radius: 16px; padding: 25px; max-width: 420px; width: 90%; text-align: center; color: white; position: relative; }
+        .renewal-box h2 { color: #f39c12; font-size: 22px; margin-bottom: 15px; }
+        .renewal-box .days-big { font-size: 48px; color: #e74c3c; font-weight: bold; }
+        .renewal-box .warning-text { color: #f39c12; font-size: 14px; margin: 15px 0; padding: 10px; background: rgba(243,156,18,0.15); border-radius: 8px; line-height: 1.5; }
+        .renewal-box .btn-renew { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; margin: 10px 5px; }
+        .renewal-box .btn-later { background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-size: 13px; cursor: pointer; margin: 10px 5px; }
+        .btn-close-modal { position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #888; font-size: 20px; cursor: pointer; padding: 5px 10px; }
+        .btn-close-modal:hover { color: #fff; }
+        
+        /* TOGGLE */
+        .toggle-row { display: flex; align-items: center; gap: 8px; }
+        .recommend-text { margin-left: auto; font-size: 11px; color: #ccc; }
+        .toggle { position: relative; width: 36px; height: 18px; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #444; border-radius: 18px; transition: 0.3s; }
+        .toggle-slider:before { content: ""; position: absolute; height: 14px; width: 14px; left: 2px; bottom: 2px; background: white; border-radius: 50%; transition: 0.3s; }
+        .toggle input:checked + .toggle-slider { background: #667eea; }
+        .toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
+        .toggle-label { font-size: 12px; color: #ccc; }
+        
+        /* BUTTONS */
+        .buttons { display: flex; gap: 8px; padding: 8px 12px; background: #16213e; justify-content: center; }
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-secondary { background: #f39c12; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-small { padding: 5px 12px; font-size: 11px; }
+        
+        /* FOLDER INFO */
+        .folder-info { background: #1f3a5f; border: 1px solid #3a5f8f; border-radius: 5px; padding: 6px 10px; margin: 0 12px 6px; font-size: 11px; }
+        .folder-info .title { font-weight: 600; color: #4dabf7; }
+        .folder-info .path { background: #0d1520; padding: 3px 8px; border-radius: 4px; font-family: monospace; color: #7bed9f; font-size: 10px; }
+        
+        /* VIDEO SECTION - 16:9 aspect ratio */
+        .video-section { position: relative; background: #000; width: 100%; padding-top: 56.25%; }
+        #webcamVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .video-overlay { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.85); color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; border-left: 4px solid #28a745; opacity: 0; transform: translateY(10px); transition: all 0.3s; z-index: 10; }
+        .video-overlay.show { opacity: 1; transform: translateY(0); }
+        .video-overlay h4 { font-size: 13px; margin-bottom: 3px; }
+        .video-overlay strong { color: #ffd700; }
+        .rec-indicator { position: absolute; top: 15px; left: 15px; background: rgba(255,0,0,0.9); color: white; padding: 6px 12px; border-radius: 5px; font-size: 12px; font-weight: bold; animation: blink 1s infinite; z-index: 10; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .fps-display { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.75); color: white; padding: 6px 10px; border-radius: 5px; font-size: 12px; display: flex; gap: 12px; z-index: 10; }
+        .fps-value { color: #00ff00; }
+        .fps-value.low { color: #ff0000; }
+        .fps-value.medium { color: #ffff00; }
+        
+        /* V7.2: SCAN LOCK OVERLAY */
+        .scan-lock-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); padding: 20px 40px; border-radius: 15px; text-align: center; z-index: 25; border: 3px solid #ffc107; }
+        .scan-lock-time { font-size: 48px; font-weight: bold; color: #ffc107; }
+        .scan-lock-text { color: white; font-size: 14px; margin-top: 8px; }
+        
+        /* STATS */
+        .stats { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 10px 12px; text-align: center; display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .stats-title { font-size: 14px; }
+        .stats-count { font-size: 20px; font-weight: bold; }
+        .stats-total { font-size: 13px; opacity: 0.9; }
+        .stats-limit { font-size: 12px; color: #ffd700; }
+        
+        /* HISTORY */
+        .history { padding: 10px 12px; background: #16213e; flex: 1; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .history-header h3 { font-size: 15px; color: #fff; }
+        .search-input { padding: 6px 12px; border: 1px solid #3a4f6f; border-radius: 10px; font-size: 12px; width: 240px; background: #1a1a2e; color: white; }
+        .history-list { border: 1px solid #2a3f5f; border-radius: 6px; overflow-y: auto; background: #1a1a2e; min-height: 600px; max-height: 1000px; }
+        .history-list::-webkit-scrollbar { width: 8px; }
+        .history-list::-webkit-scrollbar-track { background: #2a3f5f; }
+        .history-list::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
+        .history-item { display: grid; grid-template-columns: 30px 1fr 70px 50px 50px 50px 35px; gap: 6px; padding: 8px 10px; border-bottom: 1px solid #2a3f5f; font-size: 12px; align-items: center; }
+        .history-item:hover { background: #1f2b47; }
+        .h-num { color: #666; font-weight: 600; }
+        .h-qr { font-weight: 600; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .h-date { color: #888; font-size: 10px; }
+        .h-time { color: #667eea; }
+        .h-duration { color: #28a745; }
+        .h-size { color: #f39c12; }
+        .h-products { color: #e74c3c; font-weight: 600; }
+        .empty-msg { text-align: center; padding: 40px; color: #666; font-size: 14px; }
+        
+        /* HISTORY ACTIONS */
+        .history-actions { display: flex; gap: 8px; padding: 10px 12px; background: #0d1520; justify-content: center; }
+        
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-box { background: #1a1a2e; border: 1px solid #3a4f6f; border-radius: 12px; padding: 20px; width: 90%; max-width: 300px; text-align: center; }
+        .modal-box h3 { margin-bottom: 12px; color: #fff; font-size: 15px; }
+        .modal-box .date-inputs { display: flex; gap: 10px; margin-bottom: 12px; flex-direction: column; }
+        .modal-box .date-inputs label { font-size: 11px; color: #aaa; text-align: left; }
+        .modal-box .date-inputs input { padding: 8px; border: 1px solid #3a4f6f; border-radius: 5px; background: #0d1520; color: white; font-size: 12px; }
+        .modal-box .modal-buttons { display: flex; gap: 10px; justify-content: center; }
+        
+        /* LIMIT MODAL */
+        .limit-modal { background: #1a1a2e; border: 2px solid #f39c12; border-radius: 14px; padding: 25px; width: 90%; max-width: 340px; text-align: center; }
+        .limit-modal h2 { color: #f39c12; font-size: 18px; margin-bottom: 12px; }
+        .limit-modal p { color: #ccc; font-size: 13px; margin-bottom: 12px; }
+        .limit-modal .btn-upgrade { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; padding: 12px 30px; font-size: 14px; border-radius: 25px; border: none; cursor: pointer; font-weight: bold; }
+        
+        /* TOAST */
+        .toast { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: white; padding: 10px 20px; border-radius: 20px; font-size: 12px; opacity: 0; transition: all 0.3s; z-index: 2000; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { background: linear-gradient(135deg, #28a745, #20c997); }
+        .toast.warning { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .toast.error { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>📦 Quay Video Đóng Hàng <span id="userBadge" class="free-badge">FREE</span></h1>
+            <div class="subtitle">v7.42 Premium - Full Screen</div>
+        </div>
+        
+        <div class="limit-banner" id="limitBanner" onclick="window.parent.postMessage({action:'openPremiumPopup'},'*')">
+            👑 Nâng cấp Premium để hiển thị thông tin đơn hàng
+        </div>
+        
+        <div class="premium-info hidden" id="premiumInfo">
+            ⭐ Premium Active | Còn lại: <span class="days-remaining" id="daysRemaining">365</span> ngày | Không giới hạn đơn hàng
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" id="tabCamera">📷 Camera - Webcam</button>
+            <button class="tab" id="tabScanner">⌨️ Máy quét cầm tay</button>
+        </div>
+        
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group"><label>📹 Camera</label><select id="cameraSelect"><option>Đang tải...</option></select></div>
+                <div class="control-group"><label>📐 Chất lượng</label><select id="qualitySelect"><option value="1080p30">1080p 30fps</option><option value="1080p60" selected>1080p 60fps</option></select></div>
+                <div class="control-group"><label>💾 Bitrate</label><select id="bitrateSelect"><option value="8">8 Mbps</option><option value="10">10 Mbps</option><option value="12" selected>12 Mbps</option></select></div>
+            </div>
+            <div class="control-row">
+                <div class="control-group"><label>📍 Timestamp</label><select id="timestampPosition"><option value="top-left">Trên trái</option><option value="top-right" selected>Trên phải</option><option value="bottom-left">Dưới trái</option><option value="bottom-right">Dưới phải</option></select></div>
+                <div class="control-group"><label>🔊 Âm lượng Beep</label><div class="volume-group"><input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="80"><span class="volume-value" id="volumeValue">80%</span></div></div>
+                <div class="control-group"><label>⏩ Ghi hình sau quét</label><select id="postBufferSelect"><option value="2000">2 giây</option><option value="3000" selected>3 giây</option><option value="5000">5 giây</option></select></div>
+            </div>
+            <div class="toggle-row">
+                <label class="toggle"><input type="checkbox" id="audioToggle" checked><span class="toggle-slider"></span></label>
+                <span class="toggle-label">🎤 Ghi âm</span>
+                <span class="recommend-text">Khuyến nghị: Ổn định 1080p 30fps - 8Mbps</span>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button id="startBtn" class="btn btn-primary">🎬 Bắt đầu</button>
+            <button id="stopBtn" class="btn btn-danger hidden">⏹️ Dừng</button>
+            <button id="folderBtn" class="btn btn-secondary">📁 Thư mục</button>
+        </div>
+        
+        <div class="folder-info hidden" id="folderInfo">
+            <span class="title">📁 Lưu tại:</span> <span class="path" id="folderPath">Downloads/</span>
+        </div>
+        
+        <div class="video-section">
+            <video id="webcamVideo" autoplay playsinline muted></video>
+            <div class="video-overlay" id="orderInfo">
+                <h4>📦 Đang ghi</h4>
+                <div>Mã: <strong id="currentQRDisplay">-</strong></div>
+                <div>Time: <span id="currentTime">00:00:00</span> | SP: <span id="productsCount">0</span></div>
+            </div>
+            <div class="rec-indicator hidden" id="recIndicator">⏺ REC <span id="recTime">00:00</span></div>
+            <div class="fps-display hidden" id="fpsDisplay">
+                <span>FPS: <span id="fpsValue" class="fps-value">0</span></span>
+                <span>Scan: <span id="scanRate" class="scan-rate">0</span>/s</span>
+            </div>
+            <!-- V7.2: Scan Lock Overlay -->
+            <div class="scan-lock-overlay hidden" id="scanLockOverlay">
+                <div class="scan-lock-time" id="scanLockTime">10</div>
+                <div class="scan-lock-text">Chờ để quét lần 2...</div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <span class="stats-title">📊 Hôm nay:</span>
+            <span class="stats-count"><span id="todayCount">0</span> đơn</span>
+            <span class="stats-total">| Tổng: <span id="totalCount">0</span>/<span id="maxOrders">100,000</span></span>
+            <span class="stats-limit hidden" id="statsLimit">| Còn: <span id="remainingToday">100</span> đơn</span>
+        </div>
+        
+        <div class="history">
+            <div class="history-header">
+                <h3>📜 Lịch sử đơn hàng (<span id="historyCount">0</span>)</h3>
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Tìm kiếm mã đơn...">
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="empty-msg">Chưa có lịch sử đơn hàng<br><br>Quét mã QR để bắt đầu ghi video</div>
+            </div>
+        </div>
+        
+        <div class="history-actions">
+            <button id="exportBtn" class="btn btn-success btn-small">📥 Xuất Excel</button>
+            <button id="deleteByDateBtn" class="btn btn-secondary btn-small">🗑️ Xóa theo ngày</button>
+            <button id="deleteAllBtn" class="btn btn-danger btn-small">🗑️ Xóa tất cả</button>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div class="modal-overlay hidden" id="deleteModal">
+        <div class="modal-box">
+            <h3>🗑️ Xóa theo ngày</h3>
+            <div class="date-inputs">
+                <label>Từ ngày:<input type="date" id="deleteFromDate"></label>
+                <label>Đến ngày:<input type="date" id="deleteToDate"></label>
+            </div>
+            <div class="modal-buttons">
+                <button id="cancelDeleteBtn" class="btn btn-secondary btn-small">Hủy</button>
+                <button id="confirmDeleteBtn" class="btn btn-danger btn-small">Xóa</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Limit Modal -->
+    <div class="modal-overlay hidden" id="limitModal">
+        <div class="limit-modal">
+            <h2>⚠️ Đã hết lượt quét hôm nay!</h2>
+            <p>Bạn đã sử dụng hết 100 lượt quét miễn phí hôm nay.</p>
+            <p>Nâng cấp Premium để quét không giới hạn!</p>
+            <button class="btn-upgrade" onclick="window.parent.postMessage({action:'openPremiumPopup'},'*');hideLimitModal();">👑 Nâng cấp ngay</button>
+            <p style="margin-top:15px;font-size:11px;color:#888;">Hoặc chờ đến 00:00 để reset lượt quét</p>
+            <button style="background:transparent;border:none;color:#667eea;margin-top:10px;cursor:pointer;" onclick="hideLimitModal()">Đóng</button>
+        </div>
+    </div>
+    
+    <!-- Renewal Warning Modal -->
+    <div class="renewal-modal hidden" id="renewalModal">
+        <div class="renewal-box">
+            <button class="btn-close-modal" onclick="hideRenewalModal()" title="Đóng">✕</button>
+            <h2>⚠️ Premium sắp hết hạn!</h2>
+            <div class="warning-text" id="renewalWarningText">
+                Sau <strong><span id="renewDays">5</span> ngày</strong> nếu không gia hạn, thông tin đơn hàng sẽ bị che. Vui lòng gia hạn để tiếp tục sử dụng đầy đủ tính năng!
+            </div>
+            <button class="btn-renew" onclick="window.parent.postMessage({action:'openPremiumPopup'},'*');hideRenewalModal();">👑 Gia hạn ngay</button>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script>
+(function(){
+'use strict';
+// ============================================
+// V7.2 - KHÔNG PRE-BUFFER, GHI TỪ TRIGGER
+// ============================================
+
+// CONFIG
+var STORAGE_KEY='qrScannerBlogV7',LICENSE_KEY='qrScannerLicense',DAILY_KEY='qrScannerDaily';
+var LICENSE_COOKIE='qrLicenseBackupEmbed';
+var MAX_ORDERS=100000,FREE_DAILY_LIMIT=100,AUTO_DELETE_DAYS=60;
+var SCAN_LOCK_SECOND=10000,PROGRESS_DISPLAY_TIME=1500;
+var VIDEO_PRESETS={'1080p30':{width:1920,height:1080,fps:30,scanFPS:3,scanScale:0.5},'1080p60':{width:1920,height:1080,fps:60,scanFPS:3,scanScale:0.5}};
+var BITRATE_OPTIONS={'8':{value:8000000},'10':{value:10000000},'12':{value:12000000}};
+
+// COOKIE HELPERS - Backup cho localStorage
+function setCookie(name,value,days){var expires='';if(days){var d=new Date();d.setTime(d.getTime()+(days*24*60*60*1000));expires='; expires='+d.toUTCString();}document.cookie=name+'='+encodeURIComponent(value)+expires+'; path=/; SameSite=Lax';}
+function getCookie(name){var nameEQ=name+'=';var ca=document.cookie.split(';');for(var i=0;i<ca.length;i++){var c=ca[i].trim();if(c.indexOf(nameEQ)===0)return decodeURIComponent(c.substring(nameEQ.length));}return null;}
+function saveLicenseEmbed(licenseData){var jsonStr=JSON.stringify(licenseData);try{localStorage.setItem(LICENSE_KEY,jsonStr);}catch(e){}setCookie(LICENSE_COOKIE,jsonStr,400);console.log('✅ Embed: License saved + cookie backup');}
+function loadLicenseEmbed(){var licenseStr=null;try{licenseStr=localStorage.getItem(LICENSE_KEY);if(licenseStr){console.log('📂 Embed: License from localStorage');return JSON.parse(licenseStr);}}catch(e){}licenseStr=getCookie(LICENSE_COOKIE);if(licenseStr){console.log('🍪 Embed: License restored from cookie!');try{var license=JSON.parse(licenseStr);localStorage.setItem(LICENSE_KEY,licenseStr);return license;}catch(e){}}return null;}
+
+// V7.42: ORDERS SYNC - Giải quyết vấn đề Third-Party Storage bị xóa
+// Sync orders lên parent page (Blogger) để lưu localStorage bền vững
+var ordersLoadedFromParent = false;
+
+function syncOrdersToParent(){
+    if(window.parent && window.parent !== window){
+        window.parent.postMessage({
+            action: 'syncOrders',
+            orders: state.orders
+        }, '*');
+        console.log('📤 Synced ' + state.orders.length + ' orders to parent');
+    }
+}
+
+function requestOrdersFromParent(){
+    if(window.parent && window.parent !== window){
+        window.parent.postMessage({action: 'requestOrders'}, '*');
+        console.log('📤 Requesting orders from parent...');
+    }
+}
+
+function saveOrdersWithSync(){
+    // Lưu localStorage local (có thể bị xóa)
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state.orders));}catch(e){}
+    // Sync lên parent (bền vững hơn)
+    syncOrdersToParent();
+}
+
+// STATE
+var state={
+    stream:null,recorder:null,chunks:[],canvasStream:null,orders:[],
+    isRecording:false,isCameraOn:false,currentQR:null,
+    scanBlocked:false,recordingStartTime:null,
+    timerInterval:null,countdownTimer:null,
+    quality:'1080p60',bitrate:'12',audio:true,postBuf:3000,
+    cameraId:null,device:'camera',timestampPos:'top-right',
+    recordingCanvas:null,recordingCtx:null,scanCanvas:null,scanCtx:null,
+    rafId:null,frameCount:0,lastFpsTime:0,currentFPS:0,
+    lastScanTime:0,scanInterval:333,actualScanCount:0,lastScanCountTime:0,actualScanRate:0,
+    displayQR:null,displayTime:0,detectedProducts:[],
+    currentCodec:null,folderHandle:null,lastSavedFile:null,scanCycleCount:0,
+    isPremium:false,licenseKey:null,licenseExpires:null,daysRemaining:0,todayUsed:0,todayDate:null,
+    lastBeepTime:0,
+    beepVolume:80,
+    freeVideoCounter:0
+};
+
+// UTILITIES
+function $(id){return document.getElementById(id);}
+function toast(msg,type){var t=$('toast');t.textContent=msg;t.className='toast show '+(type||'');setTimeout(function(){t.classList.remove('show');},2500);}
+// Audio context for beep sound
+var audioCtx=null;
+function initAudio(){
+    if(!audioCtx){
+        try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+    }
+    if(audioCtx&&audioCtx.state==='suspended'){audioCtx.resume();}
+}
+function beep(){
+    try{
+        initAudio();
+        if(!audioCtx)return;
+        var vol = state.beepVolume / 100; // Convert 0-100 to 0-1
+        if(vol <= 0) return; // Mute
+        var o=audioCtx.createOscillator(),g=audioCtx.createGain();
+        o.connect(g);g.connect(audioCtx.destination);
+        o.frequency.value=1200;o.type='square';
+        g.gain.setValueAtTime(vol * 0.8,audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.15);
+        o.start();o.stop(audioCtx.currentTime+0.15);
+        // Double beep for better notice
+        setTimeout(function(){
+            try{
+                var o2=audioCtx.createOscillator(),g2=audioCtx.createGain();
+                o2.connect(g2);g2.connect(audioCtx.destination);
+                o2.frequency.value=1500;o2.type='square';
+                g2.gain.setValueAtTime(vol * 0.7,audioCtx.currentTime);
+                g2.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.1);
+                o2.start();o2.stop(audioCtx.currentTime+0.1);
+            }catch(e){}
+        },80);
+    }catch(e){console.log('Beep error:',e);}
+}
+function pad(n){return String(n).padStart(2,'0');}
+function formatTime(sec){return pad(Math.floor(sec/3600))+':'+pad(Math.floor((sec%3600)/60))+':'+pad(sec%60);}
+function dateStr(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function dateStrVN(){var d=new Date();return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();}
+function timeStr(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());}
+function fileTimeStr(){var d=new Date();return pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds());}
+function vnDateToISO(vnDate){var p=vnDate.split('/');return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:vnDate;}
+
+// LICENSE + PREMIUM EXPIRY LOGIC
+var GRACE_PERIOD_KEY = 'qrScannerGracePeriod';
+
+function checkPremiumStatus(){
+    try{
+        // Dùng loadLicenseEmbed để tự động khôi phục từ cookie nếu cần
+        var license=loadLicenseEmbed();
+        if(license){
+            var now=new Date();
+            var expires=new Date(license.expiresAt);
+            
+            if(now<expires){
+                // Premium còn hiệu lực
+                state.isPremium=true;
+                state.licenseKey=license.licenseKey;
+                state.licenseExpires=license.expiresAt;
+                state.daysRemaining=Math.ceil((expires-now)/(1000*60*60*24));
+                
+                // Clear grace period nếu có
+                localStorage.removeItem(GRACE_PERIOD_KEY);
+                
+                // Cảnh báo khi còn ≤5 ngày
+                if(state.daysRemaining <= 5){
+                    showRenewalWarning(state.daysRemaining);
+                }
+                return true;
+            } else {
+                // Premium đã hết hạn - bắt đầu grace period
+                handlePremiumExpired(license.expiresAt);
+            }
+        }
+    }catch(e){console.log('License check error:',e);}
+    
+    state.isPremium=false;
+    state.licenseKey=null;
+    state.daysRemaining=0;
+    return false;
+}
+
+function handlePremiumExpired(expiredAt){
+    // Premium hết hạn - chuyển về FREE mode, KHÔNG xóa data
+    localStorage.removeItem(LICENSE_KEY);
+    localStorage.removeItem(GRACE_PERIOD_KEY);
+    toast('⚠️ Premium đã hết hạn - Đã chuyển về Free mode','warning');
+}
+
+function showRenewalWarning(days){
+    var modal = $('renewalModal');
+    var daysEl = $('renewDays');
+    if(!modal || !daysEl || days <= 0) return;
+    
+    // Kiểm tra đã hiện popup hôm nay chưa (chỉ hiện 1 lần/ngày)
+    var today = dateStr();
+    var lastShown = localStorage.getItem('renewalWarningShown');
+    if(lastShown === today) return;
+    
+    // Cập nhật text theo số ngày còn lại
+    daysEl.textContent = days;
+    
+    // Lưu ngày đã hiện popup
+    localStorage.setItem('renewalWarningShown', today);
+    modal.classList.remove('hidden');
+}
+
+function hideRenewalModal(){
+    $('renewalModal').classList.add('hidden');
+}
+function checkDailyLimit(){var today=dateStr();try{var dailyData=localStorage.getItem(DAILY_KEY);if(dailyData){var daily=JSON.parse(dailyData);if(daily.date===today){state.todayUsed=daily.used||0;state.todayDate=today;}else{resetDailyData(today);}}else{resetDailyData(today);}}catch(e){resetDailyData(today);}}
+function resetDailyData(today){state.todayUsed=0;state.todayDate=today;localStorage.setItem(DAILY_KEY,JSON.stringify({date:today,used:0}));}
+function incrementDailyUsage(){state.todayUsed++;localStorage.setItem(DAILY_KEY,JSON.stringify({date:state.todayDate,used:state.todayUsed}));updateLimitDisplay();}
+function canScanMore(){return true;}
+function getRemainingScans(){return'Không giới hạn';}
+function updateLimitDisplay(){var limitBanner=$('limitBanner'),premiumInfo=$('premiumInfo'),userBadge=$('userBadge'),statsLimit=$('statsLimit'),daysRemaining=$('daysRemaining');if(state.isPremium){if(limitBanner)limitBanner.classList.add('hidden');if(premiumInfo)premiumInfo.classList.remove('hidden');if(userBadge){userBadge.textContent='PREMIUM';userBadge.className='premium-badge';}if(statsLimit)statsLimit.classList.add('hidden');if(daysRemaining)daysRemaining.textContent=state.daysRemaining;}else{if(limitBanner)limitBanner.classList.remove('hidden');if(premiumInfo)premiumInfo.classList.add('hidden');if(userBadge){userBadge.textContent='FREE';userBadge.className='free-badge';}if(statsLimit)statsLimit.classList.add('hidden');}}
+function showLimitModal(){$('limitModal').classList.remove('hidden');}
+function hideLimitModal(){$('limitModal').classList.add('hidden');}
+window.addEventListener('message',function(event){
+    // Nhận kích hoạt premium mới
+    if(event.data&&event.data.action==='premiumActivated'){
+        var licenseData=event.data.license;
+        if(licenseData){
+            // Lưu license mới với cookie backup
+            saveLicenseEmbed(licenseData);
+            
+            // Clear grace period nếu có
+            localStorage.removeItem(GRACE_PERIOD_KEY);
+            
+            // Cập nhật state
+            var now=new Date();
+            var expires=new Date(licenseData.expiresAt);
+            state.isPremium=true;
+            state.licenseKey=licenseData.licenseKey;
+            state.licenseExpires=licenseData.expiresAt;
+            state.daysRemaining=Math.ceil((expires-now)/(1000*60*60*24));
+            
+            // Update UI (KHÔNG gọi checkPremiumStatus để tránh popup)
+            updateLimitDisplay();
+            updateUI();
+            
+            // Đóng popup renewal nếu đang mở
+            hideRenewalModal();
+            
+            toast('🎉 Premium đã kích hoạt! Còn '+state.daysRemaining+' ngày','success');
+        }
+    }
+    
+    // Nhận sync license từ parent (giải quyết vấn đề cross-domain localStorage)
+    if(event.data&&event.data.action==='syncLicense'){
+        var licenseData=event.data.license;
+        if(licenseData){
+            console.log('📥 Received license from parent: '+licenseData.daysRemaining+' days');
+            
+            // Lưu vào localStorage + Cookie backup của iframe (github.io)
+            saveLicenseEmbed({
+                licenseKey: licenseData.licenseKey,
+                expiresAt: licenseData.expiresAt,
+                activatedAt: new Date().toISOString()
+            });
+            
+            // Clear grace period nếu có
+            localStorage.removeItem(GRACE_PERIOD_KEY);
+            
+            // Cập nhật state
+            var now=new Date();
+            var expires=new Date(licenseData.expiresAt);
+            state.isPremium=true;
+            state.licenseKey=licenseData.licenseKey;
+            state.licenseExpires=licenseData.expiresAt;
+            state.daysRemaining=Math.ceil((expires-now)/(1000*60*60*24));
+            
+            // Update UI
+            updateLimitDisplay();
+            updateUI();
+            
+            // Không hiện toast khi sync (để tránh spam)
+            console.log('✅ License synced! Premium: '+state.daysRemaining+' days');
+        }
+    }
+    
+    // V7.42: Nhận orders từ parent (giải quyết Third-Party Storage bị xóa)
+    if(event.data&&event.data.action==='syncOrdersFromParent'){
+        var parentOrders=event.data.orders;
+        if(parentOrders && Array.isArray(parentOrders)){
+            console.log('📥 Received '+parentOrders.length+' orders from parent, local has '+state.orders.length);
+            ordersLoadedFromParent = true;
+            
+            // Logic merge thông minh:
+            // 1. Nếu parent có nhiều hơn → dùng parent
+            // 2. Nếu local có nhiều hơn → sync local lên parent  
+            // 3. Nếu cả 2 có data → merge unique theo timestamp
+            
+            if(parentOrders.length > 0 && state.orders.length === 0){
+                // Parent có, local không có → dùng parent
+                state.orders = parentOrders;
+                try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state.orders));}catch(e){}
+                updateUI();
+                console.log('✅ Orders restored from parent: '+parentOrders.length+' đơn');
+            } else if(parentOrders.length === 0 && state.orders.length > 0){
+                // Parent không có, local có → sync local lên parent
+                console.log('📤 Local has data, syncing to parent: '+state.orders.length+' đơn');
+                syncOrdersToParent();
+            } else if(parentOrders.length > 0 && state.orders.length > 0){
+                // Cả 2 đều có → merge unique theo timestamp
+                var merged = mergeOrders(parentOrders, state.orders);
+                if(merged.length !== state.orders.length){
+                    state.orders = merged;
+                    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state.orders));}catch(e){}
+                    syncOrdersToParent(); // Sync merged data back
+                    updateUI();
+                    console.log('✅ Merged orders: '+merged.length+' đơn');
+                }
+            }
+            // Nếu cả 2 đều empty → không làm gì
+        }
+    }
+});
+
+// Helper function để merge orders unique theo timestamp
+function mergeOrders(arr1, arr2){
+    var map = {};
+    arr1.forEach(function(o){ if(o.timestamp) map[o.timestamp] = o; });
+    arr2.forEach(function(o){ if(o.timestamp) map[o.timestamp] = o; });
+    var merged = Object.values(map);
+    merged.sort(function(a,b){ return (b.timestamp||0) - (a.timestamp||0); });
+    return merged;
+}
+
+// CODEC & CANVAS
+function getCodec(){var codecs=[{mimeType:'video/webm;codecs=vp8,opus',ext:'webm',name:'VP8'},{mimeType:'video/webm;codecs=vp8',ext:'webm',name:'VP8'},{mimeType:'video/webm',ext:'webm',name:'WebM'}];for(var i=0;i<codecs.length;i++){if(MediaRecorder.isTypeSupported(codecs[i].mimeType)){state.currentCodec=codecs[i];return codecs[i];}}state.currentCodec={mimeType:'video/webm',ext:'webm',name:'WebM'};return state.currentCodec;}
+function setupCanvas(){var preset=VIDEO_PRESETS[state.quality];if(!state.recordingCanvas){state.recordingCanvas=document.createElement('canvas');state.recordingCtx=state.recordingCanvas.getContext('2d',{alpha:false});}state.recordingCanvas.width=preset.width;state.recordingCanvas.height=preset.height;if(!state.scanCanvas){state.scanCanvas=document.createElement('canvas');state.scanCtx=state.scanCanvas.getContext('2d',{willReadFrequently:true});}state.scanCanvas.width=Math.round(preset.width*preset.scanScale);state.scanCanvas.height=Math.round(preset.height*preset.scanScale);state.scanInterval=Math.round(1000/preset.scanFPS);state.frameCount=0;state.lastFpsTime=0;state.currentFPS=0;}
+
+// ============================================
+// RENDER LOOP
+// ============================================
+function renderLoop(timestamp){
+    if(!state.stream||!state.stream.active){state.rafId=null;return;}
+    var video=$('webcamVideo');
+    var ctx=state.recordingCtx;
+    var canvas=state.recordingCanvas;
+    if(!video||!ctx||video.readyState<2){state.rafId=requestAnimationFrame(renderLoop);return;}
+    
+    // Vẽ video frame
+    ctx.drawImage(video,0,0,canvas.width,canvas.height);
+    
+    // Vẽ timestamp
+    drawTimestamp(ctx);
+    
+    // V7.2: Vẽ mã QR đang ghi (dưới timestamp, nền xanh lá)
+    if(state.isRecording && state.currentQR){
+        drawCurrentQRLabel(ctx);
+    }
+    
+    // Progress Bar (hiện 1.5s sau detect - Option A)
+    if(state.displayQR && (Date.now()-state.displayTime < PROGRESS_DISPLAY_TIME)){
+        drawProgressBar(ctx, state.displayQR);
+    }
+    
+    // FPS counter
+    drawFPSCounter(ctx, timestamp);
+    
+    // Audio indicator
+    if(state.isRecording && state.audio){
+        drawAudioIndicator(ctx);
+    }
+    
+    // QR Scanning
+    var now=performance.now();
+    if(now-state.lastScanTime>=state.scanInterval){
+        state.lastScanTime=now;
+        state.actualScanCount++;
+        scanQRCode();
+    }
+    
+    // Update scan rate
+    if(now-state.lastScanCountTime>=1000){
+        state.actualScanRate=state.actualScanCount;
+        state.actualScanCount=0;
+        state.lastScanCountTime=now;
+        var scanEl=$('scanRate');
+        if(scanEl)scanEl.textContent=state.actualScanRate;
+    }
+    
+    state.rafId=requestAnimationFrame(renderLoop);
+}
+
+// ============================================
+// DRAW FUNCTIONS
+// ============================================
+function drawTimestamp(ctx){
+    var now=new Date();
+    var text=now.toLocaleDateString('vi-VN')+' '+now.toLocaleTimeString('vi-VN');
+    var position=state.timestampPos,canvas=state.recordingCanvas,margin=113;
+    ctx.font='bold 28px Arial';
+    ctx.fillStyle='white';ctx.strokeStyle='black';ctx.lineWidth=3;
+    var x=position.includes('left')?margin:canvas.width-ctx.measureText(text).width-margin;
+    var y=position.includes('top')?margin+28:canvas.height-margin;
+    ctx.strokeText(text,x,y);ctx.fillText(text,x,y);
+}
+
+// V7.2: Hiển thị mã QR đang ghi - NỀN XANH LÁ
+function drawCurrentQRLabel(ctx){
+    var position=state.timestampPos,canvas=state.recordingCanvas,margin=113;
+    var y=position.includes('top')?margin+65:canvas.height-margin-40;
+    
+    var text='📦 '+state.currentQR;
+    if(text.length>35)text=text.substring(0,35)+'...';
+    
+    ctx.font='bold 24px Arial';
+    var textWidth=ctx.measureText(text).width;
+    var x=position.includes('left')?margin:canvas.width-textWidth-margin-20;
+    
+    // Vẽ nền xanh lá
+    ctx.fillStyle='rgba(40, 167, 69, 0.9)';
+    ctx.fillRect(x-10,y-28,textWidth+20,38);
+    
+    // Vẽ text trắng
+    ctx.fillStyle='white';
+    ctx.fillText(text,x,y);
+}
+
+// Progress Bar (GIỮ NGUYÊN từ v7.18)
+function drawProgressBar(ctx,qrCode){
+    var position=state.timestampPos,canvas=state.recordingCanvas,margin=113;
+    var panelWidth=500,panelHeight=180;
+    var panelX=position.includes('left')?margin:canvas.width-panelWidth-margin;
+    var panelY=position.includes('top')?margin+100:canvas.height-margin-panelHeight-100;
+    var centerX=panelX+panelWidth/2;
+    
+    ctx.fillStyle='rgba(0,0,0,0.85)';
+    ctx.fillRect(panelX,panelY,panelWidth,panelHeight);
+    ctx.strokeStyle='#00FF00';
+    ctx.lineWidth=3;
+    ctx.strokeRect(panelX,panelY,panelWidth,panelHeight);
+    
+    ctx.fillStyle='#00FF00';
+    ctx.font='bold 24px Arial';
+    ctx.textAlign='center';
+    ctx.fillText('✅ QR CODE DETECTED',centerX,panelY+30);
+    
+    ctx.fillStyle='#FFD700';
+    ctx.font='bold 28px Arial';
+    ctx.fillText(qrCode.length>20?qrCode.substring(0,20)+'...':qrCode,centerX,panelY+65);
+    
+    var barX=panelX+20,barY=panelY+120,barWidth=panelWidth-40,barHeight=35;
+    ctx.fillStyle='rgba(50,50,50,0.9)';
+    ctx.fillRect(barX,barY,barWidth,barHeight);
+    ctx.fillStyle='#00FF00';
+    ctx.fillRect(barX,barY,barWidth,barHeight);
+    ctx.fillStyle='#FFFFFF';
+    ctx.font='bold 20px Arial';
+    ctx.fillText('100%',centerX,barY+barHeight/2+7);
+    
+    // Số SP detected
+    if(state.detectedProducts.length>0){
+        ctx.fillStyle='#00BFFF';
+        ctx.font='bold 14px Arial';
+        ctx.fillText('📦 '+state.detectedProducts.length+' SP',centerX,panelY+panelHeight-15);
+    }
+    ctx.textAlign='left';
+}
+
+function drawFPSCounter(ctx,timestamp){
+    state.frameCount++;
+    if(state.lastFpsTime===0)state.lastFpsTime=timestamp;
+    var elapsed=timestamp-state.lastFpsTime;
+    if(elapsed>=1000){
+        state.currentFPS=Math.round(state.frameCount*1000/elapsed);
+        state.frameCount=0;
+        state.lastFpsTime=timestamp;
+        var fpsEl=$('fpsValue');
+        if(fpsEl){fpsEl.textContent=state.currentFPS;fpsEl.className='fps-value '+(state.currentFPS<30?'low':state.currentFPS<50?'medium':'');}
+    }
+    var margin=113,position=state.timestampPos;
+    var y=position.includes('bottom')?margin+20:state.recordingCanvas.height-margin;
+    ctx.fillStyle=state.currentFPS<30?'#FF0000':state.currentFPS<50?'#FFFF00':'#00FF00';
+    ctx.font='bold 14px Arial';
+    ctx.fillText('FPS: '+state.currentFPS,margin,y);
+    ctx.fillStyle='#00BFFF';
+    ctx.fillText('Scan: '+state.actualScanRate+'/s',margin+80,y);
+}
+
+function drawAudioIndicator(ctx){
+    var margin=113,position=state.timestampPos;
+    var y=position.includes('bottom')?margin+45:state.recordingCanvas.height-margin-25;
+    ctx.fillStyle='#FF0000';
+    ctx.font='bold 14px Arial';
+    ctx.fillText('🎤 REC',margin,y);
+}
+
+// ============================================
+// QR SCANNING (CẢ 2 MODE)
+// ============================================
+function scanQRCode(){
+    try{
+        var video=$('webcamVideo');
+        if(!video||video.readyState<2)return;
+        var ctx=state.scanCtx,canvas=state.scanCanvas;
+        if(!ctx||!canvas)return;
+        ctx.drawImage(video,0,0,canvas.width,canvas.height);
+        var imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+        if(!imageData||typeof jsQR==='undefined')return;
+        
+        var code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'dontInvert'});
+        
+        if(code&&code.data&&code.data.trim()){
+            var qrData=code.data.trim();
+            
+            // V7.21: BEEP khi phát hiện QR - Cooldown 1s, KỂ CẢ KHI KHÓA SCAN
+            var now=Date.now();
+            if(now - state.lastBeepTime >= 1000){
+                beep();
+                state.lastBeepTime = now;
+            }
+            
+            // Hiển thị progress bar cho CẢ 2 MODE
+            state.displayQR=qrData;
+            state.displayTime=Date.now();
+            
+            // Đếm sản phẩm nếu đang ghi và mã khác mã đơn chính
+            if(state.isRecording && state.detectedProducts.indexOf(qrData)===-1){
+                state.detectedProducts.push(qrData);
+                $('productsCount').textContent=state.detectedProducts.length;
+            }
+            
+            // V7.2: TRIGGER LOGIC MỚI
+            if(state.device==='camera'){
+                // Chưa ghi → Trigger 1
+                if(!state.isRecording){
+                    handleQRDetected(qrData);
+                }
+                // Đang ghi, không bị block, QR trùng → Trigger 2
+                else if(!state.scanBlocked && qrData===state.currentQR){
+                    handleQRDetected(qrData);
+                }
+                // Đang ghi, bị block, QR trùng → KHÔNG trigger (theo yêu cầu)
+                // Đang ghi, QR khác → đã đếm sản phẩm ở trên
+            }
+        }
+    }catch(e){}
+}
+
+// ============================================
+// V7.2: HANDLE QR DETECTED - WORKFLOW MỚI
+// ============================================
+function handleQRDetected(qrData){
+    if(!qrData)return;
+    
+    // Kiểm tra giới hạn
+    if(!state.isRecording && !canScanMore()){
+        showLimitModal();
+        toast('⚠️ Đã hết lượt quét hôm nay!','warning');
+        return;
+    }
+    
+    // Beep với cooldown 1s (cho máy quét cầm tay)
+    var now=Date.now();
+    if(now - state.lastBeepTime >= 1000){
+        beep();
+        state.lastBeepTime = now;
+    }
+    
+    // TRIGGER 1: Bắt đầu ghi (V7.2: Ghi từ đây, không có pre-buffer)
+    if(!state.isRecording){
+        state.currentQR=qrData;
+        state.detectedProducts=[qrData];
+        
+        // Bắt đầu ghi thực sự
+        startRecording();
+        
+        // Update UI
+        $('currentQRDisplay').textContent=qrData;
+        $('productsCount').textContent='1';
+        $('orderInfo').classList.add('show');
+        $('recIndicator').classList.remove('hidden');
+        
+        // Start timer
+        startDisplayTimer();
+        
+        // Start scan lock
+        startScanLock();
+        
+        toast('🎬 Bắt đầu ghi: '+qrData,'success');
+    }
+    // TRIGGER 2: Kết thúc ghi
+    else if(qrData===state.currentQR){
+        state.scanBlocked=true;
+        $('scanLockOverlay').classList.add('hidden');
+        
+        if(state.countdownTimer){
+            clearInterval(state.countdownTimer);
+            state.countdownTimer=null;
+        }
+        
+        startPostBuffer();
+    }
+}
+
+// V7.2: SCAN LOCK - Khóa scan 10s, vẫn detect, chỉ block trigger
+function startScanLock(){
+    state.scanBlocked=true;
+    var lockTime=SCAN_LOCK_SECOND/1000;
+    var remaining=lockTime;
+    
+    $('scanLockOverlay').classList.remove('hidden');
+    $('scanLockTime').textContent=remaining;
+    
+    state.countdownTimer=setInterval(function(){
+        remaining--;
+        $('scanLockTime').textContent=remaining;
+        
+        if(remaining<=0){
+            clearInterval(state.countdownTimer);
+            state.countdownTimer=null;
+            state.scanBlocked=false;
+            $('scanLockOverlay').classList.add('hidden');
+            toast('✅ Quét lại mã để kết thúc!','success');
+        }
+    },1000);
+}
+
+// ============================================
+// RECORDING
+// ============================================
+function startRecording(){
+    if(!state.stream||!state.stream.active)return;
+    
+    setupCanvas();
+    var preset=VIDEO_PRESETS[state.quality],bitrate=BITRATE_OPTIONS[state.bitrate].value;
+    
+    if(state.canvasStream){
+        state.canvasStream.getTracks().forEach(function(t){t.stop();});
+    }
+    state.canvasStream=state.recordingCanvas.captureStream(preset.fps);
+    
+    if(state.audio&&state.stream.getAudioTracks().length>0){
+        state.stream.getAudioTracks().forEach(function(track){
+            state.canvasStream.addTrack(track.clone());
+        });
+    }
+    
+    var codec=getCodec();
+    try{
+        state.recorder=new MediaRecorder(state.canvasStream,{mimeType:codec.mimeType,videoBitsPerSecond:bitrate});
+    }catch(e){
+        state.recorder=new MediaRecorder(state.canvasStream);
+    }
+    
+    state.chunks=[];
+    state.recorder.ondataavailable=function(e){if(e.data&&e.data.size>0)state.chunks.push(e.data);};
+    state.recorder.onstop=function(){saveRecording();};
+    
+    state.recorder.start(1000);
+    state.isRecording=true;
+    state.recordingStartTime=Date.now();
+}
+
+function stopRecordingOnly(){
+    if(state.recorder&&state.recorder.state==='recording'){
+        state.recorder.stop();
+    }
+}
+
+function startPostBuffer(){
+    var postBufferSec=Math.round(state.postBuf/1000);
+    toast('📦 +'+postBufferSec+'s...','success');
+    $('recIndicator').classList.add('hidden');
+    $('orderInfo').classList.remove('show');
+    
+    if(state.countdownTimer){
+        clearInterval(state.countdownTimer);
+        state.countdownTimer=null;
+    }
+    
+    var countdown=postBufferSec;
+    var postTimer=setInterval(function(){
+        countdown--;
+        if(countdown<=0){
+            clearInterval(postTimer);
+            stopRecordingOnly();
+        }
+    },1000);
+}
+
+function startDisplayTimer(){
+    if(state.timerInterval)clearInterval(state.timerInterval);
+    var displayTime=0;
+    state.timerInterval=setInterval(function(){
+        displayTime++;
+        var timeString=formatTime(displayTime);
+        var recTime=$('recTime');
+        if(recTime)recTime.textContent=timeString.substring(3);
+        var curTimer=$('currentTime');
+        if(curTimer)curTimer.textContent=timeString;
+    },1000);
+}
+
+async function saveRecording(){
+    var qrCode=state.currentQR;
+    if(!qrCode||state.chunks.length===0){
+        restartForNextOrder();
+        return;
+    }
+    
+    var ext=state.currentCodec?state.currentCodec.ext:'webm';
+    var mimeType=state.currentCodec?state.currentCodec.mimeType:'video/webm';
+    
+    // Tên file: Premium = QR_date_time, Free = nang_cap_premium_XXX
+    var filename;
+    if(state.isPremium){
+        filename=qrCode+'_'+dateStr()+'_'+fileTimeStr()+'.'+ext;
+    }else{
+        state.freeVideoCounter++;
+        localStorage.setItem('freeVideoCounter',state.freeVideoCounter);
+        var counterStr=String(state.freeVideoCounter).padStart(3,'0');
+        filename='nang_cap_premium_'+counterStr+'.'+ext;
+    }
+    
+    var blob=new Blob(state.chunks,{type:mimeType});
+    var sizeMB=(blob.size/1048576).toFixed(2);
+    var duration=state.chunks.length;
+    
+    await saveVideo(blob,filename);
+    state.lastSavedFile=filename;
+    updateFolderInfo(filename);
+    
+    var order={qr:qrCode,date:dateStrVN(),time:timeStr(),duration:formatTime(duration),filename:filename,size:sizeMB+'MB',productsDetected:state.detectedProducts.length,timestamp:Date.now()};
+    state.orders.unshift(order);
+    if(state.orders.length>MAX_ORDERS)state.orders.pop();
+    saveOrdersWithSync(); // V7.42: Sync to parent for persistent storage
+    
+    if(!state.isPremium){incrementDailyUsage();}
+    updateUI();
+    state.scanCycleCount++;
+    
+    toast('✅ Lưu: '+qrCode+' ('+sizeMB+'MB) #'+state.scanCycleCount,'success');
+    
+    setTimeout(restartForNextOrder,2000);
+}
+
+async function saveVideo(blob,filename){
+    if(state.folderHandle){
+        try{
+            var fileHandle=await state.folderHandle.getFileHandle(filename,{create:true});
+            var writable=await fileHandle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            return;
+        }catch(e){}
+    }
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download=filename;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+}
+
+function updateFolderInfo(filename){
+    $('folderPath').textContent=(state.folderHandle?state.folderHandle.name+'/':'Downloads/')+filename;
+    $('folderInfo').classList.remove('hidden');
+}
+
+function restartForNextOrder(){
+    if(state.timerInterval){clearInterval(state.timerInterval);state.timerInterval=null;}
+    if(state.countdownTimer){clearInterval(state.countdownTimer);state.countdownTimer=null;}
+    
+    state.isRecording=false;
+    state.currentQR=null;
+    state.scanBlocked=false;
+    state.detectedProducts=[];
+    state.displayQR=null;
+    state.displayTime=0;
+    state.chunks=[];
+    state.recorder=null;
+    
+    $('orderInfo').classList.remove('show');
+    $('recIndicator').classList.add('hidden');
+    $('scanLockOverlay').classList.add('hidden');
+    
+    toast('🔄 Sẵn sàng #'+(state.scanCycleCount+1),'success');
+}
+
+// ============================================
+// CAMERA - V7.2: CHỈ PREVIEW KHI BẬT
+// ============================================
+function getCameras(){navigator.mediaDevices.enumerateDevices().then(function(devs){var cams=devs.filter(function(d){return d.kind==='videoinput';});var sel=$('cameraSelect');sel.innerHTML='';cams.forEach(function(c,i){var opt=document.createElement('option');opt.value=c.deviceId;opt.textContent=c.label||'Camera '+(i+1);sel.appendChild(opt);});if(cams.length&&!state.cameraId)state.cameraId=cams[0].deviceId;var saved=localStorage.getItem('camera');if(saved&&cams.find(function(c){return c.deviceId===saved;})){state.cameraId=saved;sel.value=saved;}});}
+
+function startCamera(){
+    var preset=VIDEO_PRESETS[state.quality];
+    navigator.mediaDevices.getUserMedia({
+        video:{deviceId:state.cameraId?{exact:state.cameraId}:undefined,width:{ideal:preset.width},height:{ideal:preset.height},frameRate:{ideal:preset.fps,min:30}},
+        audio:state.audio
+    }).then(function(stream){
+        state.stream=stream;
+        $('webcamVideo').srcObject=stream;
+        $('startBtn').classList.add('hidden');
+        $('stopBtn').classList.remove('hidden');
+        
+        state.isCameraOn=true;
+        state.scanCycleCount=0;
+        state.currentQR=null;
+        state.scanBlocked=false;
+        state.detectedProducts=[];
+        state.chunks=[];
+        
+        // V7.2: Chỉ setup canvas và render loop (preview), KHÔNG ghi
+        setupCanvas();
+        if(state.rafId){cancelAnimationFrame(state.rafId);state.rafId=null;}
+        state.rafId=requestAnimationFrame(renderLoop);
+        $('fpsDisplay').classList.remove('hidden');
+        
+        toast('✅ Camera ON - Quét QR để bắt đầu ghi');
+        getCameras();
+    }).catch(function(e){
+        toast('❌ Lỗi: '+e.message,'error');
+    });
+}
+
+function stopCamera(){
+    if(state.timerInterval){clearInterval(state.timerInterval);state.timerInterval=null;}
+    if(state.countdownTimer){clearInterval(state.countdownTimer);state.countdownTimer=null;}
+    if(state.rafId){cancelAnimationFrame(state.rafId);state.rafId=null;}
+    
+    if(state.recorder&&state.recorder.state==='recording'){
+        try{state.recorder.stop();}catch(e){}
+    }
+    state.recorder=null;
+    state.isRecording=false;
+    
+    if(state.canvasStream){state.canvasStream.getTracks().forEach(function(t){t.stop();});state.canvasStream=null;}
+    if(state.stream){state.stream.getTracks().forEach(function(t){t.stop();});state.stream=null;}
+    
+    $('webcamVideo').srcObject=null;
+    $('startBtn').classList.remove('hidden');
+    $('stopBtn').classList.add('hidden');
+    $('fpsDisplay').classList.add('hidden');
+    $('orderInfo').classList.remove('show');
+    $('recIndicator').classList.add('hidden');
+    $('scanLockOverlay').classList.add('hidden');
+    
+    state.isCameraOn=false;
+    state.scanBlocked=false;
+    state.currentQR=null;
+    state.chunks=[];
+    
+    toast('Camera OFF','warning');
+}
+
+async function openFolder(){
+    var folderInfo=$('folderInfo'),folderPath=$('folderPath');
+    if(!folderInfo.classList.contains('hidden')){folderInfo.classList.add('hidden');return;}
+    folderPath.textContent=state.lastSavedFile?'Downloads/'+state.lastSavedFile:'Downloads/';
+    folderInfo.classList.remove('hidden');
+    if('showDirectoryPicker'in window){
+        try{
+            state.folderHandle=await window.showDirectoryPicker({mode:'readwrite',startIn:'downloads'});
+            folderPath.textContent=state.folderHandle.name+'/';
+            toast('✅ Chọn: '+state.folderHandle.name,'success');
+        }catch(e){}
+    }
+}
+
+// ============================================
+// SCANNER MODE - Máy quét cầm tay trigger
+// ============================================
+var barcodeBuffer='',barcodeTimer=null;
+function handleKeydown(e){
+    if(state.device!=='scanner')return;
+    if(barcodeTimer)clearTimeout(barcodeTimer);
+    if(e.key==='Enter'){
+        if(barcodeBuffer.length>3){
+            // V7.21: BEEP với cooldown 1s - KỂ CẢ KHI KHÓA SCAN
+            var now=Date.now();
+            if(now - state.lastBeepTime >= 1000){
+                beep();
+                state.lastBeepTime = now;
+            }
+            
+            // V7.2: Set displayQR để hiện progress bar
+            state.displayQR=barcodeBuffer;
+            state.displayTime=Date.now();
+            
+            // Xử lý tương tự camera mode
+            if(!state.isRecording){
+                handleQRDetected(barcodeBuffer);
+            }else if(!state.scanBlocked && barcodeBuffer===state.currentQR){
+                handleQRDetected(barcodeBuffer);
+            }else if(state.detectedProducts.indexOf(barcodeBuffer)===-1){
+                state.detectedProducts.push(barcodeBuffer);
+                $('productsCount').textContent=state.detectedProducts.length;
+            }
+        }
+        barcodeBuffer='';
+    }else if(e.key.length===1){
+        barcodeBuffer+=e.key;
+    }
+    barcodeTimer=setTimeout(function(){barcodeBuffer='';},100);
+}
+
+// ============================================
+// UI & HISTORY
+// ============================================
+function updateUI(){
+    var today=dateStr();
+    var todayOrders=state.orders.filter(function(o){return vnDateToISO(o.date)===today;});
+    $('todayCount').textContent=todayOrders.length;
+    $('totalCount').textContent=state.orders.length.toLocaleString();
+    $('maxOrders').textContent=MAX_ORDERS.toLocaleString();
+    $('historyCount').textContent=state.orders.length.toLocaleString();
+    updateLimitDisplay();
+    renderHistory();
+}
+
+function renderHistory(search){
+    var list=$('historyList');
+    var filtered=search?state.orders.filter(function(o){return o.qr.toLowerCase().indexOf(search.toLowerCase())!==-1;}):state.orders;
+    if(!filtered.length){list.innerHTML='<div class="empty-msg">Chưa có lịch sử đơn hàng<br><br>Quét mã QR để bắt đầu ghi video</div>';return;}
+    var html='';
+    filtered.forEach(function(o,i){
+        // Che thông tin nếu không phải Premium
+        var showDate = state.isPremium ? o.date : '*****';
+        var showTime = state.isPremium ? o.time : '*****';
+        var showDuration = state.isPremium ? o.duration : '*****';
+        var showSize = state.isPremium ? (o.size||'-') : '*****';
+        html+='<div class="history-item"><span class="h-num">#'+(i+1)+'</span><span class="h-qr">'+o.qr+'</span><span class="h-date">'+showDate+'</span><span class="h-time">'+showTime+'</span><span class="h-duration">'+showDuration+'</span><span class="h-size">'+showSize+'</span><span class="h-products">'+(o.productsDetected||0)+'</span></div>';
+    });
+    list.innerHTML=html;
+}
+
+function exportExcel(){
+    if(!state.orders.length){toast('Chưa có dữ liệu','warning');return;}
+    var csv='\uFEFF'+['STT','Mã QR','Ngày','Giờ','Thời lượng','Dung lượng','Số SP','File'].join(',')+'\n';
+    state.orders.forEach(function(o,i){
+        // Che thông tin nếu không phải Premium
+        var showDate = state.isPremium ? o.date : '*****';
+        var showTime = state.isPremium ? o.time : '*****';
+        var showDuration = state.isPremium ? o.duration : '*****';
+        var showSize = state.isPremium ? (o.size||'-') : '*****';
+        var showFilename = state.isPremium ? o.filename : '*****';
+        csv+=[i+1,'"'+o.qr+'"',showDate,showTime,showDuration,showSize,o.productsDetected||0,showFilename].join(',')+'\n';
+    });
+    var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='QRScanner_'+dateStr()+'.csv';
+    a.click();
+    toast('✅ Xuất: '+state.orders.length+' đơn','success');
+}
+
+function showDeleteModal(){
+    var today=new Date(),lastWeek=new Date(today.getTime()-7*86400000);
+    $('deleteFromDate').value=lastWeek.toISOString().split('T')[0];
+    $('deleteToDate').value=today.toISOString().split('T')[0];
+    $('deleteModal').classList.remove('hidden');
+}
+
+function hideDeleteModal(){$('deleteModal').classList.add('hidden');}
+
+function deleteByDate(){
+    var fromDate=$('deleteFromDate').value,toDate=$('deleteToDate').value;
+    if(!fromDate||!toDate){toast('Chọn ngày','warning');return;}
+    var beforeCount=state.orders.length;
+    state.orders=state.orders.filter(function(o){
+        var isoDate=vnDateToISO(o.date);
+        return isoDate<fromDate||isoDate>toDate;
+    });
+    var deletedCount=beforeCount-state.orders.length;
+    if(deletedCount>0){
+        saveOrdersWithSync(); // V7.42: Sync to parent
+        updateUI();
+        toast('✅ Xóa '+deletedCount+' đơn','success');
+    }else{
+        toast('Không có đơn','warning');
+    }
+    hideDeleteModal();
+}
+
+function deleteAll(){
+    if(confirm('Xóa tất cả '+state.orders.length+' đơn?')){
+        state.orders=[];
+        saveOrdersWithSync(); // V7.42: Sync to parent
+        updateUI();
+        toast('✅ Đã xóa','success');
+    }
+}
+
+function autoDelete(){
+    // Xóa orders > 60 ngày cho cả FREE và Premium
+    var cutoff=Date.now()-AUTO_DELETE_DAYS*86400000;
+    var before=state.orders.length;
+    state.orders=state.orders.filter(function(o){return o.timestamp&&o.timestamp>cutoff;});
+    if(state.orders.length<before){
+        saveOrdersWithSync(); // V7.42: Sync to parent
+    }
+}
+
+// ============================================
+// INIT
+// ============================================
+function init(){
+    // Request license và orders từ parent (giải quyết cross-domain localStorage)
+    // Parent sẽ gửi license và orders nếu có
+    if(window.parent && window.parent !== window){
+        window.parent.postMessage({action: 'requestLicense'}, '*');
+        window.parent.postMessage({action: 'requestOrders'}, '*'); // V7.42: Request orders
+        console.log('📤 Requesting license + orders from parent...');
+    }
+    
+    checkPremiumStatus();
+    checkDailyLimit();
+    
+    // Load từ localStorage local trước (có thể bị xóa nếu third-party storage bị chặn)
+    try{var saved=localStorage.getItem(STORAGE_KEY);if(saved)state.orders=JSON.parse(saved);}catch(e){}
+    autoDelete();
+    
+    state.quality=localStorage.getItem('quality')||'1080p60';
+    state.bitrate=localStorage.getItem('bitrate')||'12';
+    state.audio=localStorage.getItem('audio')!=='false';
+    state.postBuf=parseInt(localStorage.getItem('postBuf'))||3000;
+    state.timestampPos=localStorage.getItem('timestampPos')||'top-right';
+    state.beepVolume=parseInt(localStorage.getItem('beepVolume'))||80;
+    state.freeVideoCounter=parseInt(localStorage.getItem('freeVideoCounter'))||0;
+    
+    $('qualitySelect').value=state.quality;
+    $('bitrateSelect').value=state.bitrate;
+    $('audioToggle').checked=state.audio;
+    $('postBufferSelect').value=state.postBuf;
+    $('timestampPosition').value=state.timestampPos;
+    $('volumeSlider').value=state.beepVolume;
+    $('volumeValue').textContent=state.beepVolume+'%';
+    $('scanRate').textContent=VIDEO_PRESETS[state.quality].scanFPS;
+    
+    updateUI();
+    
+    $('startBtn').onclick=function(){initAudio();startCamera();};
+    $('stopBtn').onclick=stopCamera;
+    $('folderBtn').onclick=openFolder;
+    $('exportBtn').onclick=exportExcel;
+    $('deleteByDateBtn').onclick=showDeleteModal;
+    $('deleteAllBtn').onclick=deleteAll;
+    $('cancelDeleteBtn').onclick=hideDeleteModal;
+    $('confirmDeleteBtn').onclick=deleteByDate;
+    
+    $('tabCamera').onclick=function(){
+        initAudio();
+        state.device='camera';
+        $('tabCamera').classList.add('active');
+        $('tabScanner').classList.remove('active');
+    };
+    $('tabScanner').onclick=function(){
+        initAudio();
+        state.device='scanner';
+        $('tabScanner').classList.add('active');
+        $('tabCamera').classList.remove('active');
+    };
+    
+    $('searchInput').oninput=function(e){renderHistory(e.target.value);};
+    
+    $('cameraSelect').onchange=function(){
+        state.cameraId=this.value;
+        localStorage.setItem('camera',this.value);
+        if(state.stream){stopCamera();setTimeout(startCamera,300);}
+    };
+    
+    $('qualitySelect').onchange=function(){
+        state.quality=this.value;
+        localStorage.setItem('quality',this.value);
+        $('scanRate').textContent=VIDEO_PRESETS[this.value].scanFPS;
+        if(state.stream){stopCamera();setTimeout(startCamera,300);}
+    };
+    
+    $('bitrateSelect').onchange=function(){
+        state.bitrate=this.value;
+        localStorage.setItem('bitrate',this.value);
+    };
+    
+    $('timestampPosition').onchange=function(){
+        state.timestampPos=this.value;
+        localStorage.setItem('timestampPos',this.value);
+    };
+    
+    $('volumeSlider').oninput=function(){
+        state.beepVolume=parseInt(this.value);
+        $('volumeValue').textContent=state.beepVolume+'%';
+        localStorage.setItem('beepVolume',this.value);
+    };
+    
+    // Test beep khi thả chuột
+    $('volumeSlider').onchange=function(){
+        beep();
+    };
+    
+    $('postBufferSelect').onchange=function(){
+        state.postBuf=parseInt(this.value);
+        localStorage.setItem('postBuf',this.value);
+    };
+    
+    $('audioToggle').onchange=function(){
+        state.audio=this.checked;
+        localStorage.setItem('audio',this.checked);
+        if(state.stream){stopCamera();setTimeout(startCamera,300);}
+    };
+    
+    document.addEventListener('keydown',handleKeydown);
+    
+    $('deleteModal').onclick=function(e){if(e.target===this)hideDeleteModal();};
+    $('limitModal').onclick=function(e){if(e.target===this)hideLimitModal();};
+    $('renewalModal').onclick=function(e){if(e.target===this)hideRenewalModal();};
+    
+    setInterval(function(){
+        var today=dateStr();
+        if(state.todayDate!==today){
+            checkDailyLimit();
+            updateUI();
+            if(!state.isPremium){
+                toast('🔄 Đã reset lượt quét mới!','success');
+            }
+        }
+    },60000);
+    
+    setTimeout(function(){
+        navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(function(s){
+            s.getTracks().forEach(function(t){t.stop();});
+            getCameras();
+        }).catch(function(){getCameras();});
+    },500);
+    
+    var statusText=state.isPremium?'Premium ('+state.daysRemaining+' ngày)':'Free';
+    toast('✅ v7.42 '+statusText,'success');
+}
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+    </script>
+</body>
+</html>
