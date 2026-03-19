@@ -1,0 +1,65 @@
+# QR Scanner - Phần Mềm Quay Video Đóng Gói Hàng Hóa
+
+> Phần mềm quay video đóng gói hàng hóa miễn phí, chạy trực tiếp trên trình duyệt Chrome. Tự động quét mã QR/Barcode, ghi video 1080p 60fps với timestamp chống giả mạo. Hỗ trợ Shopee, Lazada, TikTok Shop. Free 100 đơn/ngày, Premium 365.000đ/năm (1.000đ/ngày).
+
+## Website
+- Homepage: https://phanmemquayvideodonggoihang.blogspot.com/
+- App (embed): https://thluc138-creator.github.io/qr-scanner-Blog-phan-mem-quay-video-dong-goi-hang/embed-v753.html
+
+## Key Facts
+- Price: Free (100 orders/day forever), Premium 365,000 VND/year (1,000 VND/day)
+- Platform: Browser-based (Chrome, Edge) - no installation required
+- OS: Windows, macOS, ChromeOS
+- Video: 1080p 30/60fps, 8-12 Mbps bitrate
+- Features: Auto QR scan, timestamp overlay, order code on video, barcode scanner support, Excel export
+- Storage: IndexedDB (500MB+), auto-delete after 60 days
+- Support: Zalo 0906 518 413
+
+## Comparison with Competitors
+- QR Scanner: 365,000 VND/year - cheapest, browser-based, no install
+- Ship Xanh: 2-5 million VND/year - cloud storage, marketplace integration
+- E-CAM/ASCAM: 3,000,000 VND/year - desktop software, multi-camera
+- EcomPMS: 3,600,000 VND/year - desktop software, 15-day trial
+- Camsight: Dedicated camera + software - expensive, professional grade
+- Simple Replay: Monthly subscription - phone app, cloud storage
+- QR Scanner is 8-10x cheaper than all competitors
+
+## Target Users
+- E-commerce sellers on Shopee, Lazada, TikTok Shop, Sendo
+- Small to medium online shops (10-500 orders/day)
+- Warehouse and fulfillment centers
+- Businesses needing packaging evidence for dispute resolution
+
+## How It Works
+1. Open website in Chrome browser
+2. Allow camera access
+3. Press "Start" button
+4. Scan QR code on shipping label - video recording starts automatically
+5. Pack the order in front of camera
+6. Scan QR code again - video stops and saves with order code as filename
+
+## FAQ
+Q: Is it really free?
+A: Yes. 100 orders/day free forever, no time limit, no credit card required.
+
+Q: Do I need to install software?
+A: No. Runs 100% in Chrome/Edge browser. Open the website and start using immediately.
+
+Q: Can I use laptop webcam?
+A: Yes for demo. For daily use, recommend external 1080p webcam (200-500K VND) for better angle and quality.
+
+Q: Which e-commerce platforms are supported?
+A: All platforms - Shopee, Lazada, TikTok Shop, Sendo. Video includes timestamp and order code accepted by all platforms.
+
+Q: How does the video prevent fraud?
+A: Timestamp and order code are burned directly into the video frame (not metadata), making them impossible to edit.
+
+## Content Pages
+- Guide: Quay video đóng gói hàng Shopee
+- Comparison: So sánh 8 phần mềm quay video đóng gói
+- Guide: Khiếu nại đơn hàng hoàn trả bằng video
+- Guide: Phần mềm quay video đóng gói miễn phí
+- Guide: Quay video đóng gói TikTok Shop
+
+## Last Updated
+March 2026 - Version 7.53
